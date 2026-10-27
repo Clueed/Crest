@@ -73,7 +73,7 @@ function HeroBackground() {
  * banner never covers the hero's words or hangs past the hero onto the window below: one that
  * would at this width stays off the page.
  */
-function TemplateChips({ heroHead }: { heroHead: RefObject<HTMLDivElement | null> }) {
+function TemplateChips({ heroHead, platform }: { heroHead: RefObject<HTMLDivElement | null>; platform: Platform }) {
   const { work, mode, setTemplate } = useHome();
   const chipRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [crowded, setCrowded] = useState<TemplateId[]>([]);
@@ -123,7 +123,7 @@ function TemplateChips({ heroHead }: { heroHead: RefObject<HTMLDivElement | null
       window.removeEventListener('resize', clearWords);
       window.removeEventListener('load', clearWords);
     };
-  }, [heroHead]);
+  }, [heroHead, platform]);
 
   return (
     <div
@@ -194,9 +194,11 @@ function TemplateChips({ heroHead }: { heroHead: RefObject<HTMLDivElement | null
 }
 
 /** The device the visitor is on picks which download leads. `?plat=` pins it. */
+type Platform = 'mac' | 'ios';
+
 function usePlatform() {
   const { params } = useHome();
-  const [platform, setPlatform] = useState<'mac' | 'ios'>('mac');
+  const [platform, setPlatform] = useState<Platform>('mac');
 
   useEffect(() => {
     if (!params) return;
@@ -216,8 +218,7 @@ function usePlatform() {
 
 const external = { target: '_blank', rel: 'noopener noreferrer' } as const;
 
-function Downloads() {
-  const platform = usePlatform();
+function Downloads({ platform }: { platform: Platform }) {
   const mac = (
     <a key="mac" data-hero-button href={links.macDownload.url} {...external} className={button}>
       <img src="/assets/crest-logo.svg" alt="" className="size-7.5" />
@@ -270,6 +271,7 @@ const secondary =
 /** The dark opening of the homepage: template banners around the headline, then the feature tour. */
 export function Hero() {
   const heroHead = useRef<HTMLDivElement>(null);
+  const platform = usePlatform();
 
   return (
     <section
@@ -283,7 +285,7 @@ export function Hero() {
         ref={heroHead}
         className="relative mx-auto grid min-h-[clamp(520px,64vh,620px)] w-[min(1240px,calc(100%-2.5rem))] place-items-center pt-10 pb-4 max-phone:block max-phone:min-h-0 max-phone:pt-6"
       >
-        <TemplateChips heroHead={heroHead} />
+        <TemplateChips heroHead={heroHead} platform={platform} />
         <div className="relative z-2 grid justify-items-center text-center">
           <h1 data-hero-words className="mb-[1.2rem] max-w-[13ch] text-[clamp(2.9rem,6.6vw,5.4rem)] leading-none font-normal tracking-[-0.03em]">
             The browser for life after Arc.
@@ -291,7 +293,7 @@ export function Hero() {
           <p data-hero-words className="mx-auto mb-8 max-w-[36rem] text-[1.18rem] leading-[1.6] text-balance text-white/78">
             Spaces, a sidebar, Peek, and Split&nbsp;View. Native on Mac, iPad, and&nbsp;iPhone.
           </p>
-          <Downloads />
+          <Downloads platform={platform} />
           <p data-hero-words className="mt-[1.1rem] text-[0.85rem] text-white/50">
             Early access. Security not independently audited. MPL 2.0. Not affiliated with Arc.
           </p>

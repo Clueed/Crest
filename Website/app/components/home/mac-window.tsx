@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import { useSpaceTemplate } from './home-state';
 import { CrestArt, spaceField, windowSize } from './templates';
@@ -651,7 +651,7 @@ export function MacWindow({ view, className }: { view: WindowView; className?: s
 
   const shown = picked ?? view;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (shown.page !== 'peek') return;
     setPeekHidden(true);
     let inner = 0;

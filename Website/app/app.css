@@ -23,8 +23,9 @@
   --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --breakpoint-phone: 47.5rem;
-  --breakpoint-tablet: 61.25rem;
+  /* `max-phone:` is 760px and narrower, `max-tablet:` 980px and narrower. */
+  --breakpoint-phone: 47.5625rem;
+  --breakpoint-tablet: 61.3125rem;
 
   --container-page: 70rem;
   --container-wide: 81.25rem;
@@ -99,8 +100,11 @@
   html:has(#nd-docs-layout, #nd-home-layout) {
     scrollbar-gutter: stable;
   }
-  html:not(.noanim) {
-    scroll-behavior: smooth;
+  /* Product pages glide to the sections they link to; Crest Help jumps, as Fumadocs expects. */
+  @media (prefers-reduced-motion: no-preference) {
+    html:not(.noanim, :has(#nd-docs-layout, #nd-home-layout)) {
+      scroll-behavior: smooth;
+    }
   }
   body {
     font-family: var(--font-sans);
