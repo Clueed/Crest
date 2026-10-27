@@ -62,13 +62,17 @@ accessibility tree when you choose targets for a new scenario.
 | Key | Contents |
 | --- | --- |
 | `article` | The article, relative to `Website/` |
+| `section` | Optional heading; the check then covers only that section |
 | `sources` | Glob patterns for source files whose changes may make the article stale |
-| `labels` | Every UI string the scenario or article relies on, declared once. Refer to one as `$name` |
+| `labels` | Every Crest UI string the scenario or article relies on, declared once. Refer to one as `$name` |
+| `keys` | Bold terms in the article that name keyboard keys rather than UI text |
+| `serve` | A fixture folder next to the scenario, served on a free local port as `{server}` |
 | `launch` | `env` for the test copy and the requested `window` size |
-| `setup` | Steps that prepare the app without being recorded |
+| `setup` | Steps that prepare the app without being recorded. The text they pass counts as seen |
 | `steps` | The recorded steps |
 | `assets` | Capture name to image path, relative to the article's folder |
 | `clip` | The clip's path, relative to the article's folder |
+| `clip_zoom` | How far the clip zooms in on clicks; `1.0` keeps the whole window (default `1.7`) |
 | `verify` | The article's own steps, followed by checks of the outcome |
 
 Each step has a `name` and an `action`:
@@ -77,6 +81,8 @@ Each step has a `name` and an `action`:
 | --- | --- |
 | `click` | `target` |
 | `type` | `target`, `text`. Fails unless the field takes focus and then holds the text |
+| `drag` | `target`, `by` (points), and optionally `duration` and `hold` before release |
+| `move` | `target`, and optionally `at`, a fraction of its frame (default `[0.5, 0.5]`) |
 | `scroll` | `target`, `lines` |
 | `key` | `keys`, a System Events phrase such as `keystroke "," using command down` |
 | `open_url` | `url`, opened in the test copy from another app |
@@ -86,6 +92,7 @@ Each step has a `name` and an `action`:
 Any step can add:
 - `settle`: seconds to wait afterwards;
 - `capture`: take a screenshot with this name;
+- `collect`: record the window's text, for UI that is gone by the end;
 - `observe`: a popup's label, to record its menu items as seen strings.
 
 A target matches on `identifier`, `identifier_prefix`, `role` and `label`.
@@ -97,4 +104,7 @@ A target matches on `identifier`, `identifier_prefix`, `role` and `label`.
   `labels`.
 - Look for menu items `within` their popup. A bare "Work" also matches the
   menu bar's Spaces menu.
+- Use a fixture page from `serve` when the scenario needs web content, so
+  captures don't depend on the network or on a live site. Write strings from
+  fixture pages inline; `labels` is only for Crest's own text.
 - Only describe in the article what the replay actually shows.

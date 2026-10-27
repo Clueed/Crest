@@ -72,6 +72,7 @@ class Driver:
         self.started = time.time()
         self.log = {"started": self.started, "clicks": [], "captures": [], "steps": [], "observed": {}}
         self.seen: set[str] = set()
+        self.variables: dict[str, str] = {}
 
     # MARK: - Targets
 
@@ -79,11 +80,15 @@ class Driver:
         return int(subprocess.check_output(["pgrep", "-nx", self.process]).split()[0])
 
     def label(self, value: str) -> str:
-        """Expand a `$name` reference to its declared label."""
-        if isinstance(value, str) and value.startswith("$"):
+        """Expand a `$name` reference to its declared label, and `{name}` to a run variable."""
+        if not isinstance(value, str):
+            return value
+        if value.startswith("$"):
             if value[1:] not in self.labels:
                 raise StepFailed(f"undeclared label {value}")
             return self.labels[value[1:]]
+        for name, replacement in self.variables.items():
+            value = value.replace(f"{{{name}}}", replacement)
         return value
 
     def matches(self, element, target) -> bool:
@@ -128,24 +133,30 @@ class Driver:
             Quartz.kCGHIDEventTap, Quartz.CGEventCreateMouseEvent(None, kind, (x, y), Quartz.kCGMouseButtonLeft)
         )
 
-    def move_to(self, x, y, duration=0.35):
+    def move_to(self, x, y):
+        """Glide the pointer at a steady, readable speed; returns the seconds it took."""
         start = Quartz.CGEventGetLocation(Quartz.CGEventCreate(None))
-        for index in range(1, 21):
-            t = index / 20
+        distance = ((x - start.x) ** 2 + (y - start.y) ** 2) ** 0.5
+        duration = min(max(distance / 600, 0.35), 1.0)
+        moves = int(duration / 0.01)
+        for index in range(1, moves + 1):
+            t = index / moves
             t = t * t * (3 - 2 * t)
             self.mouse(Quartz.kCGEventMouseMoved, start.x + (x - start.x) * t, start.y + (y - start.y) * t)
-            time.sleep(duration / 20)
+            time.sleep(0.01)
+        return duration
 
     def click(self, element, name):
         AXUIElementPerformAction(element, "AXScrollToVisible")
         time.sleep(0.3)
         x, y, width, height = frame(element)
         cx, cy = x + width / 2, y + height / 2
-        self.move_to(cx, cy)
-        self.log["clicks"].append({"t": time.time() - self.started, "x": cx, "y": cy, "step": name})
+        moved = self.move_to(cx, cy)
+        self.log["clicks"].append({"t": time.time() - self.started, "x": cx, "y": cy, "step": name, "move": moved})
         self.mouse(Quartz.kCGEventLeftMouseDown, cx, cy)
         time.sleep(0.05)
         self.mouse(Quartz.kCGEventLeftMouseUp, cx, cy)
+        self.refresh_cursor(cx, cy)
 
     def type_text(self, text):
         for character in text:
@@ -169,6 +180,33 @@ class Driver:
         time.sleep(0.3)
         if attr(element, "AXValue") != text:
             raise StepFailed(f"{name}: field holds {attr(element, 'AXValue')!r}, expected {text!r}")
+
+    def refresh_cursor(self, x, y):
+        """The cursor's shape updates only as the pointer moves, so a release
+        that changes the UI underneath would leave a stale cursor. Drift a
+        little, as a hand does after clicking; tiny moves are coalesced away."""
+        time.sleep(0.1)
+        self.move_to(x + 8, y + 6)
+
+    def drag(self, element, step):
+        """Press on the element, move the pointer smoothly by `by` points, pause, and release."""
+        x, y, width, height = frame(element)
+        sx, sy = x + width / 2, y + height / 2
+        ex, ey = sx + step["by"][0], sy + step["by"][1]
+        moved = self.move_to(sx, sy)
+        self.log["clicks"].append({"t": time.time() - self.started, "x": sx, "y": sy, "step": step["name"], "move": moved})
+        self.mouse(Quartz.kCGEventLeftMouseDown, sx, sy)
+        time.sleep(0.25)
+        moves = max(int(step.get("duration", 1.2) / 0.02), 1)
+        for index in range(1, moves + 1):
+            t = index / moves
+            t = t * t * (3 - 2 * t)
+            self.mouse(Quartz.kCGEventLeftMouseDragged, sx + (ex - sx) * t, sy + (ey - sy) * t)
+            time.sleep(0.02)
+        time.sleep(step.get("hold", 0.8))
+        self.log["clicks"].append({"t": time.time() - self.started, "x": ex, "y": ey, "step": step["name"]})
+        self.mouse(Quartz.kCGEventLeftMouseUp, ex, ey)
+        self.refresh_cursor(ex, ey)
 
     def scroll(self, element, lines):
         x, y, width, height = frame(element)
@@ -199,9 +237,12 @@ class Driver:
 
     # MARK: - Steps
 
-    def run(self, steps):
+    def run(self, steps, collect=False):
+        """`collect` records the window's text after each step, for unrecorded setup."""
         for step in steps:
             self.step(step)
+            if collect:
+                self.collect_texts()
 
     def step(self, step):
         name, action = step["name"], step["action"]
@@ -210,13 +251,20 @@ class Driver:
             subprocess.run(["osascript", "-e", f'tell application "System Events" to {step["keys"]}'], check=True)
         elif action == "click":
             self.click(self.resolve(step["target"]), name)
+        elif action == "move":
+            # Rest the pointer at a fraction of the target's frame, such as blank page space.
+            x, y, width, height = frame(self.resolve(step["target"]))
+            fx, fy = step.get("at", [0.5, 0.5])
+            self.move_to(x + width * fx, y + height * fy)
+        elif action == "drag":
+            self.drag(self.resolve(step["target"]), step)
         elif action == "scroll":
             self.scroll(self.resolve(step["target"]), step["lines"])
         elif action == "type":
             self.type_into(self.resolve(step["target"]), name, self.label(step["text"]))
         elif action == "open_url":
             # Plain `open URL` goes to the default browser; this is still a link from another app.
-            subprocess.run(["open", "-a", str(self.app), step["url"]], check=True)
+            subprocess.run(["open", "-a", str(self.app), self.label(step["url"])], check=True)
         elif action == "expect":
             element = self.resolve(step["target"], step.get("timeout", 5.0))
             value = str(attr(element, step.get("attribute", "AXValue")))
@@ -231,6 +279,8 @@ class Driver:
             self.observe(name, self.label(step["observe"]))
         if "capture" in step:
             self.capture(step["capture"])
+        elif step.get("collect"):
+            self.collect_texts()
         self.log["steps"].append(
             {"name": name, "action": action, "t": round(started - self.started, 3), "seconds": round(time.time() - started, 2)}
         )

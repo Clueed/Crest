@@ -7,11 +7,13 @@ See Scripts/helpdocs/README.md for the scenario format and the stages.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import fnmatch
 import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import time
@@ -55,6 +57,38 @@ class Scenario:
 
     def affected_by(self, changed: list[str]) -> bool:
         return any(fnmatch.fnmatch(path, pattern) for path in changed for pattern in self.sources())
+
+    def article_text(self) -> str:
+        """The article, or only its `section` when the scenario covers one heading."""
+        text = self.article.read_text()
+        if "section" not in self.data:
+            return text
+        match = re.search(rf"^(#+) {re.escape(self.data['section'])}\s*$", text, re.MULTILINE)
+        if match is None:
+            raise StepFailed(f"article has no heading {self.data['section']!r}")
+        end = re.compile(rf"^#{{1,{len(match.group(1))}}} ", re.MULTILINE).search(text, match.end())
+        return text[match.start() : end.start() if end else len(text)]
+
+    @contextlib.contextmanager
+    def fixture_server(self):
+        """Serve `serve` (a folder next to the scenario) on a free local port as `{server}`."""
+        if "serve" not in self.data:
+            yield {}
+            return
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            port = probe.getsockname()[1]
+        server = subprocess.Popen(
+            [sys.executable, "-m", "http.server", str(port), "--bind", "127.0.0.1",
+             "--directory", str(self.path.parent / self.data["serve"])],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+        time.sleep(0.5)
+        try:
+            yield {"server": f"http://127.0.0.1:{port}"}
+        finally:
+            server.terminate()
+            server.wait()
 
     def asset_path(self, name: str) -> Path:
         return self.article.parent / self.assets[name]
@@ -169,22 +203,30 @@ class Run:
     def run_log(self) -> Path:
         return self.out / "run.json"
 
-    def driver(self, out: Path) -> Driver:
-        return Driver(self.app.path, "Crest", self.scenario.labels, out)
+    def driver(self, out: Path, variables: dict[str, str]) -> Driver:
+        driver = Driver(self.app.path, "Crest", self.scenario.labels, out)
+        driver.variables = variables
+        return driver
 
     def capture(self):
         """Replay `steps` while recording the screen, after an unrecorded `setup`."""
         out = self.out / "capture"
         shutil.rmtree(out, ignore_errors=True)
         out.mkdir(parents=True)
-        self.app.launch(self.scenario)
-        driver = self.driver(out)
-        driver.run(self.scenario.data.get("setup", []))
+        with self.scenario.fixture_server() as variables:
+            self.app.launch(self.scenario)
+            driver = self.driver(out, variables)
+            driver.run(self.scenario.data.get("setup", []), collect=True)
+            self.record(driver, out)
+        self.compare_captures(out)
+
+    def record(self, driver: Driver, out: Path):
         recording_started = time.time()
         recorder = subprocess.Popen(["screencapture", "-v", "-k", "-x", str(out / "raw.mov")])
         time.sleep(1.5)
+        # The recording starts here; setup steps belong to no clip.
         driver.started = time.time()
-        driver.log["started"] = driver.started
+        driver.log |= {"started": driver.started, "steps": [], "clicks": []}
         try:
             driver.run(self.scenario.data["steps"])
         finally:
@@ -193,7 +235,6 @@ class Run:
             recorder.wait()
         log = driver.finish() | {"recording_started": recording_started}
         self.run_log.write_text(json.dumps(log, indent=2))
-        self.compare_captures(out)
 
     def compare_captures(self, out: Path):
         from PIL import Image, ImageChops
@@ -220,7 +261,10 @@ class Run:
             return
         from polish import polish
 
-        polish(self.out / "capture/raw.mov", json.loads(self.run_log.read_text()), self.out / "capture/clip.mp4")
+        polish(
+            self.out / "capture/raw.mov", json.loads(self.run_log.read_text()), self.out / "capture/clip.mp4",
+            zoom=self.scenario.data.get("clip_zoom", 1.7),
+        )
 
     def publish(self):
         """Copy the fresh captures and clip next to the article."""
@@ -238,20 +282,21 @@ class Run:
     def check(self):
         """Every UI string the reader sees must have been seen in the app."""
         seen = set(json.loads(self.run_log.read_text())["seen"])
-        article = self.scenario.article.read_text()
+        keys = set(self.scenario.data.get("keys", []))
+        article = self.scenario.article_text()
         for name, value in self.scenario.labels.items():
             if value not in seen:
                 self.problems.append(f"label {name} ({value!r}) was not shown in the app")
         bold = [part.strip() for text in re.findall(r"\*\*(.+?)\*\*", article) for part in text.split("→")]
         for text in dict.fromkeys(bold):
-            if text not in seen:
+            if text not in seen and text not in keys:
                 self.problems.append(f"article names **{text}**, which the app did not show")
         # A renamed label must not survive anywhere in the article, including alt text.
         for name, old in self.scenario.committed_labels(self.base).items():
             if self.scenario.labels.get(name) != old and old in article:
                 self.problems.append(f"article still says {old!r}; label {name} is now {self.scenario.labels.get(name)!r}")
         for relative in [*self.scenario.assets.values(), self.scenario.data.get("clip")]:
-            if relative and f"./{relative}" not in article:
+            if relative and f"./{relative}" not in self.scenario.article.read_text():
                 self.problems.append(f"article does not show {relative}")
         print(f"ok  check ({len(self.problems)} problems)")
 
@@ -260,10 +305,11 @@ class Run:
         out = self.out / "verify"
         shutil.rmtree(out, ignore_errors=True)
         out.mkdir(parents=True)
-        self.app.launch(self.scenario)
-        driver = self.driver(out)
-        driver.run(self.scenario.data.get("setup", []))
-        driver.run(self.scenario.data["verify"])
+        with self.scenario.fixture_server() as variables:
+            self.app.launch(self.scenario)
+            driver = self.driver(out, variables)
+            driver.run(self.scenario.data.get("setup", []))
+            driver.run(self.scenario.data["verify"])
 
     def report(self) -> bool:
         print(f"\n{self.scenario.slug}: {'FAILED' if self.problems else 'passed'}")

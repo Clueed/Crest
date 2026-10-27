@@ -1,7 +1,7 @@
 # Create one link route: github.com, Contains, opens in Work.
 # Targets are accessibility identifiers or `$labels`; no step uses coordinates.
 # Format and actions: Scripts/helpdocs/README.md.
-article: content/docs/(browse-faster)/link-routing.mdx
+article: content/docs/(browse-faster)/link-routing.md
 sources:
   - CrestShared/Features/Settings/BrowserLinkSettingsPane/**
   - CrestShared/Features/Settings/BrowserPlatformLinkRouteEditor/**
@@ -44,7 +44,6 @@ steps:
     target: {identifier: settings-form-links}
     lines: 30
     settle: 1.0
-    capture: links-pane
   - name: new-route
     action: click
     target: {role: AXButton, label: $new_route}
@@ -78,9 +77,7 @@ steps:
     settle: 1.0
     capture: route
 assets:
-  links-pane: link-routing/links-pane.png
   route: link-routing/route.png
-clip: link-routing/create-route.mp4
 verify:
   # The article followed literally, then a link opened from another app.
   - name: article-1-settings-links
