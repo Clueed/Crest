@@ -1,0 +1,1542 @@
+# Let coding agents use Crest (/guides/coding-agents)
+
+On Mac, coding agents you run, such as Claude Code or Codex, can use Crest as their browser: list and open tabs, read pages, click and type, take screenshots, and read a page's console and network requests. They work in the Spaces you choose, with the sites you're already signed in to there.
+
+Agents are off until you turn them on.
+
+## Turn on agents [#turn-on-agents]
+
+1. Open **Settings > Agents**.
+2. Turn on **Allow agents to use Crest**.
+3. Under **Spaces**, turn on each Space agents may use.
+4. Under **Connect an Agent**, choose **Copy Setup** for your agent, and paste it in your agent's terminal or settings.
+
+Crest must be open while an agent works. Before an agent opens a window, Crest asks you; you can let it open windows without asking until it disconnects, except private windows, which Crest always asks about.
+
+To start Crest without bringing it to the front, a tool can run `open -g --env CREST_BACKGROUND_LAUNCH=1 -a Crest`. Crest opens your windows behind the app you're using, and comes forward only to ask you something, such as about an agent it hasn't met.
+
+## Allow an agent [#allow-an-agent]
+
+The first time an agent uses Crest, Crest asks whether to allow it. The question names the program macOS verified by its code signature, not the name the agent gives itself. Crest remembers your answer and lists the agent under **Allowed agents**. Choose **Forget** to disconnect it; Crest asks again the next time it connects.
+
+When the program is a general interpreter, such as node or python, allowing it covers any program it runs under the same agent name.
+
+## See what agents do [#see-what-agents-do]
+
+- Each tab an agent uses shows the agent's badge and an outline in its colour, and the page shows a bar naming the agent.
+- A pointer in the agent's colour shows where it clicks, hovers, fills and scrolls.
+- Choose **Stop** in that bar, or **Stop Agent in This Tab** from the badge, to keep the agent out of that tab, through any of its connections, until Crest quits or you forget the agent.
+- **Settings > Agents** lists the agents connected now, with what each did lately, such as the tabs it opened and closed. Choose **Disconnect** to end one's connection.
+- Choose **Stop All Agents** in the Crest menu, or in **Settings > Agents**, to disconnect every agent and keep agents out of the tabs they used until Crest quits.
+- Before an agent deletes history, Crest asks you, naming the agent, the address and the Space.
+- Turning agents off disconnects every agent.
+
+## What agents can reach [#what-agents-can-reach]
+
+- Only the Spaces you turned on. A locked Space shows agents its name and nothing in it.
+- Never into a private window, even one an agent opened for you, and never Crest's own pages, such as Settings, a browser or extension page, or a file. An agent opens an address in a private window only when it opens a new one.
+- History only in the Spaces you turned on, never private history.
+- Only `http` and `https` pages, and blank ones.
+- Not your saved passwords. A password field's value is left out of what agents read, cookies and sign-in headers are hidden in the requests they read, and request and response bodies are never shown.
+- Scripts in a page's own world only when you turn on **Let agents run scripts in pages**. A script runs with the page's own access, so it can read anything the page holds, including a password filled in on it.
+
+Any program that runs as you on your Mac can run an agent you allowed. Crest's question tells agents apart so you can see and control them; it is not a defense against harmful software already on your Mac. Allow only agents you trust, and turn agents off when you don't need them.
+
+## For agent authors [#for-agent-authors]
+
+Crest includes a Model Context Protocol server as a helper inside the app, which an agent runs over its standard input and output:
+
+```text
+/Applications/Crest.app/Contents/Helpers/crest-browser mcp
+```
+
+It speaks protocol version 2026-07-28 and the earlier versions that open with `initialize`. Call `identify` first with your name and brand colour as `#RRGGBB`, so the person sees which tabs you use. Then use `list_spaces` and `list_tabs`, and read pages with `take_snapshot`, whose element `uid`s `click`, `hover`, `fill` and `scroll` take. The other tools are `open_tab`, `navigate`, `show_tab`, `close_tab`, `screenshot`, `type_text`, `press_key`, `wait_for`, `list_console_messages`, `list_network_requests`, `get_network_request`, `evaluate_script`, `read_page_text`, `handle_dialog`, `search_history`, `delete_history`, `list_search_providers`, `open_window`, `open_blank_window`, `open_quick_window` and `open_private_window`.
+
+`read_page_text` answers a page's readable text as Markdown, without any form field's value. `handle_dialog` answers a page's alert, confirm or prompt, but never a question about leaving the page. `wait_for` also takes `url`, to wait until the tab's address contains it. Tools that open a window wait while Crest asks the person.
+
+When a page runs on WebKit, input reaches it as script events, which some pages ignore, and its network requests show their address, type and timing without their method, status or headers.
+
+## Launchers and other tools [#launchers-and-other-tools]
+
+Launchers and other local tools use the same helper, approval and Spaces as coding agents.
+
+- `list_spaces` says which Space is active and includes each unlocked Space's artwork. `list_tabs` says whether each tab is pinned or saved and which folders hold it.
+- `show_tab` shows the tab itself, opening a normal window over its Space only when none is open. `close_tab` closes only open tabs.
+- `search_history` searches the history of the allowed, unlocked Spaces, newest first. Every word of `query` must appear in the title or address, `domain` matches a host and its subdomains, and `limit` takes 1 through 1000, 25 by default.
+- `delete_history` removes every visit to one `url`, without its fragment, from one allowed, unlocked `space`, once the person agrees. An address with no visits removes nothing and asks nothing.
+- `list_search_providers` lists the enabled search providers and a Space's default.
+- `open_window`, `open_blank_window` and `open_quick_window` open a window over an allowed, unlocked Space, at an `http` or `https` address where they take one. `open_private_window` answers only with the window's ID; an address opens only in a new Private Window.
+
+
+# Use the command palette (/guides/command-palette)
+
+Click the address display or press **Command-L**. The same palette can resolve a web address, search query, open tab, saved page, history entry, Space, settings page, or Crest command.
+
+## Read the results [#read-the-results]
+
+The first row is what **Return** does. When one result clearly fits what you typed, it leads as the Top Hit: the address the field is completing, a tab or page you use often whose title or address starts with your text, or the result you chose before for the same text. Otherwise the first row opens the address you typed or searches for it with the Space's search engine, and it always follows a Top Hit.
+
+Below it, the palette lists tabs, pinned and saved tabs, history, actions, and other Spaces from the current Space under their own headers, then search suggestions last. Pages you visit often and recently, and open tabs you used recently, rank higher. A page that is open shows once, as its tab. Set the order, how many results each section shows, and whether results blend into one list in **Settings → Search**.
+
+Before you type, the palette shows **Recent Tabs**, the tabs you used most recently, and a few actions, in the order you set in **Settings → Search**. With Recent Tabs first, **Return** goes straight back to the tab you were on before.
+
+## Complete addresses [#complete-addresses]
+
+As you type the start of a site you've typed or opened before, or one a tab shows, the palette fills in the rest of its address in gray. It completes the site name, without `www.`, and once you type a `/`, the next part of the path. **Return** opens what the field shows. Press **Tab**, **Right Arrow**, or **End** to accept the completion and keep typing, or **Escape** or **Delete** to reject it, which makes **Return** run what you typed.
+
+## Search a site or ask an assistant [#search-a-site-or-ask-an-assistant]
+
+Type a provider's shortcut, such as **g** for Google, **ddg** for DuckDuckGo, **yt** for YouTube, **w** for Wikipedia, or **claude**, and press **Tab**; this needs **Tab to search providers**, which is on unless you turn it off. While you type the first word, every provider it names or starts to name shows as a chip under the field, with its shortcut; the first is the one **Tab** chooses, and you can click any of them. Once a provider is chosen, a chip with its icon and color appears beside the field. Type your search and press **Return** to search that provider, or to ask an AI assistant. When what you typed is exactly a shortcut, **Tab** chooses the provider even while the field completes an address. Type `$` before a shortcut, such as `$yt`, and a space to choose the provider without pressing **Tab**. **Space to search providers** in **Settings → Search** turns this off, or lets a shortcut alone, such as `yt`, and a space choose the provider too. Its suggestions, where it offers them, come only from that provider. Press **Escape**, **Delete** in an empty field, or the chip's close control to leave and keep your text.
+
+Crest offers search engines such as Google, DuckDuckGo, Bing, Brave Search and Startpage; AI assistants such as ChatGPT, Claude and Perplexity; and websites such as YouTube, Wikipedia, GitHub, Reddit and Amazon. Turn providers on or off, change their shortcuts, set their options, choose your default search and the one private windows use, and add your own in **Settings → Search**. Search providers stay on this device.
+
+## Narrow to one kind of result [#narrow-to-one-kind-of-result]
+
+Type `@tabs`, `@history`, `@saved`, `@actions`, or `@spaces` and press **Space** or **Tab** to list every match of that kind and nothing else. Leave the same way you leave a provider. Turn these off with **@ Filters** in **Settings → Search**.
+
+## Run commands by name [#run-commands-by-name]
+
+Type a verb or feature name such as "archive," "downloads," "reader," "split," or "copy Markdown." Initials work too, such as "tsv" for Toggle Split View. The palette uses the same command catalog as the Mac menus and shortcut settings, so an action stays discoverable even when it has no key equivalent. Settings pages appear the same way.
+
+Type arithmetic such as `24 * 7` to see the answer; **Return** copies it.
+
+## Keyboard [#keyboard]
+
+- **Up** and **Down** arrows, or **Control-N** and **Control-P**, move the selection; **Option-Up** and **Option-Down** jump between sections.
+- **Tab** chooses the provider whose shortcut you typed, accepts a completion, or moves to the next result. **Shift-Tab** moves back.
+- **Return** runs the selected result. Hold **Command** to open it in a background tab, **Shift-Command** for a new tab, **Shift** for Split View, or **Option** for a Quick Window; the selected row shows where it will open while you hold the keys.
+- **Shift-Delete** on a history result removes it from history, and on a result the palette learned, forgets it.
+- **Escape** leaves a provider or scope, then rejects a completion, then closes the palette.
+
+## What the palette remembers [#what-the-palette-remembers]
+
+The palette learns which result you choose for what you type, so the result you usually pick for "gi" leads next time. It remembers this for each Space on this device only, never syncs it, and never learns in a private window. Clearing a Space's history forgets it too, and **Settings → Search → Clear Learned Choices** forgets everything it learned.
+
+Search suggestions from your search engine are optional, never fetched in a private window, and separate from the tabs, history, and actions the palette finds on your device.
+
+
+# Gestures and pointer actions (/guides/gestures-and-pointer)
+
+Many Crest actions stay out of the permanent chrome. This is the practical map for touch, trackpad, mouse, and drag and drop.
+
+## iPhone [#iphone]
+
+- Swipe vertically on the address capsule to move between the page and tab viewer.
+- Swipe horizontally on the compact toolbar to page between cards in Split View. Outside a split, this gesture intentionally does nothing.
+- Swipe from the sidebar’s chosen edge to reveal it. Set a left- or right-side sidebar in **Settings → Appearance**.
+- Swipe or scroll the Space picker to move between Spaces.
+- Touch and hold tabs, folders, links, and Space controls for context actions.
+
+## Mac and iPad [#mac-and-ipad]
+
+- Drag a Split View divider to resize its columns.
+- Drag a sidebar tab onto the page to create or extend a Split View.
+- Drag tabs and folders to reorder them, save them in folders, or move them when a destination is shown.
+- Swipe or scroll over the Space picker to change Spaces.
+- Use the normal two-finger Back and Forward gesture inside web content; the page's engine owns the page-navigation gesture.
+
+## Mouse and trackpad details on Mac [#mouse-and-trackpad-details-on-mac]
+
+- Right-click a tab, folder, Space, or link for its contextual actions.
+- Command-click tabs and folders to select several items; Shift-click to select a range.
+- Drag a webpage link to pull out a live Peek. **Settings → Links → Drag links to Peek** controls this gesture; hold Option to use the opposite behavior.
+- Middle-click a current tab to close it.
+- Middle-click a pinned or saved item to unload its live page while keeping the durable item.
+- Double-click the saved-location indicator on a saved tab, or its pinned tile when applicable, to return to the saved home URL.
+- Turn on **Focus follows pointer** in **Settings → Tabs** if moving the pointer between Split View cards should move focus too.
+
+## Dragging without losing work [#dragging-without-losing-work]
+
+Drag into a Saved folder to keep a page, or into a Current Tabs folder to group ongoing work. A tab moved to another Space loads under that destination profile; a tab dropped onto a page joins its Split View. Watch the insertion target before releasing when folders are nested.
+
+
+# Keyboard shortcuts (/guides/keyboard-shortcuts)
+
+These are the current defaults. On Mac, open **Settings → Shortcuts** to search the whole catalog, record a new shortcut, clear an assignment, inspect conflicts, or restore the default. Commands marked **Unassigned** remain available from the menu and command palette.
+
+## Windows and navigation [#windows-and-navigation]
+
+| Action | Default |
+| --- | --- |
+| New Window | Command-N |
+| New Blank Window (Mac) | Option-Command-N |
+| New Tab | Command-T |
+| New Quick Window (Mac) | Option-Shift-Command-N |
+| New Private Window | Shift-Command-N |
+| Close Current Tab or Window | Command-W |
+| Close Window | Shift-Command-W |
+| Open Location / command palette | Command-L |
+| Back | Command-[ |
+| Forward | Command-] |
+| Reload Page | Command-R |
+| Stop Loading | Command-. |
+| Reload from Origin | Shift-Command-R |
+
+On Mac, **Command-L** opens the address editor while keeping a collapsed sidebar collapsed.
+
+## Tabs and Spaces [#tabs-and-spaces]
+
+| Action | Default |
+| --- | --- |
+| Pin or Unpin Current Tab | Command-D |
+| Duplicate Tab | Unassigned |
+| Reopen Last Closed Tab | Shift-Command-T |
+| Clear Unpinned Tabs | Shift-Command-K |
+| Archive Tab | Command-E |
+| Previous Tab | Option-Command-Up Arrow |
+| Next Tab | Option-Command-Down Arrow |
+| Most Recent Tab | Control-Tab |
+| Most Recent Tab Backward | Control-Shift-Tab |
+| Select Tab 1–9 | Command-1 through Command-9 |
+| Previous Space | Option-Command-Left Arrow |
+| Next Space | Option-Command-Right Arrow |
+| Select Space 1–9 | Control-1 through Control-9 |
+
+Tap **Control-Tab** to jump to the tab you used last. On a Mac, hold it to see your recent tabs: press **Tab** or the arrow keys to move through them and let go of **Control** to switch. **Control-Shift-Tab** goes to the tab you used longest ago. A split appears as one card. To skip the previews, turn off **Show recent tabs while switching** in Settings > Tabs.
+
+## Split View [#split-view]
+
+| Action | Default |
+| --- | --- |
+| Split With Next Tab | Unassigned |
+| Focus Previous Split Card | Control-Command-Left Arrow |
+| Focus Next Split Card | Control-Command-Right Arrow |
+| Remove Tab From Split | Unassigned |
+| Separate All Tabs | Option-Command-U |
+| Move Split Card Left | Shift-Command-Left Arrow |
+| Move Split Card Right | Shift-Command-Right Arrow |
+
+## Page tools [#page-tools]
+
+| Action | Default |
+| --- | --- |
+| Show or Hide Reader | Unassigned |
+| Show or Hide Translation Toolbar | Shift-Command-L |
+| Toggle Content Blocking | Unassigned |
+| Find in Page | Command-F |
+| Zoom In | Command-+ |
+| Zoom Out | Command-- |
+| Actual Size | Command-0 |
+| Copy Page Link | Shift-Command-C |
+| Copy Page Link as Markdown | Option-Shift-Command-C |
+| Share Page | Unassigned |
+| Export as PDF | Unassigned |
+| Save Web Archive | Unassigned |
+| Print Page | Command-P |
+
+## Browser surfaces and developer tools [#browser-surfaces-and-developer-tools]
+
+| Action | Default |
+| --- | --- |
+| Show or Hide Sidebar | Command-S |
+| Show History | Command-Y |
+| Show Archive | Unassigned |
+| Show Downloads | Shift-Command-J |
+| Show Web Inspector | Option-Command-I |
+| Show or Hide Developer Toolbar (Mac) | Shift-Command-I |
+
+## iPad hardware keyboards [#ipad-hardware-keyboards]
+
+iPad uses Crest’s shipped defaults for the commands available on that platform. Hold the Command key to inspect commands exposed by the current menu context. Full shortcut rebinding is a Mac feature.
+
+On iPad, **Option-Command-N** remains New Quick Window. New Blank Window is a Mac command.
+
+## Context-only keys [#context-only-keys]
+
+Some temporary interfaces have their own local actions. In Peek, **Command-W** closes the preview and **Command-O** promotes it to a full tab. **Escape** dismisses transient panels such as the command palette or Quick Window flow when dismissal is available.
+
+## Resolve a conflict on Mac [#resolve-a-conflict-on-mac]
+
+Search for either command in **Settings → Shortcuts**, select the row, and record a different key combination. Crest shows collisions before the replacement becomes part of your command map. Clearing a shortcut makes the action unassigned; resetting restores the shipped default.
+
+
+# Route links to the right Space (/guides/link-routing)
+
+Link Routing is Crest’s equivalent of Arc’s Air Traffic Control: matching links opened from other apps can go to a specific Space before the normal external-link destination is considered.
+
+## Create a route [#create-a-route]
+
+1. Open **Settings → Links**.
+2. In **Routing**, choose **New Route**.
+3. Enter a URL pattern.
+4. Choose **Contains** or **Exact**.
+5. Choose the destination Space.
+
+Routes are evaluated from top to bottom. Reorder them when a narrow rule should win before a broad one.
+
+## Match deliberately [#match-deliberately]
+
+- **Exact** is best for one complete address that should always land in one Space.
+- **Contains** is useful for a domain or stable path fragment, but a pattern that is too broad may catch unrelated links.
+
+Start with the smallest meaningful domain or URL fragment, test a link from another app, then broaden only if needed.
+
+## Relationship to Quick Window [#relationship-to-quick-window]
+
+Routing runs before the default **Links from other apps** choice. If no rule matches, Crest uses Quick Window, Most Recent Space, or the Chosen Space according to that default.
+
+A route targeting a protected Private Space is hidden until that Space is unlocked. This prevents its URL patterns and destination identity from leaking through Settings.
+
+
+# Localhost and developer tools (/guides/localhost-developer-tools)
+
+On Mac, Crest automatically shows its developer toolbar for local development addresses. This includes `localhost`, loopback and private-network addresses, single-label hosts, common local suffixes such as `.local` and `.test`, and file URLs.
+
+Use **Shift-Command-I** to show or hide the toolbar on any website. To stop the toolbar opening by itself on local addresses, turn off **Developer toolbar on local pages** in **Settings > General**. The shortcut still shows it whenever you want it.
+
+## Preview a different viewport [#preview-a-different-viewport]
+
+Choose a phone or desktop preset, or enter a custom size, in the developer toolbar. The live page renders within that viewport so you can review responsive layouts without resizing your whole browser window. Return to the normal viewport when finished.
+
+This previews the page’s layout at the chosen dimensions; it does not reproduce another device’s hardware or browser engine.
+
+## Toolbar controls [#toolbar-controls]
+
+- Edit the complete development URL without losing the visible route.
+- Copy the current link.
+- Open Site Settings and inspect permissions.
+- Use **Capture in Portrait Mode**, **Copy Full Page Capture**, or drag a region to copy it.
+- Toggle the inspector's Console, Network panel, or element inspection.
+
+Automatic localhost tools follow the focused address. The manual toolbar toggle lets you inspect other sites too.
+
+## Open the inspector directly [#open-the-inspector-directly]
+
+Use **Option-Command-I**, the menu, or the command palette; the same shortcut closes it again. A Chromium page opens Chromium DevTools in the window, and a WebKit page opens Web Inspector. The inspector follows the focused page, including the focused card inside Split View.
+
+## Security boundary [#security-boundary]
+
+Developer tools make page internals visible and can change runtime state. Use them only for sites and code you trust. A certificate warning, external-app request, or protected permission remains subject to Crest’s normal navigation and site-permission policies; localhost mode does not bypass those checks.
+
+
+# Translate, read, and use page tools (/guides/page-tools)
+
+Page actions operate on the focused page. In Split View, click or tap a card first so the intended page owns the command.
+
+On Mac, each page runs in Chromium or WebKit. Crest on iPhone and iPad uses WebKit. A few page tools depend on the page's engine, and this page notes where. To switch a page, see [Chromium and WebKit on Mac](/guides/engines/).
+
+## Translate a page [#translate-a-page]
+
+Translate webpages on device using Apple’s Translation framework. Whole-page translation works on iPhone, iPad, and Mac, where it works on both Chromium and WebKit pages. On a Chromium page you can also select text and translate the selection from the page's context menu; it uses the same on-device translation.
+
+On Mac, open the translation toolbar with **Shift-Command-L**. On iPhone and iPad, tap the address bar’s translation button for options, or touch and hold it to translate immediately.
+
+Choose **Detect Language** or a source language, pick a target language, then translate. **Show Original** restores the page’s original text. Language availability depends on Apple’s support; Apple asks before downloading a language that is needed.
+
+**Automatically Translate** is off by default. When enabled, Crest uses your preferred device language and languages already downloaded. Showing the original keeps that page untranslated until you navigate or reload.
+
+Downloaded language packs are shared with other apps and remain on the device after Private Browsing ends.
+
+## Read and search [#read-and-search]
+
+- **Reader** converts a supported article into a focused reading surface. Use the page controls, menu, command palette, or assign a shortcut. Reader works on WebKit pages. On Mac, open a Chromium page in WebKit to read it in Reader.
+- **Find in Page** uses **Command-F**. Step through matches and close Find when finished. On a Chromium page, Find shows how many matches there are and which one is selected; on a WebKit page, it shows whether there is a match.
+- **Zoom In**, **Zoom Out**, and **Actual Size** use **Command-+**, **Command--**, and **Command-0**.
+
+Set a default zoom for pages in **Settings → Appearance**, from **50% to 300%**.
+
+## Video and audio [#video-and-audio]
+
+Use the sidebar’s Now Playing controls for eligible active media. On Mac, supported videos can open in **Picture in Picture**. Turn on **Picture in Picture when switching tabs** in **Settings → General** to start it automatically. Availability depends on the website and its player.
+
+## Copy and share [#copy-and-share]
+
+- **Copy Page Link** uses **Shift-Command-C**.
+- **Copy Page Link as Markdown** uses **Option-Shift-Command-C** and produces a title-and-URL link suitable for notes or issue trackers.
+- **Share Page** opens the platform share sheet when available.
+
+## Export [#export]
+
+- **Print Page** uses **Command-P**.
+- **Export as PDF** writes a portable rendered document.
+- **Save Web Archive** saves the whole page in one file. A Chromium page saves an `.mhtml` file, and a WebKit page saves a `.webarchive` file.
+
+**File → Open File…** offers the archive format of the focused page's engine. Chromium cannot open a `.webarchive`, and WebKit cannot open an `.mhtml` file.
+
+Export and Share are available through menus and the command palette even when no default shortcut is assigned.
+
+## Reload choices [#reload-choices]
+
+**Command-R** performs a normal reload. **Shift-Command-R** reloads from the origin when a cached response is not what you need. **Command-.** stops the current load.
+
+## Content and site controls [#content-and-site-controls]
+
+The contextual site controls also expose the page's engine, Reader and content blocking where the engine offers them, permissions, extension actions, and developer status. On Chromium pages, blocking ads and trackers comes from the extensions you install. Decisions for camera, microphone, automatic downloads, popups, or external-app handoff are remembered within the current Space.
+
+
+# Use Peek and Quick Window (/guides/peek-and-quick-window)
+
+Peek and Quick Window are transient browsing surfaces. Both use a real Crest Space profile so the page can access the right signed-in session and Crest Passwords, but neither has to become a durable tab.
+
+## Peek [#peek]
+
+Peek opens a link above the source page. Close it to return immediately, or choose **Open In…** to promote it into a full tab in the current Space or another one. **Command-W** closes an open Peek and **Command-O** promotes it.
+
+In **Settings → Links**, you can automatically open cross-site links from pinned and saved tabs in Peek. You can also choose whether **Option-click** or **Command-click** explicitly opens Peek; the other modifier opens the link in a new tab.
+
+Peek stays attached to its source tab when you open another tab or switch Spaces. Return to the source tab to continue in its Peek. If the source is one card in Split View, promotion and page commands follow that focused card.
+
+### Pull a link into Peek on Mac [#pull-a-link-into-peek-on-mac]
+
+Drag a webpage link to pull out a live preview that follows your gesture and fades in as the page loads. Release to keep the preview open, then close it or promote it into a tab using Peek’s controls.
+
+Choose this behavior in **Settings → Links → Drag links to Peek**. Hold **Option** to drag the link normally; when the setting is off, Option-drag opens Peek instead.
+
+On iPhone and iPad, touch and hold webpage links for the native link preview and actions, including opening a link in another Space. Touch and hold an image for image actions such as saving it.
+
+## Quick Window [#quick-window]
+
+Quick Window carries forward the idea behind Arc's Tiny Arc. It handles a link from another app without dropping it immediately into the durable sidebar. It uses the configured Space’s cookies and passwords. When the page matters, move it into a normal window and choose the right Space.
+
+Open a blank Quick Window with **Option-Shift-Command-N** on Mac. In **Settings → Links**, choose whether external links use Quick Window, the most recent Space, or a chosen Space.
+
+### Sign-in and other popup windows [#sign-in-and-other-popup-windows]
+
+When a page opens a popup window, like a **Sign in with Google** or **Sign in with Apple** window, Crest for Mac shows it in a Quick Window in the same Space. The popup stays connected to the page that opened it, uses the same engine as that page, and closes itself when the sign-in finishes. Choose **Open in** and the Space to keep it as a tab instead, or close the Quick Window to drop it. A page that opens a new tab, rather than a popup window, still opens a tab beside it. On iPhone and iPad, a popup opens as a tab.
+
+## Shared windows and Blank Window on Mac [#shared-windows-and-blank-window-on-mac]
+
+Use **Command-N** for another window onto your shared Spaces and tabs. Each window keeps its own selected Space and tab. Organizing or closing a tab changes the shared workspace; closing the window itself keeps your tabs available in the other windows.
+
+When two windows show the same tab, the focused window holds the live page and the other displays its preview. Focus the other window to continue there with the same page state.
+
+Use **Option-Command-N** for a **New Blank Window**: a disposable workspace using the current Space's cookies, passwords, extensions, and settings. Its tabs, folders, history, and archive are temporary, stay out of iCloud sync, and are discarded when the window closes. It shares the Space's signed-in website session; use a Private Space when you need temporary website storage too.
+
+Drag a tab outside the window to move it into a blank window at the drop location. Move a tab back into a normal window to keep it in the shared workspace.
+
+## Cleanup and remembered destinations [#cleanup-and-remembered-destinations]
+
+Quick Window records can auto-archive after **1, 6, 12, or 24 hours**, or remain until you remove them. Enable **Remember the chosen Space for each site** when repeated links from the same domain should return to the destination you previously chose.
+
+Archived Quick Windows remain distinguishable in Archive so you can recover something you dismissed too quickly.
+
+
+# Extension compatibility (/guides/extension-api-compatibility)
+
+Extensions in Crest for Mac run on the Chromium engine. Chromium runs each extension itself, with its own background service worker, APIs and permission checks, so an extension behaves much as it does in Chrome. Crest connects the parts that appear in a browser window, such as the toolbar, popups, side panels and shortcuts, to its own interface.
+
+## Where extensions run [#where-extensions-run]
+
+| Where | Extensions |
+| --- | --- |
+| Chromium pages in Crest for Mac | Chrome extensions from the Chrome Web Store |
+| WebKit pages in Crest for Mac | None |
+| Crest on iPhone and iPad | None |
+
+Crest does not install Firefox add-ons or Safari Web Extensions. Many of them also publish a Chrome version. See [Firefox add-ons](/guides/install-firefox-add-ons/) and [Safari Web Extensions](/guides/scan-safari-web-extensions/).
+
+## Packages [#packages]
+
+| Package | Support |
+| --- | --- |
+| Chrome Web Store extensions | Supported. Chromium checks the publisher's signature and the extension's ID before Crest shows its install review. |
+| Extensions in more than one Space | Each Space gets its own installation and data. A copy reuses your approval only when the extension's identity, version and permission warnings match what you reviewed. |
+| Unpacked extensions | For development. Install them from Chromium's extension manager in developer mode, linked from each Space's Extensions page in Settings. |
+| Firefox `.xpi` packages | Not supported. |
+| Safari Web Extensions, Safari content blockers, Safari App Extensions | Not supported. |
+
+## Browser features extensions use [#browser-features-extensions-use]
+
+| Feature | In Crest |
+| --- | --- |
+| Toolbar actions and popups | The action appears in the Space's extension strip or in Site Controls. Its popup opens below the button in a window attached to the Crest window. Pinned actions belong to the Space, so they appear even on the Start Page. |
+| Side panels | `chrome.sidePanel` opens as a card beside the page it belongs to. The action's context menu, an icon click set to open the panel, and `sidePanel.open()` and `close()` all reach that card. |
+| Keyboard shortcuts | `chrome.commands` shortcuts work when Crest's own shortcuts do not use the same keys. Change them on Chromium's extension shortcuts page, linked from each Space's Extensions page in Settings. See [Set extension keyboard shortcuts](/guides/extension-keyboard-shortcuts/). |
+| New windows | `chrome.windows.create` opens a Crest window in the Space that owns the extension's profile. A popup window, such as a password manager's popout, opens as a tab in the current window instead, and the extension can still find, move and close it as its own window. A requested window state is ignored. A request no Space can host fails with an error. |
+| Tab groups | A group an extension makes with `chrome.tabs.group` or `chrome.tabGroups` appears as a folder in the Space's open tabs, with the group's name and color. Renaming, recoloring, collapsing or deleting the folder, or moving tabs into or out of it, changes the group, and the extension sees the change. A pinned or saved tab an extension groups stays where it is. After Crest restarts, the folder keeps following the group, which comes back under the same ID as its tabs load. This Mac keeps the link between folder and group; it does not sync to your other devices. |
+| Signing in | `chrome.identity.launchWebAuthFlow` returns to the extension's own sign-in address, as in Chrome, so an extension that signs you back in on its own, such as Claude, stays signed in after Crest restarts. |
+| Private windows | Private windows use separate profiles and do not run installed extensions. |
+| Tab sharing and debugging bars | Chromium's confirmation bars, such as the one `chrome.debugger` shows, appear inside the page. |
+| Updates | Chromium updates Chrome Web Store extensions and checks their signatures and permissions. |
+| Native companion apps | Supported through `nativeMessaging`. When a companion app registered its helper only for Google Chrome, Crest also looks in Chrome's locations. A helper still answers only the extensions it lists. See [Native companions](/guides/native-companion-limits/). |
+
+## Known limits [#known-limits]
+
+- Crest's registration of the Chromium engine states that full extension API parity is not complete. Features that need a Chrome browser window Crest does not draw may be missing.
+- Apple's iCloud Passwords helper checks the browser's signature and entitlements before it pairs. See [iCloud Passwords in Crest](/guides/icloud-passwords/).
+- An extension that is still enabled but whose files are gone shows no toolbar tile or settings row, and its action reports that it is unavailable.
+
+For package-specific native limits, continue with [Native companions](/guides/native-companion-limits/).
+
+
+# Extension known limitations (/guides/extension-compatibility)
+
+Crest for Mac runs Chrome extensions from the Chrome Web Store on its Chromium engine. The [extension compatibility](/guides/extension-api-compatibility/) page lists which browser features Crest connects to its interface. This page collects the limits.
+
+<Callout type="info" title="Mac, Chromium pages">
+Extensions run only on Chromium pages in Crest for Mac. Pages you open in WebKit, including protected-video pages that switch there automatically, run without extensions, as does Crest on iPhone and iPad. Installations and settings stay in one Space on one device.
+</Callout>
+
+## Package formats [#package-formats]
+
+- Chrome Web Store extensions install and update through Chromium.
+- Unpacked extensions install from Chromium's extension manager in developer mode.
+- Firefox add-ons, Safari Web Extensions, Safari content blockers and Safari App Extensions are not supported.
+
+## Spaces and private windows [#spaces-and-private-windows]
+
+- Each Space has its own installation and data. Copying an extension to another Space installs it fresh; its data does not follow.
+- Private windows use a fresh, separate profile and do not run installed extensions. You cannot install or remove extensions from a private window.
+- A locked Space cannot receive an extension until you unlock it.
+
+## Browser features [#browser-features]
+
+- Crest does not yet match Chrome for every extension API. A feature that needs part of Chrome's window that Crest does not draw may be missing.
+- A window an extension opens appears as a Crest window in the extension's Space. A requested window state, such as maximized, is ignored.
+- Extension shortcuts work only when Crest's own shortcuts don't use the same keys.
+
+## Companion apps [#companion-apps]
+
+Extensions that talk to a Mac app, such as password managers, depend on that app trusting Crest's signature. See [Native companions](/guides/native-companion-limits/), [Set up 1Password in Crest](/guides/onepassword/) and [iCloud Passwords in Crest](/guides/icloud-passwords/).
+
+## Extensions from older Crest versions [#extensions-from-older-crest-versions]
+
+Earlier versions of Crest ran extensions in WebKit through their own compatibility layer. Crest no longer runs extensions in WebKit, and those installations do not carry over. Install each extension again from the Chrome Web Store in the Space you want.
+
+If an installed extension misbehaves, continue with [Troubleshoot an extension](/guides/troubleshoot-extension-compatibility/).
+
+
+# Check an extension's status and details (/guides/extension-status)
+
+Crest shows each extension's basic state in its own settings. Chromium's extension manager holds the detailed record: errors, permissions and site access.
+
+## In Crest Settings [#in-crest-settings]
+
+Open **Crest Settings**, select the Space in the sidebar, then select **Extensions**. Each installed extension has a row with:
+
+- its name, version and description;
+- **From Chrome Web Store** for store installations;
+- the **Enabled** switch. Turning it off keeps the installation and its data in the Space.
+
+Expand the row to see the permissions and website access Chromium reports, and to reach **Extension Settings**, **Manage Permissions in Chromium**, **Install a copy in other spaces** and **Remove Extension**.
+
+## In Chromium's extension manager [#in-chromiums-extension-manager]
+
+For errors and every other detail, open the manager for the extension's Space:
+
+- From the extension's action menu, choose **Manage Extension…** for that extension, or **Manage Extensions…** for the whole list.
+- On the Space's Extensions page in **Crest Settings**, select **Chromium Extension Manager**.
+
+The manager shows what Chrome's does, including errors the extension reported. Include them, with the extension version, Crest version and the steps that fail, in a bug report.
+
+## An extension whose files are gone [#an-extension-whose-files-are-gone]
+
+If an extension is still turned on but its files are missing, Crest shows no toolbar tile and no settings row for it. Selecting its action reports that the extension is unavailable. Reinstall it from the Chrome Web Store.
+
+Continue with [Troubleshoot an extension](/guides/troubleshoot-extension-compatibility/).
+
+
+# iCloud Passwords in Crest (/guides/icloud-passwords)
+
+The iCloud Passwords extension installs from the Chrome Web Store into Crest for Mac and runs on Chromium pages. It is only half of iCloud Passwords. The other half is Apple's system password helper, which the extension reaches through native messaging.
+
+## How the extension finds Apple's helper [#how-the-extension-finds-apples-helper]
+
+Apple registers its helper for Google Chrome. Crest checks Chrome's native-messaging folders when Chromium's own lookup finds nothing, so the extension can reach it. Chromium still checks that the helper allows this extension. Crest does not read your passwords; Apple's helper controls authentication and access to them.
+
+## What Apple checks [#what-apple-checks]
+
+Apple protects its helper with a launch constraint on the browser. The browser must carry the managed **Web Browser Public Key Credential Requests** capability, or use an identity Apple has approved. The entitlement is:
+
+```text
+com.apple.developer.web-browser.public-key-credential
+```
+
+The signed Crest release carries this entitlement. Development and review builds do not, so iCloud Passwords cannot pair in them. Adding the entitlement to a build yourself does not authorize it; Apple checks it against the app's provisioning.
+
+## If it does not pair [#if-it-does-not-pair]
+
+- Confirm that you are running the signed Crest release from `/Applications`.
+- Reinstalling the extension does not change the browser's signature or entitlements.
+- Until it pairs, use Crest's built-in passwords for the Space or another password manager.
+
+## Official reference [#official-reference]
+
+- [Web Browser Public Key Credential entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.web-browser.public-key-credential)
+
+
+# Native companions (/guides/native-companion-limits)
+
+Most extensions need no desktop helper. A smaller group, with password managers the common example, uses `nativeMessaging` to talk to a separate Mac app.
+
+## How Crest finds the helper [#how-crest-finds-the-helper]
+
+Extensions run on Chromium, which handles `nativeMessaging` as Chrome does. Each companion app registers a small manifest that names its helper and the extension IDs it will answer.
+
+Most companion apps register only with Google Chrome. When Chromium's own lookup finds no manifest, Crest also checks Chrome's per-user and system `NativeMessagingHosts` folders. Chromium still checks the manifest's `allowed_origins`, so a helper answers only the extensions its app lists.
+
+## The app decides whether to trust Crest [#the-app-decides-whether-to-trust-crest]
+
+Some companion apps check the browser's code signature before they answer.
+
+- **1Password** accepts a browser you add through its **Add Browser** setting, and checks that browser's signature. See [Set up 1Password in Crest](/guides/onepassword/).
+- **iCloud Passwords** uses Apple's password helper, which Apple protects with a launch constraint on the browser's identity and entitlements. See [iCloud Passwords in Crest](/guides/icloud-passwords/).
+
+Use the signed and notarized Crest release in `/Applications`. A development build carries a different signature, and companion apps that check the signature reject it.
+
+## What Crest does not do [#what-crest-does-not-do]
+
+- Crest does not copy Chrome's profile or read a companion app's data.
+- Safari app extensions and their native handlers do not work in Crest.
+
+## Availability [#availability]
+
+Official Crest for Mac builds are signed with Developer ID, notarized, and published through GitHub Releases, with updates through a signed Sparkle appcast.
+
+
+# Set up 1Password in Crest (/guides/onepassword)
+
+The 1Password Chrome Web Store extension runs on Chromium pages in Crest for Mac. To unlock and fill through the 1Password app, the app must trust Crest as a browser.
+
+<Callout type="warn" title="Use the signed Crest release">
+1Password checks the browser's code signature. Use the Developer ID signed and notarized Crest release installed in `/Applications`. A development build carries a different signature, and 1Password rejects it.
+</Callout>
+
+## Before you begin [#before-you-begin]
+
+- Install and unlock **1Password for Mac**.
+- Switch to the Crest Space that should own the extension. Installations do not copy to another Space or device on their own.
+
+## Install the extension [#install-the-extension]
+
+1. In Crest for Mac, open the 1Password page in the Chrome Web Store.
+2. Select **Add to Crest**.
+3. Review the package, its permissions and the destination Space in Crest's review sheet.
+4. Select **Add Extension**, then **Done**.
+
+## Authorize Crest in 1Password [#authorize-crest-in-1password]
+
+1. Open and unlock **1Password for Mac**.
+2. Select your account or collection at the top of the sidebar, then select **Settings**.
+3. Select **Browser** in the sidebar.
+4. Select **Add Browser**.
+5. Choose **Crest** in `/Applications`.
+6. Review 1Password's access prompt and select **Authorize**.
+
+1Password warns that an additional browser can reach your saved information while 1Password is unlocked, so it can save and fill logins. Only authorize a Crest build you trust.
+
+## If it does not connect [#if-it-does-not-connect]
+
+Reinstalling the extension does not change the signature 1Password checks. Confirm that you added the Crest app in `/Applications`, then see [Native companions](/guides/native-companion-limits/) and [Troubleshoot an extension](/guides/troubleshoot-extension-compatibility/).
+
+## Official references [#official-references]
+
+- [Connect additional browsers to the 1Password app](https://support.1password.com/additional-browsers/)
+- [1Password browser code-signature requirements](https://support.1password.com/code-signature/)
+
+
+# Troubleshoot an extension (/guides/troubleshoot-extension-compatibility)
+
+Extensions run on Chromium, so most behave as they do in Chrome. When one doesn't, the cause is usually its Space, its site access, or a browser feature Crest draws differently from Chrome.
+
+## Try these first [#try-these-first]
+
+1. Check that you are in the Space where you installed it. Each Space has its own installations. See [Spaces and profile isolation](/guides/spaces-and-isolation/).
+2. In **Crest Settings**, select the Space in the sidebar, then **Extensions**. Turn the extension off and back on.
+3. Expand its row, select **Manage Permissions in Chromium**, and check whether its site access covers the page you are on.
+4. Open **Extension Settings** if the extension has them, and check its own options.
+5. Remove the extension and install it again from the Chrome Web Store.
+
+## Read the error [#read-the-error]
+
+Choose **Manage Extension…** from the extension's action menu to open Chromium's extension manager. It lists errors the extension reported. See [Check an extension's status and details](/guides/extension-status/).
+
+## In a private window [#in-a-private-window]
+
+Private windows use a fresh profile and do not inherit a Space's installed extensions. You cannot install or remove extensions there. Test the extension in its normal Space instead; enabling Chrome's incognito option does not copy it into Crest's separate private profile.
+
+## Password managers and companion apps [#password-managers-and-companion-apps]
+
+If the extension needs a Mac app, such as 1Password or iCloud Passwords, the app decides whether to trust Crest. Use the signed and notarized Crest release, not a development build. See [Native companions](/guides/native-companion-limits/).
+
+## Features Crest draws differently [#features-crest-draws-differently]
+
+Crest shows popups, side panels, extension windows and keyboard shortcuts in its own interface. An extension that expects part of Chrome's window that Crest does not draw may lose that feature. See [Extension compatibility](/guides/extension-api-compatibility/).
+
+
+# Chromium and WebKit on Mac (/guides/engines)
+
+Crest for Mac includes two web engines. New pages open in Chromium unless you choose otherwise, and any website or page can use WebKit, the engine behind Safari. Crest on iPhone and iPad uses WebKit.
+
+Your Spaces, tabs, history, passwords and settings are the same whichever engine shows a page. Website data is not: each engine keeps its own cookies and storage for a Space, so signing in to a site in Chromium does not sign you in to it in WebKit.
+
+## Chromium [#chromium]
+
+Crest's Chromium engine is built on [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium), which removes Google integrations from Chromium. It runs [Chrome Web Store extensions](/guides/install-chrome-web-store/).
+
+Chromium starts the first time you need it. If WebKit is your default and no page uses Chromium, it stays unloaded. Opening a Chromium page or an extension starts it, and it stays running until you quit Crest.
+
+## Choose the default engine [#choose-the-default-engine]
+
+1. Open **Crest Settings → Engines**.
+2. Select **Chromium** or **WebKit**.
+
+The default applies to pages you open afterwards. Open pages keep their engine, and links a page opens stay on that page's engine. Select **Use Recommended Default** to return to Chromium.
+
+## Open a website in the other engine [#open-a-website-in-the-other-engine]
+
+- **For one page:** choose **Page → Open Page in WebKit** or **Open Page in Chromium**. The page reloads in the other engine. Other pages from the site keep opening where they did.
+- **For a whole website:** open Site Controls and change **Opens in**. The page reloads in that engine, and later pages from the website open there too.
+
+A tab whose page runs in the engine that is not your default shows that engine's mark on its icon.
+
+## Website rules [#website-rules]
+
+Choosing **Opens in** saves a website rule. Rules are listed under **Crest Settings → Engines → Website rules**, where you can:
+
+- select **Add Website Rule…** to send a website to an engine before you visit it;
+- select a rule to change its website or engine;
+- select **Remove Rule** to return a website to your default engine.
+
+Rules match the website's scheme, host and port. A rule for `example.com` does not cover its subdomains. A choice made while browsing privately is not saved as a rule; it lasts until you quit Crest.
+
+## Protected video [#protected-video]
+
+Chromium in Crest cannot play DRM-protected video. When a page asks for it, Crest automatically switches to WebKit to try Apple's FairPlay support, unless you have explicitly chosen an engine for that website. The switch checks for unsaved work first. Choosing **Stay on Page** keeps the page in Chromium and leaves its website rule unchanged; repeated requests from that document do not prompt again. After an allowed move, the website opens in WebKit on later visits. Select **Move Back** to return it to Chromium, or remove its rule in Settings. Playback still depends on the site's support for FairPlay.
+
+## After updating from a WebKit-only Crest [#after-updating-from-a-webkit-only-crest]
+
+The previous stable 0.6 release used WebKit only. Updating to Crest 0.7 keeps your Spaces, tabs, history and Crest Passwords. New pages open in Chromium unless you choose WebKit as your default. Each engine keeps separate website data, so Chromium does not inherit your WebKit sign-ins. Your existing WebKit website data remains available to pages opened in WebKit.
+
+Extensions installed in earlier versions do not carry over. Install them again from the Chrome Web Store.
+
+## What each engine supports [#what-each-engine-supports]
+
+| Feature | Chromium | WebKit |
+| --- | --- | --- |
+| Chrome Web Store extensions | Yes | No |
+| Reader | No | Yes |
+| Built-in ad and tracker blocking | No. Use a blocking extension. | Yes |
+| Protected video | Automatically switches to WebKit after unsaved-changes checks | FairPlay, when the website supports it |
+| Find in Page | Shows the number of matches | Shows whether there is a match |
+| Save Web Archive | `.mhtml` file | `.webarchive` file |
+| Inspect a page | Chromium DevTools | Web Inspector |
+
+Tabs, Spaces, Split View, Peek, Crest Passwords, site permissions, Picture in Picture and downloads are available in both. Their engine controls can differ; Chromium downloads also offer pause and resume. See [Translate, read, and use page tools](/guides/page-tools/) and [Downloads](/guides/history-archive-and-downloads/#downloads) for details.
+
+## Current Chromium limits [#current-chromium-limits]
+
+- Crest Passwords handles saved passwords. Built-in address and payment-card autofill are not available.
+- Screen sharing offers your tabs in the same Space first, with their audio when the site asks for it. A window or your screen goes through the macOS picker, which shares no audio.
+- Local service-worker and extension notifications work while Crest runs. Remote Web Push is not available.
+
+See [Site permissions and notifications](/guides/content-blocking-and-site-permissions/) for permission controls and the Google-free engine's site and download protection limits.
+
+
+# Install and update Crest for Mac (/guides/install-and-update-mac)
+
+Crest for Mac requires Apple silicon and macOS 26.1 or later. It is distributed directly as a signed and notarized app with Chromium and WebKit; see [Chromium and WebKit on Mac](/guides/engines/). Crest for iPhone and iPad is on the App Store and continues to use WebKit.
+
+## Install the latest Mac release [#install-the-latest-mac-release]
+
+1. Open the [latest stable Crest release](https://github.com/pauljoda/Crest/releases/latest).
+2. Download its `Installer-….dmg` file.
+3. Open the disk image, then drag Crest into **Applications**.
+4. Eject the disk image and open Crest from Applications.
+
+Alternatively, Crest can be installed via Homebrew:
+1. Open Terminal.
+2. Run `brew install --cask crest-browser`
+
+Keeping Crest in Applications gives macOS and the updater one stable installed location. If Gatekeeper reports that the app cannot be verified, do not bypass the warning; download the current release again from the official Releases page.
+
+## Automatic updates [#automatic-updates]
+
+Crest uses Sparkle to check for signed updates from inside the installed app. When an update is available, review the release, install it, and let Crest relaunch. Your Spaces and browsing data remain in their normal app storage rather than inside the application bundle.
+
+Turn automatic checks and installs on or off in **Settings → About**, which also has **Check for Updates…**. You can also open the app menu and choose **Check for Updates**. A manual check uses the same signed update channel as the automatic check.
+
+## Update channels [#update-channels]
+
+Use **Settings → About** to choose the update channel:
+
+- **Stable** is the normal public release cadence.
+- **Nightly** receives newer builds sooner and can change more frequently.
+- **Development** follows the latest signed public `main` build and can change several times a day.
+
+Changing channels changes which future update is offered; it does not move or duplicate your profile.
+
+## Updating from an older Crest [#updating-from-an-older-crest]
+
+The same installer updates older WebKit-only versions and versions that already include Chromium. Your Spaces and browser records stay in place. Chromium and WebKit keep separate website sign-ins, and older WebKit extension installations do not carry over. See [Upgrading from a WebKit-only Crest](/guides/engines/#after-updating-from-a-webkit-only-crest) before switching engines.
+
+Crest checks pages for unsaved work before an update restart. Choose **Stay on Page** to keep working, then retry the restart when ready. Updates are offered only when your Mac meets the whole app's macOS requirement.
+
+## iPhone and iPad [#iphone-and-ipad]
+
+Install Crest for iPhone and iPad from the [App Store](https://apps.apple.com/us/app/crest-browser/id6797335023), or join the beta through [TestFlight](https://testflight.apple.com/join/vV1CM49Q). If iCloud sync is enabled, the same durable Space structure can follow you between Mac, iPad, and iPhone.
+
+
+# Move your browser data to Crest (/guides/move-to-crest)
+
+Browser-to-browser import runs on Mac. Crest prepares a visual review first so you can decide what arrives and where it belongs before the live session changes.
+
+## Import during setup [#import-during-setup]
+
+Choose one or more detected browsers, then review each source Space, profile, or window. Depending on what that browser exposes, Crest can bring across Spaces or profiles, tabs, bookmarks, saved folders, split views, tab groups, colors, icons, extensions, and supported passwords.
+
+| Source | Crest can review |
+| --- | --- |
+| Arc | Spaces, tabs, folders, split views, colors, icons, extensions, and supported passwords |
+| Zen | Spaces from every profile, Essentials, pinned tabs, folders, split views, open tabs, icons, and colors |
+| Chrome | Profiles, bookmarks, open tabs, tab groups, split views, extensions, and supported passwords |
+| Brave, Edge, Vivaldi, Opera, Dia, Comet, Aside, ego lite, Chromium, and Chrome Beta, Dev, and Canary | Profiles, bookmarks, open tabs, tab groups, split views, extensions, and supported passwords |
+| Safari | Bookmarks, windows, open tabs, and pinned tabs |
+| Firefox | Profiles, windows, open tabs, pinned tabs, and tab groups |
+
+If your browser isn't listed, choose **Browser not listed?** and Crest looks for other Chromium-based browsers on your Mac. Not every browser can be found this way; you can [request support for one](https://github.com/pauljoda/Crest/issues/new?template=feature_request.yml&title=Import%20from%20).
+
+In the review, each Space shows the Chrome Web Store extensions it brings under its address bar. Turn off any you don't want, and Crest installs the rest once the import finishes, without asking about each one.
+
+For every source group, you can remove individual items, choose a new or existing Crest Space, and include supported passwords only when you want them. Choose **Customize** to rename the destination and edit its colors, crest, and Banner or Traditional Gradient style before importing. The before-and-after preview updates as you decide. When an import holds more than Crest keeps, it brings what fits and lists what it left out.
+
+## Import later [#import-later]
+
+Open **Settings → Advanced**. The **Import & Export** section can import a Crest archive, bookmark HTML, browser history, or open tabs from supported sources. External-browser imports always create fresh isolated Crest Spaces unless the review explicitly routes content into an existing destination.
+
+## Export a portable backup [#export-a-portable-backup]
+
+Choose **Export Browser Data…** in **Settings → Advanced**. A Crest archive includes Spaces, folders, saved and current tabs, Archive, history, and browsing preferences.
+
+For safety, the portable archive does not contain passwords, cookies, website storage, site permissions, downloaded files, favicons, or extensions. Password export is a separate, device-authenticated plaintext operation: select a Space in the Settings sidebar, then choose **Passwords → Export Passwords…**. Treat that file as sensitive.
+
+## After import [#after-import]
+
+Browse each new Space once before removing data from your old browser. Check signed-in state, saved locations, folder nesting, and any critical extension workflow. If iCloud sync is enabled, imported Spaces and tabs can then follow you to iPad and iPhone.
+
+
+# Settings reference (/guides/settings-reference)
+
+Open **Crest → Settings** on Mac. On iPhone and iPad, open Settings from the browser interface. Some controls appear only on the platform that supports them.
+
+On Mac and wider iPad windows, Settings opens as a browser tab and keeps your place when you switch away. In compact layouts, including iPhone, it opens as a dismissible sheet while your current page stays selected.
+
+On Mac, the Settings sidebar lists General, Tabs, Search, Appearance, Links, Engines, Shortcuts, Sync, and Privacy, then each of your Spaces by name and crest, then Agents, Advanced and About. iPhone and iPad keep their own layout; see [iPhone and iPad](#iphone-and-ipad).
+
+## General [#general]
+
+Make Crest your default browser, choose what happens when Crest opens, and pick the default Space. General also holds automatic page translation and spell checking. On Mac, it includes **Picture in Picture when switching tabs** and **Developer toolbar on local pages**. On iPhone and iPad, **Start on new tab** opens Crest on a new tab in the default Space, and **Allow floating sidebar** lets the sidebar float over the page instead of filling the screen.
+
+## Tabs [#tabs]
+
+Choose whether tabs opened from links get focus with **Switch to tabs opened from links**, and whether to **Follow tabs moved to another Space**. Set what pinned and saved tabs do after you close them, and whether clicking the favicon returns to the saved URL. Tabs also holds sidebar widgets and, on Mac, Split View's **Focus follows pointer** and **Show recent tabs while switching**, which shows your recent tabs while you hold Control-Tab.
+
+## Search [#search]
+
+- **Default search**: the search engine or AI assistant every Space uses unless it chose its own, the one **Private windows** use, and whether the default gives **Search suggestions**. **Tab to search providers** lets Tab choose a provider by its name or shortcut in the command palette, and **Space to search providers** lets a space after `$` and a shortcut, or after a shortcut alone, choose it.
+
+The command palette settings come next:
+
+- **Results**: show results under a header for each kind or **Blended** into one list, lead with a **Top Hit**, prefer an open tab over history for the same site, and **Show match reasons**, which notes under each result why it is there, such as "Often visited".
+- **Sections**: turn each kind of result on or off, choose how many results each shows, and drag them into the order you want; **Reset Order** puts them back. Before you type, **Recent Tabs** and **Actions** show in this order.
+- **Also show**: **Settings Pages**, **@ Filters** such as `@tabs`, the **Calculator** and, on Mac, **Paste and Go**, which offers the address you copied when the palette opens.
+- **Typing**: complete addresses inline and learn from the results you choose. **Clear Learned Choices** forgets what the palette learned. Learned choices stay on this device.
+
+The search providers come last:
+
+- **Search Engines**, **AI Assistants** and **Websites**: every provider Crest offers, each with its main shortcut. Turn a provider off to stop its shortcut; the default stays on. Click a provider to open it and see its options, such as Google's **Hide AI Overviews** or ChatGPT's **Model**, and to change its shortcuts.
+- **Add Provider…** adds your own search engine, AI assistant or website with a name, shortcuts, search URL and color. **Restore Defaults…** puts the built-in providers' shortcuts and options back; providers you added stay.
+
+Search providers and their settings stay on this device.
+
+See [Use the command palette](/guides/command-palette/).
+
+## Appearance [#appearance]
+
+Customize the browser on this device with a live preview. Choose sidebar position, the window border, tab shape and scale, pinned-tab layout, address-field style, folder display, and an app icon palette. With **Follow Space accent** on, selected tabs, pins, and the address field use the current Space's color; turn it off to pick a custom color. **Default page zoom** offers fixed levels from **50% to 300%**. Use presets to get started or reset individual changed settings.
+
+A Space's crest, colors, and sidebar background live on the Space's Appearance page. See [Spaces](#spaces) and [Customize and arrange Spaces](/guides/customize-spaces/).
+
+## Links [#links]
+
+Choose what happens to links from other apps, which Space supplies their signed-in session, and how long Quick Windows remain recoverable. Under Peek, choose whether eligible links from pinned or saved pages open in Peek, which modifier click opens it, and, on Mac, whether to **Drag links to Peek**. Link Routing rules live here too.
+
+## Engines [#engines]
+
+On Mac, choose whether new pages open in Chromium or WebKit, and manage website rules that send particular websites to one engine. Chromium is the recommended default. See [Chromium and WebKit on Mac](/guides/engines/).
+
+## Shortcuts [#shortcuts]
+
+Search the complete Mac command catalog, record a replacement, inspect conflicts, clear an assignment, or restore the default. Extension shortcuts are set on Chromium's extension shortcuts page, opened from **Shortcuts…** on a Space's Extensions page, because they belong to the extension installed in that Space.
+
+## Sync [#sync]
+
+Enable or disable iCloud sync and review its current state. Private Spaces and transient browsing are intentionally excluded.
+
+## Privacy [#privacy]
+
+On Mac, Privacy covers the whole device. **System permissions** shows whether macOS lets Crest use the camera, microphone, location, notifications, passkeys, and files and folders. Below that, select a Space to open its Privacy page, where its data retention, content blocking, and site permissions live.
+
+## Spaces [#spaces]
+
+On Mac, every Space has its own page. Select the Space in the Settings sidebar; the window switches to that Space, and Settings follows. The page header shows the Space's crest and name. Hover over the name and click the pencil to rename it, or open the **…** menu for more actions.
+
+Each Space's page has these tabs:
+
+- **Appearance**: Crest Studio for the Space's crest, colors, and sidebar background.
+- **Browsing**: **Search with** and **Search suggestions**, which follow your default search until you choose for the Space, archiving old tabs with **Archive current tabs** and **Archive Now**, downloads (whether to ask where to save, and the download folder), and **Delete Space**.
+- **Privacy**: **Require Touch ID or password**, how long to keep History, Archived Tabs, and Download Records, content blocking, and saved site permissions.
+- **Passwords**: **Use Crest Passwords**, **Sync with iCloud Keychain**, and the Space's saved passwords, with **Import Passwords…** and **Export Passwords…**.
+- **Extensions**: available when Chromium is. **Open Chrome Web Store**, **Chromium Extension Manager**, **Shortcuts…**, and the extensions installed in the Space.
+
+### Add, arrange, and remove Spaces [#add-arrange-and-remove-spaces]
+
+Click **+** next to the Spaces heading to add a Space. Its Appearance page opens with the name ready to type. Click the pencil next to it to rearrange: drag Spaces by their handles, then click the checkmark when done.
+
+Right-click a Space, or use the **…** menu on its page, for **Rename**, **Edit Crest…**, **Move Up**, **Move Down**, **Lock Space**, and **Delete**. Crest needs at least one Space.
+
+## Agents [#agents]
+
+On Mac, choose whether coding agents on your Mac may use Crest, which Spaces they reach, and whether they may run scripts in pages; connect an agent, and see the agents connected now and the ones you allowed. See [Let coding agents use Crest](/guides/coding-agents/).
+
+## Advanced [#advanced]
+
+Import and export browser data, access runtime and diagnostic controls, and manage developer-facing behavior. Change advanced options deliberately; many of them exist to diagnose a specific browser or engine condition rather than improve everyday browsing.
+
+On Mac, the **Feature Flags** row opens Chromium's feature flags for the current Space. Use the back arrow to return to Advanced.
+
+Choose **Rerun onboarding** to return to Welcome and go through setup again. Completing setup opens Getting Started in your first Space, reusing its existing guide when available.
+
+## About [#about]
+
+**About** shows Crest’s build information and links to the community. On Mac, it also holds software updates: automatic checks and installs, the update channel, and **Check for Updates…**.
+
+## iPhone and iPad [#iphone-and-ipad]
+
+iPhone and iPad keep their own Settings navigation, with the same **Tabs** and **Appearance** pages for the whole device. **Spaces** is a page of its own: choose a Space from its picker to customize it and set its browsing and cleanup choices. **Privacy** also has a Space picker for data retention, content blocking, and site permissions. **Passwords** lists Crest Passwords by Space; authenticate to reveal or export them, and choose whether eligible credentials sync with iCloud Keychain.
+
+
+# Install from the Chrome Web Store (/guides/install-chrome-web-store)
+
+Crest for Mac installs Chrome extensions from the Chrome Web Store. Extensions run on Chromium pages. Pages you open in WebKit, and Crest on iPhone and iPad, run no extensions.
+
+## Before you add it [#before-you-add-it]
+
+Switch to the Space that should own the extension. Its package, enablement, permissions, storage and pinning stay separate from every other Space and device.
+
+## Install the extension [#install-the-extension]
+
+1. In a normal Crest window on Mac, open the extension's page in the **Chrome Web Store**.
+2. Select the store's own button, which reads **Add to Crest**. You can also open **Site Controls** and select **Install Extension…**.
+3. Wait while Crest downloads the package from Google's update service. Chromium checks the publisher's signature and the extension's ID before the review appears.
+4. In the review sheet, check the extension's name and the **Verified Chrome Web Store package** label.
+5. Open **Review Access and Compatibility** and read the permission warnings. Where the extension allows it, turn on **Withhold website access until I grant it**.
+6. To install the same package in more Spaces, select **Install in other Spaces…** and choose them.
+7. Select **Add Extension**, then **Done**.
+
+Once installed, the listing's button reads **Added to Crest**, and it offers **Remove from Crest** for this Space.
+
+## Use it after installation [#use-it-after-installation]
+
+- Open **Site Controls** beside the address field to find the extension's action, and pin it if you want it in the Space's extension strip. See [Pin extensions and use popups](/guides/pin-extensions-and-popups/).
+- Open **Crest Settings**, select the Space in the sidebar, then select **Extensions**. Expand the extension to turn it on or off, open its settings, manage its permissions, copy it to other Spaces, or remove it.
+- If the extension has keyboard commands, see [Set extension keyboard shortcuts](/guides/extension-keyboard-shortcuts/).
+
+## Updates [#updates]
+
+Chromium updates Chrome Web Store extensions on its own and checks each update's signature and permissions, as Chrome does.
+
+## When you can't install [#when-you-cant-install]
+
+- Private windows keep the store's own behavior and do not offer **Add to Crest**.
+- A locked Space, or one that has been deleted, cannot receive an extension or a copy.
+- Crest does not install Firefox add-ons or Safari Web Extensions. Look for the extension's Chrome version.
+
+Next: [Manage permissions and website access](/guides/manage-extension-permissions/).
+
+
+# Firefox add-ons (/guides/install-firefox-add-ons)
+
+Crest does not install Firefox add-ons from **addons.mozilla.org**.
+
+Extensions in Crest for Mac run on the Chromium engine, which runs Chrome extensions from the Chrome Web Store. It cannot load a Firefox `.xpi` package. WebKit pages, and Crest on iPhone and iPad, run no extensions.
+
+Many Firefox add-ons also publish a Chrome version. Look for the same extension in the Chrome Web Store and install it from there. See [Install from the Chrome Web Store](/guides/install-chrome-web-store/).
+
+If you installed Firefox add-ons in an earlier version of Crest, they do not carry over. Install each extension's Chrome version into the Space you want.
+
+
+# Safari Web Extensions (/guides/scan-safari-web-extensions)
+
+Crest does not scan the apps on your Mac for Safari Web Extensions, and it cannot add one from an app bundle.
+
+Extensions in Crest for Mac run on the Chromium engine, which installs Chrome extensions from the Chrome Web Store. A Safari Web Extension ships inside a Mac app in Safari's format, and Chromium does not load it. WebKit pages, and Crest on iPhone and iPad, run no extensions.
+
+Many Safari Web Extensions also publish a Chrome version. Look for the same extension in the Chrome Web Store and install it from there. See [Install from the Chrome Web Store](/guides/install-chrome-web-store/).
+
+Safari content blockers and legacy Safari App Extensions are separate formats, and Crest does not support them either.
+
+
+# Clear website data (/guides/clear-website-data)
+
+Website data belongs to the Space that stored it, and it stays on this device. Clearing it in one Space never touches another Space, your saved passwords, extensions, downloaded files, or site permissions.
+
+## Clear one site [#clear-one-site]
+
+Open Site Controls beside the address and choose:
+
+- **Clear Cookies** removes the site's cookies and everything else it stored in the Space: local storage, IndexedDB, Cache Storage and service workers, including what sites embedded in it stored there. It signs you out of the site.
+- **Clear Cache** removes only the responses Crest kept to load the site faster.
+
+Crest clears the whole site, such as `example.com` and its subdomains, in both engines, reloads the page, and shows the result at the top of the window. The same actions are in the command palette as **Clear Cookies for This Site** and **Clear Cache for This Site**, and on iPhone and iPad in the page menu. In a private window, they clear only what that window holds in memory.
+
+## Manage a Space's website data [#manage-a-spaces-website-data]
+
+On Mac, open Settings, select the Space, then select **Privacy**. On iPhone and iPad, open **Settings → Privacy** and choose the Space. **Website data** lists the sites that keep data in the Space and what each keeps. Choose **Remove** for one site, or **Remove All…** for every site in the Space.
+
+## Clear browsing data [#clear-browsing-data]
+
+Below Website data, **Clear browsing data** removes what the Space browsed within a time range, from **Last Hour** to **All Time**. Choose any of **History**, **Cookies and Site Data**, and **Cached Images and Files**, then **Clear…**. Clearing history in a Space that syncs removes it from your other devices too.
+
+
+# Content blocking and site permissions (/guides/content-blocking-and-site-permissions)
+
+Privacy decisions belong to the current Space. A permission granted to a work account does not silently become a permission for the same host in Personal.
+
+## Content blocking [#content-blocking]
+
+Crest includes a small built-in ad and tracker ruleset that can be enabled or disabled per Space. It uses WebKit, so it applies on iPhone, iPad, and WebKit pages on Mac. Use the site controls or assign **Toggle Content Blocking** a shortcut when a site needs a quick exception.
+
+To change it for a Space, turn **Block known ads and trackers** on or off in that Space’s privacy settings. On Mac, open Settings, select the Space in the sidebar, then select **Privacy**. On iPhone and iPad, open **Settings → Privacy** and choose the Space.
+
+Chromium pages on Mac have no built-in blocking. Install a content-blocking extension, such as uBlock Origin Lite, in each Space that needs it. Extensions do not run on WebKit pages.
+
+For broader filter-list coverage, install a content-blocking extension in the Space that needs it. Built-in protection and an extension can have different rule coverage, so check which layer is active before assuming the page itself is broken.
+
+## Malicious sites and downloads [#malicious-sites-and-downloads]
+
+Crest's Chromium build keeps Google services disabled and does not include Google Safe Browsing or another built-in site and download reputation service. It cannot warn about every known phishing site or malicious download. Certificate checks, Chromium's sandbox, and warnings about executable or insecure downloads remain in place. Those checks do not determine whether a file is malware, and a completed download is not a safety verdict.
+
+## Site permissions [#site-permissions]
+
+Crest can remember decisions for:
+
+- Camera
+- Microphone
+- Camera and microphone together
+- Location
+- Notifications
+- Pop-ups
+- Automatic downloads
+- Opening external apps
+
+Open Site Controls on the affected page to inspect or reset the decision. The Space’s privacy settings, in the same place as content blocking, list its saved site permissions.
+
+Screen sharing asks what to share each time. You can block it for a site, but cannot preapprove a tab, screen or window. On pages that run in Chromium on Mac, Crest first lists the tabs in the same Space, and can share a tab's audio. Choose Window or Screen to use the macOS picker instead, which shares no audio. While a tab is shared, it and the sharing page show a bar with Stop sharing, and the shared tab is outlined in the sidebar. Minimize a bar to hide it until you come back to that tab. To stop from the sidebar, right-click either tab and choose Stop Sharing. Clicking the sharing symbol on a shared tab also offers to go to the tab it is shared to.
+
+## Notifications [#notifications]
+
+Allow the site in Crest and allow Crest in macOS notification settings to receive notifications. On Mac, **Settings → Privacy → System permissions** shows whether macOS allows it. Document notifications belong to their open page. Chromium also supports local service-worker and extension notifications while Crest runs, including a service worker's notification after its tab closes. Private profiles do not deliver these background notifications. Locking a Space or revoking its site permission withdraws notifications it can no longer show.
+
+Remote Web Push delivery is not available in this Google-free Chromium build. Local service-worker notifications do not mean that a site can receive server pushes or wake Crest after it quits.
+
+## Reset a site [#reset-a-site]
+
+If a site behaves as though an old choice still applies, first reset its saved permission rather than deleting the entire Space. [Clearing a site's data](/guides/clear-website-data/) is broader: it signs you out and removes what the site stored in that Space.
+
+## Extension site access [#extension-site-access]
+
+Extension permissions are a separate layer. An extension may be installed but still blocked from the current host, or it may require approval for additional sites. See [Manage extension permissions and site access](/guides/manage-extension-permissions/) for the extension-specific controls.
+
+
+# History, Archive, downloads, and retention (/guides/history-archive-and-downloads)
+
+History, Archive, and Downloads are common browser surfaces, but every record remains attached to the Space that created it.
+
+## History [#history]
+
+Open History with **Command-Y**, the menu, or the command palette. Search visits in the current Space and reopen a result. The command palette also includes relevant history matches while you type.
+
+## Archive [#archive]
+
+Archive contains manually closed or archived tabs, automatic Space cleanup, and expired Quick Windows. Filter by reason when you know how the item left the sidebar. Restoring an archived tab returns it to an appropriate live position in that Space.
+
+Use **Command-E** to archive the current tab, **Shift-Command-T** to reopen the last closed tab, and **Shift-Command-K** to clear unpinned current tabs into Archive.
+
+## Downloads [#downloads]
+
+Open Downloads with **Shift-Command-J**. Crest tracks status, destination, failures, and blocked automatic downloads. On Mac, each Space chooses its download folder, and whether to ask where to save each download, on its Browsing page in Settings. Removing or expiring a download record does not delete the downloaded file from disk.
+
+Chromium downloads offer **Pause Download** while transferring and **Resume Download** when the engine can continue a paused or interrupted transfer. Depending on the server, resuming may restart the file. The same download record keeps its chosen destination. Cancel ends the transfer; removing a failed record does not retry it. WebKit downloads do not offer these pause and resume controls.
+
+An unsafe-file warning requires its own decision. Resuming a transfer does not approve a warning or bypass a block. See [Malicious sites and downloads](/guides/content-blocking-and-site-permissions/#malicious-sites-and-downloads) for the limits of Chromium's Google-free protection.
+
+## Retention per Space [#retention-per-space]
+
+On Mac, open Settings, select the Space in the sidebar, then select **Privacy**. On iPhone and iPad, open **Settings → Privacy** and choose the Space. Choose **1 Day, 1 Week, 30 Days, 90 Days, 1 Year, or Forever** independently for History, Archived Tabs, and Download Records.
+
+Crest checks retention when it opens, after sync, and every 15 minutes while active. Shortening a duration can permanently remove older synchronized records, so Crest confirms the destructive change first.
+
+Current-tab automatic cleanup is a different setting, **Archive current tabs** on the Space’s Browsing page on Mac. It archives old unpinned tabs after the chosen interval, keeping them recoverable until the Archive retention policy later expires them.
+
+
+# Turn Crest Passwords on or off per Space (/guides/crest-passwords-per-space)
+
+Crest Passwords are private to the Space that owns them. You can stop using Crest-owned suggestions, generation, and save prompts in one Space without deleting its saved passwords or changing another Space.
+
+## Change the setting [#change-the-setting]
+
+On Mac:
+
+1. Open **Crest Settings** and select the Space in the sidebar.
+2. Select **Passwords**.
+3. Turn **Use Crest Passwords** on or off.
+
+On iPhone and iPad:
+
+1. Open **Settings → Passwords**.
+2. Choose the Space you want to change from the **Space** menu.
+3. Turn **Use Crest Passwords** on or off.
+
+When Crest Passwords is off, saved passwords remain in that Space until you delete them. Turning the setting back on makes them available to matching sites again.
+
+## Related controls [#related-controls]
+
+The same page lists the Space’s saved passwords, with **Import Passwords…** and **Export Passwords…**. When Crest Passwords is on, supported Mac builds can also show:
+
+- **Sync with iCloud Keychain**, which updates whether existing and future Crest credentials in that Space synchronize through the system Keychain.
+- **Offer a copy to Passwords**, which lets the system Passwords app ask separately for a copy after Crest saves in the Space.
+
+System Passwords and passkeys are provider-managed and may appear in any Space for a matching site. They are separate from Crest Passwords’ Space-local records. On Mac, check Crest’s access to system passkeys in **Settings → Privacy → System permissions → Passkeys**.
+
+<Callout type="info" title="What turning it off does not do">
+It does not delete saved passwords, export them, move them to another Space, or place password values in CloudKit session data.
+</Callout>
+
+Private Spaces must be unlocked before Crest reveals account and site metadata or changes their password settings.
+
+## Storage and deletion [#storage-and-deletion]
+
+Crest Passwords are saved in the system Keychain and suggested only for matching websites. Viewing, copying, or exporting a password can require device authentication.
+
+Deleting a saved password, clearing a site's data, and deleting a whole Space are separate actions, and each shows what it removes before it proceeds.
+
+
+# Customize and arrange Spaces (/guides/customize-spaces)
+
+Open a Space’s context menu to edit it, or open its page in Settings. On Mac, select the Space in the Settings sidebar; on iPhone and iPad, choose it in **Settings → Spaces**. A strong visual identity makes a profile boundary obvious before you type a password or open a work account.
+
+## Choose an identity [#choose-an-identity]
+
+Crest offers two presentation styles:
+
+- **Banner** uses Crest Studio: begin with a template, then choose a shape, field division, pattern, trim, and heraldic artwork. Use independent colors for the parts of your design, or make an identity with an emoji, monogram, or searchable SF Symbol.
+- **Traditional Gradient** keeps the familiar Arc-style theme: it blends one to three colors with direction, intensity, a readability fade, and optional texture.
+
+The result appears in the Space picker and browser chrome on Mac, iPad, and iPhone.
+
+Crest Studio is on the Space’s Appearance page. The crest sits on the Space’s own sidebar background, with its colors named by what they paint:
+
+- **Crest:** Field, Second field, Band, Emblem, Border and Edge. A color for a part the crest doesn’t draw is dimmed.
+- **Sidebar:** Background, Accent (selected tabs, pins, the address field and the Space picker) and Pattern.
+
+Click or tap a color to choose one of the templates’ tinctures or a custom color. Below the crest, work through **Start from**, **Shape**, **Field**, **Band**, **Emblem**, **Border**, **Finish** and **Sidebar**; each step shows your crest with each choice applied. On iPhone, the steps are a list showing what each has chosen; tap one to open it. Choose **Icon** at the top of **Emblem** to use an SF Symbol or emoji instead of a crest. **Shuffle** suggests a new crest in the templates’ colors, and **Undo** steps back through your changes. **Reset Appearance** and **Artwork Credits** are in the **…** menu on the Space’s page.
+
+## Customize folders [#customize-folders]
+
+Choose folder color intensity and text color on the Space’s Appearance page. Individual folder menus let you set colors, search the full SF Symbols catalog, or choose emoji. You can show a custom icon on its own instead of the animated folder artwork. In **Settings → Appearance**, enable **Tint Folder Title** to use semibold titles in the folder’s color, adjusted for stronger contrast against light or dark sidebars.
+
+## Customize the browser around your Spaces [#customize-the-browser-around-your-spaces]
+
+Open **Settings → Appearance** for device-wide appearance: a left- or right-side sidebar, borderless pages, tab shape and scale, pinned-tab layout, address-field colors, and a default page zoom from **50% to 300%**. Selected tabs, pins, and the address field follow the current Space’s color; turn off **Follow Space accent** to pick a custom color instead. Presets and a live preview help you find a starting point; each changed setting has its own reset.
+
+Choose an app icon palette here too. These controls change the browser on this device; a Space’s identity belongs to that Space and stays on its own Appearance page.
+
+## Add and arrange Spaces [#add-and-arrange-spaces]
+
+On Mac, click **+** next to the Spaces heading in the Settings sidebar to add a Space. Its Appearance page opens with the name ready to type. Right-click a Space there, or use the **…** menu on its page, to rename it, edit its crest, lock it, or delete it. Crest needs at least one Space.
+
+Drag a Space in the picker to reorder it. In the Mac Settings sidebar, click the pencil next to the Spaces heading, drag Spaces by their handles, then click the checkmark; or right-click a Space and choose **Move Up** or **Move Down**. On iPhone and iPad, use the order controls in **Settings → Spaces**. Position matters for **Control-1** through **Control-9**, so put frequently used Spaces first.
+
+## Automatic cleanup [#automatic-cleanup]
+
+Each Space can archive unpinned current tabs after **12 hours, 24 hours, 7 days, or 30 days**, or keep them until you close them. On Mac, set this with **Archive current tabs** on the Space’s Browsing page, and choose **Archive Now** to run it right away. Cleanup moves tabs into the recoverable Archive; it does not silently erase them.
+
+Pinned sites, saved tabs, folders, and tabs marked **Keep Loaded** have different roles from ordinary current tabs. Use a saved tab for something you intend to revisit, and Keep Loaded only when the live in-page state matters.
+
+
+# Organize tabs, saved pages, and folders (/guides/organize-tabs-and-folders)
+
+Crest uses a few distinct kinds of tab so temporary work and lasting structure do not become the same pile.
+
+## Current tabs [#current-tabs]
+
+An ordinary page appears in the current-tabs area. Close or archive it when finished, or let the Space’s cleanup policy move old unpinned tabs into Archive.
+
+## Pinned sites [#pinned-sites]
+
+Pinned sites appear as a compact icon grid near the top of a Space. Use them for always-close destinations such as mail, calendar, or a dashboard. Choose **Pin or Unpin Current Tab** or press **Command-D**. You can also right-click a tab and choose **Pin Tab**, or right-click a pinned tab and choose **Unpin Tab**; on iPhone and iPad, touch and hold the tab instead.
+
+## Saved tabs and saved locations [#saved-tabs-and-saved-locations]
+
+A saved tab belongs to the durable sidebar, optionally inside a folder. Its saved location is a home URL: you can navigate away, then double-click the saved-location indicator or use the context menu to return home. The context menu can replace or reset that saved location.
+
+## Folders [#folders]
+
+Folders work in both Saved and Current Tabs. Rename them, choose a color or symbol, collapse them, nest them, and reorder their contents. Drag a complete folder between the two sections to move its tabs and nested folders together. You can also use the folder menu to change sections.
+
+Both kinds restore and sync with their section. Moving a folder preserves its name, color, hierarchy, and contents. Drag a tab onto another current tab to create a folder, or use its context menu to create or choose a folder.
+
+When an extension groups tabs, as Claude does with the tabs it works in, the group appears as a current folder with the group's name and color. Editing that folder changes the group the extension sees. See [Extension compatibility](/guides/extension-api-compatibility/).
+
+Drop along a folder’s top or bottom edge to place a tab beside it, including between empty folders. Drop inside the folder to file the tab.
+
+## Context-menu actions [#context-menu-actions]
+
+Right-click on Mac or touch and hold on iPhone and iPad. Depending on the item, Crest offers rename, copy link, change icon, pin, save, move to Space, add to Split View, duplicate, unload, Keep Loaded, close, archive, reset saved location, or delete.
+
+## Tab icons [#tab-icons]
+
+A tab's icon normally follows the current website. From the tab's context menu, choose **Pull New Icon** to keep the website's current icon, **Change Icon…** to choose an emoji, or **Clear Icon** to return to the automatic website icon.
+
+## Organize several items at once [#organize-several-items-at-once]
+
+Select tabs, Split View groups, and folders together to organize them in one step. On Mac, **Command-click** toggles individual items and **Shift-click** selects a range. Use the selected items’ context menu for the available batch actions, or drag the selection to its destination.
+
+On iPhone and iPad, use the selection actions in a tab or folder’s context menu. VoiceOver exposes selection actions too. A selected folder carries its nested contents with it.
+
+## Clear open tabs [#clear-open-tabs]
+
+Use the archive control on the sidebar divider to clear open tabs while keeping pinned and saved tabs. Closed tabs remain recoverable in Archive, subject to the Space’s retention settings.
+
+## Keep Loaded and unload [#keep-loaded-and-unload]
+
+**Keep Loaded** protects an important live page from ordinary unloading. It is useful for an unsaved editor, a live call, or a dashboard whose in-page state matters. Crest can still respond to genuine system memory pressure.
+
+Choose **Unload** when you want to release a page but retain its tab. On Mac, middle-clicking a current tab closes it; middle-clicking a pinned or saved item unloads its page while keeping the durable item.
+
+
+# Browse with a Private Space (/guides/private-spaces)
+
+Create a Private Space when the browsing session should not become part of normal durable browser state.
+
+Private Spaces use non-persistent website storage. They stay out of normal history, session restoration, Archive, and ordinary Crest sync. Closing the private session discards its transient pages and website data.
+
+## Add device authentication [#add-device-authentication]
+
+You can require Touch ID, Face ID, or the device passcode before opening a protected Private Space. On Mac, turn on **Require Touch ID or password** on the Space’s Privacy page in Settings. Crest can relock protected content when the app leaves the foreground so another person cannot return to it from the app switcher.
+
+## What private browsing does not do [#what-private-browsing-does-not-do]
+
+Private browsing does not make you anonymous to websites, your network, an employer, or an internet provider. Files you download and information you deliberately share with a site can still leave the browser. Use the feature to control local browser persistence, not as a promise of network anonymity.
+
+
+# Spaces and profile isolation (/guides/spaces-and-isolation)
+
+A Crest Space is not only a group of tabs. It is a separate browsing profile with its own durable organization, runtime, and privacy boundary.
+
+## What belongs to one Space [#what-belongs-to-one-space]
+
+- Signed-in website sessions, cookies, caches, local storage, and other website data. On Mac, Chromium and WebKit each keep their own copy for the Space, so a sign-in in one engine does not carry to the other.
+- Current, pinned, saved, grouped, and archived tabs
+- Nested folders and saved locations
+- History, Archive, download records, and their retention choices
+- Crest Passwords and optional iCloud Keychain participation
+- Site permissions and content-blocking choices
+- Extensions, actions, permissions, and extension settings on Mac
+- Name, symbol, gradient or crest, and sidebar appearance
+
+That means the same website can be signed into different accounts in Work and Personal without those sessions meeting.
+
+## Switch Spaces [#switch-spaces]
+
+Select a Space from the sidebar, swipe or scroll through the Space picker, or use **Option-Command-Left/Right** on a keyboard. **Control-1** through **Control-9** selects a Space by position.
+
+Switching changes the whole browser context. The visible tabs, history search, credentials, permissions, and website process pool all follow the selected Space.
+
+## Move a tab between Spaces [#move-a-tab-between-spaces]
+
+Open the tab’s context menu and choose a destination, or drag it to another Space when the interface presents that destination. Crest moves the durable tab record and loads it inside the destination profile; it does not transfer the source Space’s cookies or signed-in session.
+
+## Delete a Space carefully [#delete-a-space-carefully]
+
+Deleting a Space removes its tabs, pins, folders, Archive, history, Crest Passwords, cookies, website storage, permissions, downloads records, and extension state. Read the confirmation before continuing. If you only need less clutter, archive or move tabs instead.
+
+
+# Use Split View (/guides/split-view)
+
+Split View keeps two to four live tabs in one durable sidebar group. The focused card owns the address field and page commands; the other cards remain visible and live.
+
+## Create a Split View [#create-a-split-view]
+
+Use any of these paths:
+
+- Drag a sidebar tab onto the current page.
+- Open the tab context menu and choose the Split View action.
+- Right-click or touch and hold a page link, then choose **Open Link in Split View**.
+- Run **Split With Next Tab** from the command palette or assign it a shortcut.
+
+A one-card placeholder lets you add the next tab without losing the first page.
+
+## Focus a card [#focus-a-card]
+
+Click or tap a card. On a keyboard, use **Control-Command-Left** and **Control-Command-Right**. The address, Back and Forward, Reload, Find, Reader, page tools, Peek, and extension popups follow the focused card.
+
+On Mac, turn on **Focus follows pointer** in **Settings → Tabs** to make pointer movement choose the active card automatically.
+
+## Resize and reorder [#resize-and-reorder]
+
+Drag a divider to resize columns on Mac or iPad. Crest remembers widths for the window. Use **Shift-Command-Left/Right** to move the focused card, or drag when the interface exposes a reordering target.
+
+In the sidebar, drag the split's header to move the whole group. Drag an individual tab row to move just that tab out of the split, into a folder, or into another Split View. The remaining tabs stay together.
+
+## Remove or separate tabs [#remove-or-separate-tabs]
+
+**Remove Tab From Split** takes the focused tab out of the group. **Separate All Tabs** turns every card back into an independent tab; its default shortcut is **Option-Command-U**. Closing the focused card closes that tab while the remaining group survives.
+
+## iPad and iPhone [#ipad-and-iphone]
+
+iPad uses the same resizable column model as Mac. On iPhone, the group remains complete but one card fills the screen at a time. Swipe horizontally on the compact toolbar to page between cards; the gesture intentionally does nothing when the current tab is not in Split View.
+
+## Sync behavior [#sync-behavior]
+
+The durable group and its card order can sync with the Space. A receiving device adapts the presentation to its screen instead of flattening the group.
+
+
+# Sync Crest across devices (/guides/sync-across-devices)
+
+Open **Settings → Sync** and enable **Sync Crest with iCloud** on each device signed into the same Apple Account.
+
+## What sync carries [#what-sync-carries]
+
+Crest synchronizes durable browser structure such as Spaces, tabs, saved folders, Split View groups, appearance, Archive, history, and supported preferences. Mac, iPad, and iPhone then render the same model in an interface suited to the screen.
+
+Password values never enter CloudKit. Each Space’s separate **Sync with iCloud Keychain** switch controls its encrypted Crest Password items. Private Spaces and transient Quick Window or Peek state are not normal synced browsing state.
+
+## Check status [#check-status]
+
+The Sync page shows whether iCloud is available and whether Crest has pending records. Apple does not expose the Apple Account email to Crest, so confirm the account directly in System Settings if two devices do not meet.
+
+## Resolve a conflict [#resolve-a-conflict]
+
+If Crest finds different local and cloud histories, it pauses instead of merging or overwriting silently. Choose **Use This Device** only when its copy should replace iCloud. Choose **Use iCloud** only when the cloud copy should replace this device. Read the confirmation carefully because the selected copy becomes authoritative for subsequent sync.
+
+
+# Set extension keyboard shortcuts (/guides/extension-keyboard-shortcuts)
+
+Extensions can declare keyboard commands, such as opening their popup. Chromium keeps these shortcuts for each Space's installation, so changing one in Work does not change it in Personal.
+
+## Change a shortcut [#change-a-shortcut]
+
+1. Open **Crest Settings** and select the Space in the sidebar.
+2. Select **Extensions**, then **Shortcuts…**. Chromium's extension shortcuts page opens for that Space.
+3. Find the extension's command and set, change or clear its shortcut there.
+
+## When a shortcut does nothing [#when-a-shortcut-does-nothing]
+
+Crest's own shortcuts come first. An extension shortcut runs only when no Crest command uses the same keys. Check **Crest Settings → Shortcuts** for a conflict, and pick different keys for one of them.
+
+A shortcut that opens an extension's popup shows it beside the extension's pinned icon, or beside the control that opens the window's extension list when the extension is not pinned.
+
+
+# Manage permissions and website access per Space (/guides/manage-extension-permissions)
+
+Every Space keeps its own extension installations, permissions and website access. Allowing a tool in Work does not grant it the same access in Personal or on another Mac.
+
+## At installation [#at-installation]
+
+The install review lists the permission warnings Chromium reports for the extension. Where the extension allows it, turn on **Withhold website access until I grant it** so the extension reaches a site only after you allow it. See [Install from the Chrome Web Store](/guides/install-chrome-web-store/).
+
+## Review access later [#review-access-later]
+
+1. Open **Crest Settings** and select the Space in the sidebar.
+2. Select **Extensions**.
+3. Expand the extension's row to see its **Permissions and Website Access**.
+
+## Change website access [#change-website-access]
+
+In the expanded row, select **Manage Permissions in Chromium**. Chromium's page for that extension opens in the same Space, where you can change its site access and other permissions. The change applies only to this Space's installation.
+
+## Turn an extension off without removing it [#turn-an-extension-off-without-removing-it]
+
+Use the **Enabled** switch on the extension's row. The installation and its data in the Space stay put, ready for when you turn it back on.
+
+## Remove it and its data [#remove-it-and-its-data]
+
+Expand the row, select **Remove Extension**, and confirm **Remove from _Space_**. Crest removes the extension and its data from that Space. Other Spaces are unchanged.
+
+Private Spaces must be unlocked before Crest shows or changes their installed extensions.
+
+
+# Pin extensions and use extension popups (/guides/pin-extensions-and-popups)
+
+Extension actions belong to the Space. Pin the ones you use often and leave occasional tools in Site Controls.
+
+## Open an extension action [#open-an-extension-action]
+
+1. Select **Site Controls** beside the address field.
+2. Find the extension's icon in the extension action area.
+3. Select the icon to run its action or open its popup.
+
+A popup opens below the icon you selected, attached to the Crest window. It closes when you click outside it, press Escape, move or resize the window, or switch to another app.
+
+Open the icon's menu for more choices: **Extension Settings…**, **Pin to Toolbar**, **Disable Extension**, **Manage Extension…**, **View on Chrome Web Store** and **Remove Extension…**. In a private window the menu offers only the choices that don't change the Space's installation.
+
+## Pin an action [#pin-an-action]
+
+Select the pin button beside the action in Site Controls, or choose **Pin to Toolbar** from its menu. Pinned icons appear in the Space's own strip below the address field. They stay there on the Start Page too, before you open any page in the Space.
+
+To remove an icon from the strip, choose **Unpin from Toolbar**. Unpinning does not disable or uninstall the extension.
+
+## Open an extension's settings [#open-an-extensions-settings]
+
+If the extension has a settings page, choose **Extension Settings…** from its menu, or expand it on the Space's Extensions page in **Crest Settings** and select **Extension Settings**. The page opens in the Space that owns the installation.
+
+## Use side panels [#use-side-panels]
+
+Extensions with a Chrome side panel open it as a card beside the page. Choose **Open Side Panel** from the action's menu, select the icon if the extension opens its panel that way, or let the extension open it itself. The panel belongs to the page it opened beside. Crest does not keep side panels after you quit.
+
+<Callout type="info" title="Space-local placement">
+Pinning is independent per Space and per device. A Work strip can hold work tools while Personal or another Mac uses a different set.
+</Callout>
+
+
+# Crest Help (/guides)
+
+Crest is a browser made of Spaces. It gives work, home, research, and private browsing separate places to live, and switching Spaces changes the browsing context, not just the color of the window. Each Space keeps its own signed-in sessions, cookies, history, tabs, pinned sites, passwords, permissions, website data, appearance, and sync identity.
+
+Crest brings Chromium and WebKit together on Mac. Read the [engine and upgrade guide](/guides/engines/) for website sign-ins, extensions, and choosing an engine. iPhone and iPad continue to use WebKit.
+
+## Crest on each device [#crest-on-each-device]
+
+The same Spaces and browsing model carry across Mac, iPad, and iPhone, while the controls adapt to the screen.
+
+| Device | How Crest fits |
+| --- | --- |
+| Mac | Chromium and WebKit in one app, the sidebar, Split View with two to four tabs, keyboard-first commands, Quick Window, Peek, extensions, and multiple windows. Signed, notarized releases come directly from GitHub. |
+| iPad | The full Space structure, resizable Split View columns, touch navigation, hardware-keyboard commands, and Peek. |
+| iPhone | The web page stays primary. The full sidebar becomes its own view, and Split View becomes a pager of focused cards. |
+
+## Get started [#get-started]
+
+<Cards>
+  <Card title="Install and update Crest for Mac" href="/guides/install-and-update-mac/">
+    Download Crest directly, install it in Applications, and understand automatic updates.
+  </Card>
+  <Card title="Move your browser data to Crest" href="/guides/move-to-crest/">
+    Review imports from Arc, Zen, Chrome, Safari, Firefox, and other Chromium browsers, and export portable Crest data.
+  </Card>
+  <Card title="Settings reference" href="/guides/settings-reference/">
+    Find every major Crest setting and understand whether it applies globally or to one Space.
+  </Card>
+  <Card title="Chromium and WebKit on Mac" href="/guides/engines/">
+    Choose the engine new pages open in, send a website to the other engine, and see what each engine supports.
+  </Card>
+</Cards>
+
+## Spaces & organization [#spaces--organization]
+
+<Cards>
+  <Card title="Spaces and profile isolation" href="/guides/spaces-and-isolation/">
+    Understand how each Crest Space separates accounts, history, passwords, permissions, and website data.
+  </Card>
+  <Card title="Customize and arrange Spaces" href="/guides/customize-spaces/">
+    Design a crest, choose Space and folder colors, and configure cleanup.
+  </Card>
+  <Card title="Organize tabs, saved pages, and folders" href="/guides/organize-tabs-and-folders/">
+    Use current tabs, pinned sites, saved locations, folders, Archive, and Keep Loaded deliberately.
+  </Card>
+  <Card title="Use Split View" href="/guides/split-view/">
+    Create, focus, resize, reorder, synchronize, and separate two to four live tabs.
+  </Card>
+  <Card title="Browse with a Private Space" href="/guides/private-spaces/">
+    Understand Private Space storage, history, sync, authentication, and relocking.
+  </Card>
+  <Card title="Sync Crest across devices" href="/guides/sync-across-devices/">
+    Use iCloud to synchronize durable Spaces and resolve a device-versus-cloud conflict safely.
+  </Card>
+  <Card title="Turn Crest Passwords on or off per Space" href="/guides/crest-passwords-per-space/">
+    Control Crest-owned password suggestions, generation, and save prompts independently for every Space.
+  </Card>
+</Cards>
+
+## Browse faster [#browse-faster]
+
+<Cards>
+  <Card title="Use the command palette" href="/guides/command-palette/">
+    Search, navigate, switch tabs, revisit history, and run Crest commands from one field.
+  </Card>
+  <Card title="Keyboard shortcuts" href="/guides/keyboard-shortcuts/">
+    Reference every default Crest browser shortcut and customize the complete Mac command map.
+  </Card>
+  <Card title="Gestures and pointer actions" href="/guides/gestures-and-pointer/">
+    Learn Crest’s swipes, drags, middle-click actions, context menus, and other less-obvious interactions.
+  </Card>
+  <Card title="Use Peek and Quick Window" href="/guides/peek-and-quick-window/">
+    Preview links without losing your place and handle links opened from other apps.
+  </Card>
+  <Card title="Route links to the right Space" href="/guides/link-routing/">
+    Build Air Traffic Control-style URL rules that send external links to a chosen Crest Space.
+  </Card>
+  <Card title="Translate, read, and use page tools" href="/guides/page-tools/">
+    Translate webpages on device, read without distractions, share, and export pages.
+  </Card>
+  <Card title="Localhost and developer tools" href="/guides/localhost-developer-tools/">
+    Preview responsive layouts at phone, desktop, or custom sizes and inspect websites on Mac.
+  </Card>
+</Cards>
+
+## Privacy, data & recovery [#privacy-data--recovery]
+
+<Cards>
+  <Card title="Content blocking and site permissions" href="/guides/content-blocking-and-site-permissions/">
+    Control ads, trackers, camera, microphone, pop-ups, downloads, and external apps per Space.
+  </Card>
+  <Card title="History, Archive, downloads, and retention" href="/guides/history-archive-and-downloads/">
+    Search, restore, remove, and retain browser records independently in each Space.
+  </Card>
+</Cards>
+
+## Install extensions [#install-extensions]
+
+<Cards>
+  <Card title="Install from the Chrome Web Store" href="/guides/install-chrome-web-store/">
+    Add a Chrome extension from its store page to the current Crest Space.
+  </Card>
+  <Card title="Firefox add-ons" href="/guides/install-firefox-add-ons/">
+    Crest does not install Firefox add-ons. Use an extension's Chrome Web Store version instead.
+  </Card>
+  <Card title="Safari Web Extensions" href="/guides/scan-safari-web-extensions/">
+    Crest does not scan Mac apps for Safari Web Extensions. Use an extension's Chrome Web Store version instead.
+  </Card>
+</Cards>
+
+## Use extensions [#use-extensions]
+
+<Cards>
+  <Card title="Manage permissions and website access per Space" href="/guides/manage-extension-permissions/">
+    Review and change an extension's permissions and site access without changing another Crest Space.
+  </Card>
+  <Card title="Pin extensions and use extension popups" href="/guides/pin-extensions-and-popups/">
+    Pin extension actions and use popups, side panels, and settings pages in the right Space on Mac.
+  </Card>
+  <Card title="Set extension keyboard shortcuts" href="/guides/extension-keyboard-shortcuts/">
+    Assign and change keyboard shortcuts for extension commands in a Crest Space.
+  </Card>
+</Cards>
+
+## Compatibility & troubleshooting [#compatibility--troubleshooting]
+
+<Cards>
+  <Card title="Check an extension's status and details" href="/guides/extension-status/">
+    See whether an extension is on, and find its errors and permissions in Chromium's extension manager.
+  </Card>
+  <Card title="Native companions" href="/guides/native-companion-limits/">
+    How extensions in Crest for Mac connect to their companion Mac apps, and what those apps check.
+  </Card>
+  <Card title="Extension compatibility" href="/guides/extension-api-compatibility/">
+    Which extensions Crest runs, where, and which Chrome extension features Crest connects to its own interface.
+  </Card>
+  <Card title="Extension known limitations" href="/guides/extension-compatibility/">
+    Where extensions run in Crest, and the limits that apply to them.
+  </Card>
+  <Card title="Troubleshoot an extension" href="/guides/troubleshoot-extension-compatibility/">
+    Steps to try when a Chrome extension installs in Crest but a feature does not work.
+  </Card>
+  <Card title="Set up 1Password in Crest" href="/guides/onepassword/">
+    Install the 1Password Chrome extension in Crest for Mac and authorize Crest in the 1Password app.
+  </Card>
+  <Card title="iCloud Passwords in Crest" href="/guides/icloud-passwords/">
+    How the iCloud Passwords extension connects to Apple's password helper in Crest for Mac, and what Apple requires.
+  </Card>
+</Cards>

@@ -1,0 +1,42 @@
+import{t as e}from"./jsx-runtime-LKYXHABd.js";var t=e(),n={title:`Troubleshoot an extension`,description:`Steps to try when a Chrome extension installs in Crest but a feature does not work.`},r=`Extensions run on Chromium, so most behave as they do in Chrome. When one doesn't, the cause is usually its Space, its site access, or a browser feature Crest draws differently from Chrome.
+
+## Try these first [#try-these-first]
+
+1. Check that you are in the Space where you installed it. Each Space has its own installations. See [Spaces and profile isolation](/guides/spaces-and-isolation/).
+2. In **Crest Settings**, select the Space in the sidebar, then **Extensions**. Turn the extension off and back on.
+3. Expand its row, select **Manage Permissions in Chromium**, and check whether its site access covers the page you are on.
+4. Open **Extension Settings** if the extension has them, and check its own options.
+5. Remove the extension and install it again from the Chrome Web Store.
+
+## Read the error [#read-the-error]
+
+Choose **Manage Extension…** from the extension's action menu to open Chromium's extension manager. It lists errors the extension reported. See [Check an extension's status and details](/guides/extension-status/).
+
+## In a private window [#in-a-private-window]
+
+Private windows use a fresh profile and do not inherit a Space's installed extensions. You cannot install or remove extensions there. Test the extension in its normal Space instead; enabling Chrome's incognito option does not copy it into Crest's separate private profile.
+
+## Password managers and companion apps [#password-managers-and-companion-apps]
+
+If the extension needs a Mac app, such as 1Password or iCloud Passwords, the app decides whether to trust Crest. Use the signed and notarized Crest release, not a development build. See [Native companions](/guides/native-companion-limits/).
+
+## Features Crest draws differently [#features-crest-draws-differently]
+
+Crest shows popups, side panels, extension windows and keyboard shortcuts in its own interface. An extension that expects part of Chrome's window that Crest does not draw may lose that feature. See [Extension compatibility](/guides/extension-api-compatibility/).
+`,i={contents:[{heading:void 0,content:`Extensions run on Chromium, so most behave as they do in Chrome. When one doesn't, the cause is usually its Space, its site access, or a browser feature Crest draws differently from Chrome.`},{heading:`try-these-first`,content:`Check that you are in the Space where you installed it. Each Space has its own installations. See Spaces and profile isolation.`},{heading:`try-these-first`,content:`In **Crest Settings**, select the Space in the sidebar, then **Extensions**. Turn the extension off and back on.`},{heading:`try-these-first`,content:`Expand its row, select **Manage Permissions in Chromium**, and check whether its site access covers the page you are on.`},{heading:`try-these-first`,content:`Open **Extension Settings** if the extension has them, and check its own options.`},{heading:`try-these-first`,content:`Remove the extension and install it again from the Chrome Web Store.`},{heading:`read-the-error`,content:`Choose **Manage Extension…** from the extension's action menu to open Chromium's extension manager. It lists errors the extension reported. See Check an extension's status and details.`},{heading:`in-a-private-window`,content:`Private windows use a fresh profile and do not inherit a Space's installed extensions. You cannot install or remove extensions there. Test the extension in its normal Space instead; enabling Chrome's incognito option does not copy it into Crest's separate private profile.`},{heading:`password-managers-and-companion-apps`,content:`If the extension needs a Mac app, such as 1Password or iCloud Passwords, the app decides whether to trust Crest. Use the signed and notarized Crest release, not a development build. See Native companions.`},{heading:`features-crest-draws-differently`,content:`Crest shows popups, side panels, extension windows and keyboard shortcuts in its own interface. An extension that expects part of Chrome's window that Crest does not draw may lose that feature. See Extension compatibility.`}],headings:[{id:`try-these-first`,content:`Try these first`},{id:`read-the-error`,content:`Read the error`},{id:`in-a-private-window`,content:`In a private window`},{id:`password-managers-and-companion-apps`,content:`Password managers and companion apps`},{id:`features-crest-draws-differently`,content:`Features Crest draws differently`}]},a=[{depth:2,url:`#try-these-first`,title:(0,t.jsx)(t.Fragment,{children:`Try these first`})},{depth:2,url:`#read-the-error`,title:(0,t.jsx)(t.Fragment,{children:`Read the error`})},{depth:2,url:`#in-a-private-window`,title:(0,t.jsx)(t.Fragment,{children:`In a private window`})},{depth:2,url:`#password-managers-and-companion-apps`,title:(0,t.jsx)(t.Fragment,{children:`Password managers and companion apps`})},{depth:2,url:`#features-crest-draws-differently`,title:(0,t.jsx)(t.Fragment,{children:`Features Crest draws differently`})}];function o(e){let n={a:`a`,h2:`h2`,li:`li`,ol:`ol`,p:`p`,strong:`strong`,...e.components};return(0,t.jsxs)(t.Fragment,{children:[(0,t.jsx)(n.p,{children:`Extensions run on Chromium, so most behave as they do in Chrome. When one doesn't, the cause is usually its Space, its site access, or a browser feature Crest draws differently from Chrome.`}),`
+`,(0,t.jsx)(n.h2,{id:`try-these-first`,children:`Try these first`}),`
+`,(0,t.jsxs)(n.ol,{children:[`
+`,(0,t.jsxs)(n.li,{children:[`Check that you are in the Space where you installed it. Each Space has its own installations. See `,(0,t.jsx)(n.a,{href:`/guides/spaces-and-isolation/`,children:`Spaces and profile isolation`}),`.`]}),`
+`,(0,t.jsxs)(n.li,{children:[`In `,(0,t.jsx)(n.strong,{children:`Crest Settings`}),`, select the Space in the sidebar, then `,(0,t.jsx)(n.strong,{children:`Extensions`}),`. Turn the extension off and back on.`]}),`
+`,(0,t.jsxs)(n.li,{children:[`Expand its row, select `,(0,t.jsx)(n.strong,{children:`Manage Permissions in Chromium`}),`, and check whether its site access covers the page you are on.`]}),`
+`,(0,t.jsxs)(n.li,{children:[`Open `,(0,t.jsx)(n.strong,{children:`Extension Settings`}),` if the extension has them, and check its own options.`]}),`
+`,(0,t.jsx)(n.li,{children:`Remove the extension and install it again from the Chrome Web Store.`}),`
+`]}),`
+`,(0,t.jsx)(n.h2,{id:`read-the-error`,children:`Read the error`}),`
+`,(0,t.jsxs)(n.p,{children:[`Choose `,(0,t.jsx)(n.strong,{children:`Manage Extension…`}),` from the extension's action menu to open Chromium's extension manager. It lists errors the extension reported. See `,(0,t.jsx)(n.a,{href:`/guides/extension-status/`,children:`Check an extension's status and details`}),`.`]}),`
+`,(0,t.jsx)(n.h2,{id:`in-a-private-window`,children:`In a private window`}),`
+`,(0,t.jsx)(n.p,{children:`Private windows use a fresh profile and do not inherit a Space's installed extensions. You cannot install or remove extensions there. Test the extension in its normal Space instead; enabling Chrome's incognito option does not copy it into Crest's separate private profile.`}),`
+`,(0,t.jsx)(n.h2,{id:`password-managers-and-companion-apps`,children:`Password managers and companion apps`}),`
+`,(0,t.jsxs)(n.p,{children:[`If the extension needs a Mac app, such as 1Password or iCloud Passwords, the app decides whether to trust Crest. Use the signed and notarized Crest release, not a development build. See `,(0,t.jsx)(n.a,{href:`/guides/native-companion-limits/`,children:`Native companions`}),`.`]}),`
+`,(0,t.jsx)(n.h2,{id:`features-crest-draws-differently`,children:`Features Crest draws differently`}),`
+`,(0,t.jsxs)(n.p,{children:[`Crest shows popups, side panels, extension windows and keyboard shortcuts in its own interface. An extension that expects part of Chrome's window that Crest does not draw may lose that feature. See `,(0,t.jsx)(n.a,{href:`/guides/extension-api-compatibility/`,children:`Extension compatibility`}),`.`]})]})}function s(e={}){let{wrapper:n}=e.components||{};return n?(0,t.jsx)(n,{...e,children:(0,t.jsx)(o,{...e})}):o(e)}export{r as _markdown,s as default,n as frontmatter,i as structuredData,a as toc};

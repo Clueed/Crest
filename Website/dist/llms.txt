@@ -1,0 +1,45 @@
+# Docs
+
+- [Crest Help](/guides): Help articles for Crest on Mac, iPad, and iPhone.
+- Get started
+  - [Install and update Crest for Mac](/guides/install-and-update-mac): Download Crest directly, install it in Applications, and understand automatic updates.
+  - [Move your browser data to Crest](/guides/move-to-crest): Review imports from Arc, Zen, Chrome, Safari, Firefox, and other Chromium browsers, and export portable Crest data.
+  - [Settings reference](/guides/settings-reference): Find every major Crest setting and understand whether it applies globally or to one Space.
+  - [Chromium and WebKit on Mac](/guides/engines): Choose the engine new pages open in, send a website to the other engine, and see what each engine supports.
+- Spaces & organization
+  - [Spaces and profile isolation](/guides/spaces-and-isolation): Understand how each Crest Space separates accounts, history, passwords, permissions, and website data.
+  - [Customize and arrange Spaces](/guides/customize-spaces): Design a Space in Crest Studio, customize its folders, and choose its browsing and cleanup settings.
+  - [Organize tabs, saved pages, and folders](/guides/organize-tabs-and-folders): Use current tabs, pinned sites, saved locations, folders, Archive, and Keep Loaded deliberately.
+  - [Use Split View](/guides/split-view): Create, focus, resize, reorder, synchronize, and separate two to four live tabs.
+  - [Browse with a Private Space](/guides/private-spaces): Understand Private Space storage, history, sync, authentication, and relocking.
+  - [Sync Crest across devices](/guides/sync-across-devices): Use iCloud to synchronize durable Spaces and resolve a device-versus-cloud conflict safely.
+  - [Turn Crest Passwords on or off per Space](/guides/crest-passwords-per-space): Control Crest-owned password suggestions, generation, and save prompts independently for every Space.
+- Browse faster
+  - [Use the command palette](/guides/command-palette): Search, navigate, switch tabs, revisit history, search any site or ask an AI assistant, and run Crest commands from one field.
+  - [Keyboard shortcuts](/guides/keyboard-shortcuts): Reference every default Crest browser shortcut and customize the complete Mac command map.
+  - [Gestures and pointer actions](/guides/gestures-and-pointer): Learn Crest’s swipes, drags, middle-click actions, context menus, and other less-obvious interactions.
+  - [Use Peek and Quick Window](/guides/peek-and-quick-window): Preview links without losing your place and handle links opened from other apps.
+  - [Route links to the right Space](/guides/link-routing): Build Air Traffic Control-style URL rules that send external links to a chosen Crest Space.
+  - [Translate, read, and use page tools](/guides/page-tools): Translate webpages on device, use Reader, find text, adjust zoom, share, and export pages.
+  - [Localhost and developer tools](/guides/localhost-developer-tools): Preview phone, desktop, and custom viewport sizes, capture pages, and inspect websites with Crest’s Mac developer tools.
+  - [Let coding agents use Crest](/guides/coding-agents): Let coding agents on your Mac read and act on tabs in the Spaces you choose, through the Model Context Protocol server Crest includes.
+- Privacy, data & recovery
+  - [Content blocking and site permissions](/guides/content-blocking-and-site-permissions): Control ads, trackers, camera, microphone, pop-ups, downloads, and external apps per Space.
+  - [History, Archive, downloads, and retention](/guides/history-archive-and-downloads): Search, restore, remove, and retain browser records independently in each Space.
+  - [Clear website data](/guides/clear-website-data): Clear one site's cookies or cache, manage each Space's website data, and clear browsing data by time range.
+- Install extensions
+  - [Install from the Chrome Web Store](/guides/install-chrome-web-store): Add a Chrome extension from its store page to the current Crest Space.
+  - [Firefox add-ons](/guides/install-firefox-add-ons): Crest does not install Firefox add-ons. Use an extension's Chrome Web Store version instead.
+  - [Safari Web Extensions](/guides/scan-safari-web-extensions): Crest does not scan Mac apps for Safari Web Extensions. Use an extension's Chrome Web Store version instead.
+- Use extensions
+  - [Manage permissions and website access per Space](/guides/manage-extension-permissions): Review and change an extension's permissions and site access without changing another Crest Space.
+  - [Pin extensions and use extension popups](/guides/pin-extensions-and-popups): Pin extension actions and use popups, side panels, and settings pages in the right Space on Mac.
+  - [Set extension keyboard shortcuts](/guides/extension-keyboard-shortcuts): Assign and change keyboard shortcuts for extension commands in a Crest Space.
+- Compatibility & troubleshooting
+  - [Check an extension's status and details](/guides/extension-status): See whether an extension is on, and find its errors and permissions in Chromium's extension manager.
+  - [Native companions](/guides/native-companion-limits): How extensions in Crest for Mac connect to their companion Mac apps, and what those apps check.
+  - [Extension compatibility](/guides/extension-api-compatibility): Which extensions Crest runs, where, and which Chrome extension features Crest connects to its own interface.
+  - [Extension known limitations](/guides/extension-compatibility): Where extensions run in Crest, and the limits that apply to them.
+  - [Troubleshoot an extension](/guides/troubleshoot-extension-compatibility): Steps to try when a Chrome extension installs in Crest but a feature does not work.
+  - [Set up 1Password in Crest](/guides/onepassword): Install the 1Password Chrome extension in Crest for Mac and authorize Crest in the 1Password app.
+  - [iCloud Passwords in Crest](/guides/icloud-passwords): How the iCloud Passwords extension connects to Apple's password helper in Crest for Mac, and what Apple requires.

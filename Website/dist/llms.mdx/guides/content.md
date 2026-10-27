@@ -1,0 +1,149 @@
+# Crest Help (/guides)
+
+Crest is a browser made of Spaces. It gives work, home, research, and private browsing separate places to live, and switching Spaces changes the browsing context, not just the color of the window. Each Space keeps its own signed-in sessions, cookies, history, tabs, pinned sites, passwords, permissions, website data, appearance, and sync identity.
+
+Crest brings Chromium and WebKit together on Mac. Read the [engine and upgrade guide](/guides/engines/) for website sign-ins, extensions, and choosing an engine. iPhone and iPad continue to use WebKit.
+
+## Crest on each device [#crest-on-each-device]
+
+The same Spaces and browsing model carry across Mac, iPad, and iPhone, while the controls adapt to the screen.
+
+| Device | How Crest fits |
+| --- | --- |
+| Mac | Chromium and WebKit in one app, the sidebar, Split View with two to four tabs, keyboard-first commands, Quick Window, Peek, extensions, and multiple windows. Signed, notarized releases come directly from GitHub. |
+| iPad | The full Space structure, resizable Split View columns, touch navigation, hardware-keyboard commands, and Peek. |
+| iPhone | The web page stays primary. The full sidebar becomes its own view, and Split View becomes a pager of focused cards. |
+
+## Get started [#get-started]
+
+<Cards>
+  <Card title="Install and update Crest for Mac" href="/guides/install-and-update-mac/">
+    Download Crest directly, install it in Applications, and understand automatic updates.
+  </Card>
+  <Card title="Move your browser data to Crest" href="/guides/move-to-crest/">
+    Review imports from Arc, Zen, Chrome, Safari, Firefox, and other Chromium browsers, and export portable Crest data.
+  </Card>
+  <Card title="Settings reference" href="/guides/settings-reference/">
+    Find every major Crest setting and understand whether it applies globally or to one Space.
+  </Card>
+  <Card title="Chromium and WebKit on Mac" href="/guides/engines/">
+    Choose the engine new pages open in, send a website to the other engine, and see what each engine supports.
+  </Card>
+</Cards>
+
+## Spaces & organization [#spaces--organization]
+
+<Cards>
+  <Card title="Spaces and profile isolation" href="/guides/spaces-and-isolation/">
+    Understand how each Crest Space separates accounts, history, passwords, permissions, and website data.
+  </Card>
+  <Card title="Customize and arrange Spaces" href="/guides/customize-spaces/">
+    Design a crest, choose Space and folder colors, and configure cleanup.
+  </Card>
+  <Card title="Organize tabs, saved pages, and folders" href="/guides/organize-tabs-and-folders/">
+    Use current tabs, pinned sites, saved locations, folders, Archive, and Keep Loaded deliberately.
+  </Card>
+  <Card title="Use Split View" href="/guides/split-view/">
+    Create, focus, resize, reorder, synchronize, and separate two to four live tabs.
+  </Card>
+  <Card title="Browse with a Private Space" href="/guides/private-spaces/">
+    Understand Private Space storage, history, sync, authentication, and relocking.
+  </Card>
+  <Card title="Sync Crest across devices" href="/guides/sync-across-devices/">
+    Use iCloud to synchronize durable Spaces and resolve a device-versus-cloud conflict safely.
+  </Card>
+  <Card title="Turn Crest Passwords on or off per Space" href="/guides/crest-passwords-per-space/">
+    Control Crest-owned password suggestions, generation, and save prompts independently for every Space.
+  </Card>
+</Cards>
+
+## Browse faster [#browse-faster]
+
+<Cards>
+  <Card title="Use the command palette" href="/guides/command-palette/">
+    Search, navigate, switch tabs, revisit history, and run Crest commands from one field.
+  </Card>
+  <Card title="Keyboard shortcuts" href="/guides/keyboard-shortcuts/">
+    Reference every default Crest browser shortcut and customize the complete Mac command map.
+  </Card>
+  <Card title="Gestures and pointer actions" href="/guides/gestures-and-pointer/">
+    Learn Crest’s swipes, drags, middle-click actions, context menus, and other less-obvious interactions.
+  </Card>
+  <Card title="Use Peek and Quick Window" href="/guides/peek-and-quick-window/">
+    Preview links without losing your place and handle links opened from other apps.
+  </Card>
+  <Card title="Route links to the right Space" href="/guides/link-routing/">
+    Build Air Traffic Control-style URL rules that send external links to a chosen Crest Space.
+  </Card>
+  <Card title="Translate, read, and use page tools" href="/guides/page-tools/">
+    Translate webpages on device, read without distractions, share, and export pages.
+  </Card>
+  <Card title="Localhost and developer tools" href="/guides/localhost-developer-tools/">
+    Preview responsive layouts at phone, desktop, or custom sizes and inspect websites on Mac.
+  </Card>
+</Cards>
+
+## Privacy, data & recovery [#privacy-data--recovery]
+
+<Cards>
+  <Card title="Content blocking and site permissions" href="/guides/content-blocking-and-site-permissions/">
+    Control ads, trackers, camera, microphone, pop-ups, downloads, and external apps per Space.
+  </Card>
+  <Card title="History, Archive, downloads, and retention" href="/guides/history-archive-and-downloads/">
+    Search, restore, remove, and retain browser records independently in each Space.
+  </Card>
+</Cards>
+
+## Install extensions [#install-extensions]
+
+<Cards>
+  <Card title="Install from the Chrome Web Store" href="/guides/install-chrome-web-store/">
+    Add a Chrome extension from its store page to the current Crest Space.
+  </Card>
+  <Card title="Firefox add-ons" href="/guides/install-firefox-add-ons/">
+    Crest does not install Firefox add-ons. Use an extension's Chrome Web Store version instead.
+  </Card>
+  <Card title="Safari Web Extensions" href="/guides/scan-safari-web-extensions/">
+    Crest does not scan Mac apps for Safari Web Extensions. Use an extension's Chrome Web Store version instead.
+  </Card>
+</Cards>
+
+## Use extensions [#use-extensions]
+
+<Cards>
+  <Card title="Manage permissions and website access per Space" href="/guides/manage-extension-permissions/">
+    Review and change an extension's permissions and site access without changing another Crest Space.
+  </Card>
+  <Card title="Pin extensions and use extension popups" href="/guides/pin-extensions-and-popups/">
+    Pin extension actions and use popups, side panels, and settings pages in the right Space on Mac.
+  </Card>
+  <Card title="Set extension keyboard shortcuts" href="/guides/extension-keyboard-shortcuts/">
+    Assign and change keyboard shortcuts for extension commands in a Crest Space.
+  </Card>
+</Cards>
+
+## Compatibility & troubleshooting [#compatibility--troubleshooting]
+
+<Cards>
+  <Card title="Check an extension's status and details" href="/guides/extension-status/">
+    See whether an extension is on, and find its errors and permissions in Chromium's extension manager.
+  </Card>
+  <Card title="Native companions" href="/guides/native-companion-limits/">
+    How extensions in Crest for Mac connect to their companion Mac apps, and what those apps check.
+  </Card>
+  <Card title="Extension compatibility" href="/guides/extension-api-compatibility/">
+    Which extensions Crest runs, where, and which Chrome extension features Crest connects to its own interface.
+  </Card>
+  <Card title="Extension known limitations" href="/guides/extension-compatibility/">
+    Where extensions run in Crest, and the limits that apply to them.
+  </Card>
+  <Card title="Troubleshoot an extension" href="/guides/troubleshoot-extension-compatibility/">
+    Steps to try when a Chrome extension installs in Crest but a feature does not work.
+  </Card>
+  <Card title="Set up 1Password in Crest" href="/guides/onepassword/">
+    Install the 1Password Chrome extension in Crest for Mac and authorize Crest in the 1Password app.
+  </Card>
+  <Card title="iCloud Passwords in Crest" href="/guides/icloud-passwords/">
+    How the iCloud Passwords extension connects to Apple's password helper in Crest for Mac, and what Apple requires.
+  </Card>
+</Cards>
