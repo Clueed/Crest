@@ -1,0 +1,110 @@
+# Create one link route: github.com, Contains, opens in Work.
+# Targets are accessibility identifiers or `$labels`; no step uses coordinates.
+# Format and actions: Scripts/helpdocs/README.md.
+article: content/docs/(browse-faster)/link-routing.mdx
+sources:
+  - CrestShared/Features/Settings/BrowserLinkSettingsPane/**
+  - CrestShared/Features/Settings/BrowserPlatformLinkRouteEditor/**
+labels:
+  links: Links
+  routing: Routing
+  new_route: New Route
+  when_url: When URL
+  contains: Contains
+  is_exactly: Is Exactly
+  pattern: URL or text
+  open_in_space: Open in Space
+  destination: Destination, Destination
+  external_links: Links from other apps
+  personal: Personal
+  work: Work
+launch:
+  # Nothing is saved between runs; the showcase seed has the Spaces Work and Personal.
+  env: {CREST_ISOLATED_SESSION: 1, CREST_SHOWCASE_SESSION: 1}
+  window: [1280, 800]
+setup:
+  # Unrecorded. Starting in Personal makes choosing Work a real change.
+  - name: start-in-personal
+    action: click
+    target: {role: AXButton, label: $personal, within: {identifier: space-switcher-picker}}
+    settle: 1.0
+steps:
+  - name: open-settings
+    action: key
+    keys: keystroke "," using command down
+    settle: 1.5
+  - name: open-links
+    action: click
+    target: {identifier: settings-links}
+  - name: undock-sidebar          # a narrow window clips the route card while the sidebar is docked
+    action: click
+    target: {identifier: browser-sidebar-toggle}
+  - name: show-routing
+    action: scroll
+    target: {identifier: settings-form-links}
+    lines: 30
+    settle: 1.0
+    capture: links-pane
+  - name: new-route
+    action: click
+    target: {role: AXButton, label: $new_route}
+  - name: show-route
+    action: scroll
+    target: {identifier: settings-form-links}
+    lines: 30
+  - name: open-match
+    action: click
+    target: {role: AXPopUpButton, label: Match}
+    settle: 0.8
+    observe: Match
+  - name: choose-contains
+    action: click
+    target: {role: AXMenuItem, label: $contains, within: {role: AXPopUpButton, label: Match}}
+  - name: type-pattern
+    action: type
+    target: {role: AXTextField, label: $pattern}
+    text: github.com
+  - name: open-destination
+    action: click
+    target: {role: AXPopUpButton, label: $destination}
+    settle: 0.8
+    observe: $destination
+  - name: choose-work
+    action: click
+    target: {role: AXMenuItem, label: $work, within: {role: AXPopUpButton, label: $destination}}
+  - name: finish                  # click the section heading to end editing
+    action: click
+    target: {role: AXHeading, label: $routing}
+    settle: 1.0
+    capture: route
+assets:
+  links-pane: link-routing/links-pane.png
+  route: link-routing/route.png
+clip: link-routing/create-route.mp4
+verify:
+  # The article followed literally, then a link opened from another app.
+  - name: article-1-settings-links
+    action: key
+    keys: keystroke "," using command down
+    settle: 1.5
+  - {name: article-1-links, action: click, target: {identifier: settings-links}}
+  - {name: undock-sidebar, action: click, target: {identifier: browser-sidebar-toggle}}
+  - {name: article-2-new-route, action: click, target: {role: AXButton, label: $new_route}}
+  - {name: show-route, action: scroll, target: {identifier: settings-form-links}, lines: 30}
+  - {name: article-3-pattern, action: type, target: {role: AXTextField, label: $pattern}, text: github.com}
+  - {name: article-4-when-url, action: click, target: {role: AXPopUpButton, label: Match}, settle: 0.8}
+  - name: article-4-contains
+    action: click
+    target: {role: AXMenuItem, label: $contains, within: {role: AXPopUpButton, label: Match}}
+  - name: article-5-open-in-space
+    action: click
+    target: {role: AXPopUpButton, label: $destination}
+    settle: 0.8
+  - name: article-5-work
+    action: click
+    target: {role: AXMenuItem, label: $work, within: {role: AXPopUpButton, label: $destination}}
+  - {name: open-link, action: open_url, url: "https://github.com/pauljoda/Crest", settle: 4}
+  - name: routed-to-work
+    action: expect
+    target: {role: AXButton, label: $work, within: {identifier: space-switcher-picker}}
+    contains: Selected

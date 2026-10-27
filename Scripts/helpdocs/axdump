@@ -1,0 +1,6 @@
+#!/bin/zsh
+# Print the accessibility tree of a running app. See README.md in this folder.
+exec uv run --quiet --no-project --python 3.13 \
+  --with pyyaml --with pillow --with numpy \
+  --with pyobjc-framework-ApplicationServices --with pyobjc-framework-Quartz \
+  python "${0:A:h}/axdump.py" "$@"
