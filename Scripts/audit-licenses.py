@@ -19,11 +19,12 @@ PACKAGE_RESOLVED_PATH = (
     / "swiftpm"
     / "Package.resolved"
 )
-PACKAGE_LOCK_PATH = REPOSITORY_ROOT / "HelpCenter" / "package-lock.json"
+PACKAGE_LOCK_PATH = REPOSITORY_ROOT / "Website" / "package-lock.json"
 WORKFLOW_DIRECTORY = REPOSITORY_ROOT / ".github" / "workflows"
 
 ALLOWED_NPM_LICENSES = {
     "(BSD-2-Clause OR MIT OR Apache-2.0)",
+    "(MIT OR Apache-2.0)",
     "(MIT OR CC0-1.0)",
     "(WTFPL OR MIT)",
     "0BSD",
@@ -35,8 +36,11 @@ ALLOWED_NPM_LICENSES = {
     "CC0-1.0",
     "ISC",
     "MIT",
+    "MIT OR Apache-2.0",
     "MIT-0",
+    "MPL-2.0",
     "Python-2.0",
+    "Unlicense",
 }
 
 
@@ -97,10 +101,10 @@ def audit_npm_packages(catalog: dict) -> int:
     package_lock = load_json(PACKAGE_LOCK_PATH)
     packages = package_lock.get("packages", {})
     root_dependencies = packages.get("", {}).get("dependencies", {})
-    expected_direct = catalog["helpCenterDirectDependencies"]
+    expected_direct = catalog["websiteDirectDependencies"]
     if set(root_dependencies) != set(expected_direct):
         raise RuntimeError(
-            "Help Center direct dependency inventory changed; update the license catalog."
+            "Website direct dependency inventory changed; update the license catalog."
         )
 
     metadata_exceptions = catalog["knownNpmLicenseMetadataExceptions"]
@@ -167,7 +171,7 @@ def main() -> int:
     print(
         f"License audit passed: {swift_count} runtime Swift package, "
         f"{component_count} bundled components, {data_count} bundled data set, "
-        f"{npm_count} Help Center packages, and "
+        f"{npm_count} website packages, and "
         f"{action_count} workflow action repositories are declared and reviewed."
     )
     return 0

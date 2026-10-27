@@ -1,0 +1,9 @@
+{
+  "title": "Privacy, data & recovery",
+  "defaultOpen": true,
+  "pages": [
+    "content-blocking-and-site-permissions",
+    "history-archive-and-downloads",
+    "clear-website-data"
+  ]
+}

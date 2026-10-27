@@ -1,0 +1,13 @@
+{
+  "title": "Compatibility & troubleshooting",
+  "defaultOpen": true,
+  "pages": [
+    "extension-status",
+    "native-companion-limits",
+    "extension-api-compatibility",
+    "extension-compatibility",
+    "troubleshoot-extension-compatibility",
+    "onepassword",
+    "icloud-passwords"
+  ]
+}

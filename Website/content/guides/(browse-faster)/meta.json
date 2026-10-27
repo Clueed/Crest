@@ -1,0 +1,14 @@
+{
+  "title": "Browse faster",
+  "defaultOpen": true,
+  "pages": [
+    "command-palette",
+    "keyboard-shortcuts",
+    "gestures-and-pointer",
+    "peek-and-quick-window",
+    "link-routing",
+    "page-tools",
+    "localhost-developer-tools",
+    "coding-agents"
+  ]
+}

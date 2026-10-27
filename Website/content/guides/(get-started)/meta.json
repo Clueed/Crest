@@ -1,0 +1,5 @@
+{
+  "title": "Get started",
+  "defaultOpen": true,
+  "pages": ["install-and-update-mac", "move-to-crest", "settings-reference", "engines"]
+}

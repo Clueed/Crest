@@ -240,10 +240,10 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: HelpCenter/package-lock.json
+          cache-dependency-path: Website/package-lock.json
 
-      - name: Build Help Center
-        working-directory: HelpCenter
+      - name: Build website
+        working-directory: Website
         run: |
           npm ci
           npm run build

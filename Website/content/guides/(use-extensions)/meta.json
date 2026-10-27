@@ -1,0 +1,5 @@
+{
+  "title": "Use extensions",
+  "defaultOpen": true,
+  "pages": ["manage-extension-permissions", "pin-extensions-and-popups", "extension-keyboard-shortcuts"]
+}

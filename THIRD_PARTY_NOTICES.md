@@ -40,21 +40,19 @@ service; it is not part of Crest's distributed app or source. The license audit
 keeps the exact workflow-action repository inventory synchronized with
 `Config/ThirdPartyDependencies.json`.
 
-## Help Center toolchain
+## Website toolchain
 
-The Help Center is built with Docusaurus 3.10.2, React 19.2.8, React DOM
-19.2.8, MDX React 3.1.1, clsx 2.1.1, and prism-react-renderer 2.4.1. These direct
-dependencies are MIT-licensed. Their exact transitive dependency versions and
-declared licenses are recorded in `HelpCenter/package-lock.json`.
+The website at crestbrowser.com is built with Fumadocs 16.17.8 (fumadocs-core,
+fumadocs-ui, and fumadocs-mdx 15.4.10), React Router 8.5.0, React 19.3.1,
+React DOM 19.3.1, and cn 0.5.0, which are MIT-licensed; lucide-react 1.62.0,
+which is ISC-licensed; takumi-js 2.18.2, which is available under MIT or
+Apache-2.0; and isbot 5.2.2, which is released under the Unlicense. Their exact
+transitive dependency versions and declared licenses are recorded in
+`Website/package-lock.json`.
 
-The build graph also includes the CC BY 4.0 `caniuse-lite` browser-support
-dataset. It is used by the documentation build toolchain and is not linked into
-the Crest application. Attribution: caniuse-lite contributors,
-<https://github.com/browserslist/caniuse-lite>.
-
-`eval` 0.1.8, `format` 0.2.2, and `require-like` 0.1.2 omit a machine-readable
-license field in their package metadata; their distributed license files or
-project documentation identify the MIT license. The repository license audit
-records those exceptions explicitly.
+The build graph also includes the MPL-2.0 `lightningcss` CSS compiler and the
+CC BY 4.0 `caniuse-lite` browser-support dataset. Both are used by the website
+build toolchain and are not linked into the Crest application. Attribution:
+caniuse-lite contributors, <https://github.com/browserslist/caniuse-lite>.
 
 Third-party names and logos remain the property of their respective owners.

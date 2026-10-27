@@ -1,0 +1,146 @@
+import type { Route } from './+types/privacy';
+import type { PageHandle } from '@/root';
+import { SiteFooter, SiteHeader, external } from '@/components/site-chrome';
+import { productPageMeta, siteIcons, webPageStructuredData } from '@/lib/page-meta';
+import siteStylesheet from '@/styles/site.css?url';
+
+export const handle: PageHandle = { bodyClassName: 'privacy-body' };
+
+export function meta(_: Route.MetaArgs) {
+  return productPageMeta({
+    path: '/privacy/',
+    title: 'Crest Privacy — Your Browsing Stays Yours',
+    description:
+      'Crest has no account, analytics, advertising SDK, or browsing-data backend. Learn what stays on your device, what can sync through iCloud, and when third-party services receive a request.',
+    shareTitle: 'Crest Privacy — Your Browsing Stays Yours',
+    shareDescription:
+      'No Crest account, analytics, advertising SDK, or browsing-data backend. A plain-language guide to local data, iCloud sync, search, and third-party services.',
+    type: 'article',
+    themeColor: '#101827',
+    colorScheme: 'dark light',
+  });
+}
+
+export const links: Route.LinksFunction = () => [
+  { rel: 'stylesheet', href: siteStylesheet },
+  ...siteIcons,
+];
+
+const structuredData = webPageStructuredData({
+  path: '/privacy/',
+  name: 'Crest Privacy',
+  description:
+    'How Crest handles local browsing data, optional iCloud sync, search requests, and third-party services.',
+  dateModified: '2026-09-30',
+});
+
+export default function Privacy() {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <SiteHeader skipTo="privacy-content" skipLabel="Skip to privacy policy" />
+
+      <main id="privacy-content">
+        <section className="privacy-hero" aria-labelledby="privacy-title">
+          <div className="privacy-hero-copy">
+            <p className="eyebrow">Privacy · Effective September 30, 2026</p>
+            <h1 id="privacy-title">Your browsing<br />stays <em>yours.</em></h1>
+            <p>Crest has no account system, analytics pipeline, advertising SDK, or browsing-data backend. Crest does not collect or receive your browsing history, searches, passwords, cookies, or website data.</p>
+          </div>
+          <div className="privacy-promises" aria-label="Crest privacy promises">
+            <article><span>01</span><strong>No Crest account</strong><p>There is no profile to build or identity to follow.</p></article>
+            <article><span>02</span><strong>No analytics or ads</strong><p>No tracking SDK, advertising identifier, or behavioral telemetry.</p></article>
+            <article><span>03</span><strong>No browsing-data server</strong><p>Your activity is not sent to Crest or its developer.</p></article>
+          </div>
+        </section>
+
+        <div className="privacy-layout">
+          <aside className="privacy-nav" aria-label="Privacy policy sections">
+            <p>On this page</p>
+            <a href="#short-version">The short version</a>
+            <a href="#your-devices">On your devices</a>
+            <a href="#icloud">Optional iCloud sync</a>
+            <a href="#services">Sites and services</a>
+            <a href="#search-attribution">Search attribution</a>
+            <a href="#website-beta">Website and beta</a>
+            <a href="#control">Your control</a>
+          </aside>
+
+          <article className="privacy-article">
+            <section id="short-version">
+              <p className="eyebrow">The short version</p>
+              <h2>Crest is a browser,<br />not a data business.</h2>
+              <p>Crest does not sell, rent, profile, or share your personal information because Crest does not collect it. There is no Crest-operated service receiving the pages you visit, the searches you make, or the accounts you use.</p>
+              <p>Like every browser, Crest connects directly to the websites and services you choose. Those services receive the requests needed to work and handle them under their own privacy policies. Optional Apple services are covered separately below.</p>
+            </section>
+
+            <section id="your-devices">
+              <p className="privacy-index">01</p>
+              <h2>What stays on your devices.</h2>
+              <p>Cookies, website storage, service workers, downloads, and active page state stay on the device where you use them. Crest keeps this browsing data isolated by Space so one context does not silently become another.</p>
+              <p>Passwords are stored with the system Keychain. Crest does not upload password values to a Crest server. Private Spaces use temporary website storage and do not join ordinary history, restoration, archive, or synchronization.</p>
+            </section>
+
+            <section id="icloud">
+              <p className="privacy-index">02</p>
+              <h2>iCloud is optional.</h2>
+              <p>If you enable Crest sync, Space identity, pinned and saved tabs, current tabs, history, and archive records can sync through your private CloudKit database. This is an Apple service associated with your iCloud account; Crest does not operate a parallel copy.</p>
+              <p>Password values never enter CloudKit. Each Space has a separate switch for syncing those encrypted Keychain items through iCloud Keychain. Cookies, website data, service workers, downloads, and active page state remain device-only.</p>
+              <a className="privacy-source" href="https://developer.apple.com/documentation/cloudkit/ckcontainer/privateclouddatabase" target="_blank" rel="noopener noreferrer">About private CloudKit databases at Apple <span aria-hidden="true">↗</span></a>
+            </section>
+
+            <section id="services">
+              <p className="privacy-index">03</p>
+              <h2>Requests go where you send them.</h2>
+              <p>When you visit a website or search the web, Crest sends the request directly to that website or to your selected search provider. The recipient and the network carrying the request may receive ordinary connection information such as your IP address, browser details, and the page or search you requested. Their policies—not Crest's—govern what they do with it.</p>
+              <p>When content blocking is enabled, Crest applies its bundled rules locally to WebKit pages. Crest does not download third-party filter lists; users who want broader blocking, or blocking on Chromium pages, can install a compatible extension.</p>
+              <p>On Mac, Crest&rsquo;s Chromium engine is built on ungoogled-chromium, which removes Chromium&rsquo;s Google integrations. When you install an extension from the Chrome Web Store, Crest downloads it from Google&rsquo;s update service, and Chromium later checks Google&rsquo;s service for updates to the extensions you installed. Extensions you add can see and send data according to their own permissions and policies.</p>
+              <p>Chromium does not include a site or download reputation service or remote Web Push. Read the <a href="/guides/content-blocking-and-site-permissions/">engine protection and notification details</a> for the controls and limits.</p>
+            </section>
+
+            <aside className="privacy-attribution" id="search-attribution" aria-labelledby="search-attribution-title">
+              <div className="privacy-attribution-label"><span>Footnote</span><strong>Search-source attribution</strong></div>
+              <div>
+                <h2 id="search-attribution-title">A future search may identify Crest—not you.</h2>
+                <p><strong>Today, Crest does not add a Crest source or partner parameter to search URLs.</strong> In the future, Crest may add a fixed, app-wide source-attribution parameter so a search provider can recognize that a search came from Crest.</p>
+                <p>DuckDuckGo, for example, calls this its <code>t</code> source parameter and documents partner searches with an <code>&amp;t=</code> value for anonymous, aggregate attribution. Any Crest value would identify only the app. It would not identify a person, device, Space, session, or account, and it would not add personal information to the request.</p>
+                <p>The selected provider would still receive the search query and that fixed tag directly. Crest would not receive, transmit to its own service, or store a copy of the query.</p>
+                <a className="privacy-source" href="https://duckduckgo.com/duckduckgo-help-pages/privacy/t" target="_blank" rel="noopener noreferrer">How DuckDuckGo describes its source parameter <span aria-hidden="true">↗</span></a>
+              </div>
+            </aside>
+
+            <section id="website-beta">
+              <p className="privacy-index">04</p>
+              <h2>This website and TestFlight.</h2>
+              <p>This product site is static. It has no Crest analytics, tracking pixels, advertising, cookies, account forms, or embedded third-party media. It is hosted by GitHub Pages; GitHub says it logs visitor IP addresses for security and may collect ordinary website usage information under its own policy.</p>
+              <p>Apple handles TestFlight enrollment and beta delivery. While you use a TestFlight build, Apple may provide Crest's developer with crash reports. Testers can also choose to send screenshots, comments, or other feedback through TestFlight. Crest adds no separate telemetry to those builds.</p>
+              <div className="privacy-sources">
+                <a className="privacy-source" href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages" target="_blank" rel="noopener noreferrer">GitHub Pages privacy notes <span aria-hidden="true">↗</span></a>
+                <a className="privacy-source" href="https://developer.apple.com/testflight/" target="_blank" rel="noopener noreferrer">How Apple describes TestFlight <span aria-hidden="true">↗</span></a>
+              </div>
+            </section>
+
+            <section id="control">
+              <p className="privacy-index">05</p>
+              <h2>Your data remains under your control.</h2>
+              <p>You can clear site data and history, remove saved credentials, delete a Space, disable iCloud sync, or turn off iCloud Keychain syncing for an individual Space. Data kept on your devices remains until you clear it, remove the app and its data, or the operating system removes it. Synced data remains in your iCloud account until it is deleted through Crest or your Apple account.</p>
+              <p>If this policy changes, the new version will be posted here with a revised effective date. A future feature that changes what Crest collects would require this policy to change first.</p>
+              <div className="privacy-contact">
+                <span>Questions or concerns?</span>
+                <p>Reach the developer through the <a href="https://www.reddit.com/r/CrestBrowser" target="_blank" rel="noopener noreferrer">Crest community on Reddit</a> or the <a href="https://discord.gg/gjrM5qMB6x" target="_blank" rel="noopener noreferrer">Crest Discord</a>. Both are public, so do not include passwords, account details, private URLs, or other sensitive information.</p>
+              </div>
+            </section>
+          </article>
+        </div>
+      </main>
+
+      <SiteFooter tagline="No account. No analytics. No browsing-data backend. Just a browser that keeps your internet under your colors.">
+        <a href="/support/">Support</a>
+        <a href="https://testflight.apple.com/join/vV1CM49Q" {...external}>TestFlight</a>
+      </SiteFooter>
+    </>
+  );
+}

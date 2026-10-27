@@ -13,11 +13,11 @@ updates:
       prefix: "chore(deps)"
 
   - package-ecosystem: npm
-    directory: /HelpCenter
+    directory: /Website
     schedule:
       interval: monthly
     groups:
-      help-center:
+      website:
         patterns:
           - "*"
     commit-message:

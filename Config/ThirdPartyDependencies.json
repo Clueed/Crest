@@ -68,18 +68,18 @@
     "actions/upload-pages-artifact": "MIT",
     "github/codeql-action": "MIT source; CodeQL CLI terms"
   },
-  "helpCenterDirectDependencies": {
-    "@docusaurus/core": "MIT",
-    "@docusaurus/preset-classic": "MIT",
-    "@mdx-js/react": "MIT",
-    "clsx": "MIT",
-    "prism-react-renderer": "MIT",
+  "websiteDirectDependencies": {
+    "@react-router/node": "MIT",
+    "cn": "MIT",
+    "fumadocs-core": "MIT",
+    "fumadocs-mdx": "MIT",
+    "fumadocs-ui": "MIT",
+    "isbot": "Unlicense",
+    "lucide-react": "ISC",
     "react": "MIT",
-    "react-dom": "MIT"
+    "react-dom": "MIT",
+    "react-router": "MIT",
+    "takumi-js": "(MIT OR Apache-2.0)"
   },
-  "knownNpmLicenseMetadataExceptions": {
-    "eval": "MIT",
-    "format": "MIT",
-    "require-like": "MIT"
-  }
+  "knownNpmLicenseMetadataExceptions": {}
 }

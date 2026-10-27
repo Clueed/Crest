@@ -13,8 +13,8 @@ covered by [`TRADEMARKS.md`](TRADEMARKS.md).
 4. Use Python 3.11 or later for the Chromium and release tools. Check that
    `python3 --version` resolves to that interpreter.
 5. Install [ripgrep](https://github.com/BurntSushi/ripgrep) for the script
-   test suite, and Node.js 20 or later if you build the Help Center in
-   `HelpCenter/`. `swift-format` ships with Xcode; the checks call it through
+   test suite, and Node.js 20 or later if you build the website in
+   `Website/`. `swift-format` ships with Xcode; the checks call it through
    `xcrun`.
 6. Run `Scripts/bootstrap.sh` from the repository root.
 
@@ -40,8 +40,8 @@ for the enforced contracts and current exact exemptions.
 
 **Build Crest** runs on pull requests and pushes to `main`, and can also be
 dispatched manually. It checks source, core tests and analyzers, architecture,
-scripts, Swift formatting, native contracts, macOS and iOS builds, and the Help
-Center. Release publication calls the same workflow for the exact source SHA
+scripts, Swift formatting, native contracts, macOS and iOS builds, and the
+website. Release publication calls the same workflow for the exact source SHA
 and waits for it to pass. Run the relevant local validation before opening a
 pull request; builds do not replace native app acceptance checks.
 

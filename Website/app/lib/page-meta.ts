@@ -1,0 +1,88 @@
+import type { LinkDescriptor, MetaDescriptor } from 'react-router';
+import { siteUrl } from './shared';
+
+const ogImage = `${siteUrl}/assets/og-card-brand.jpg`;
+const ogImageAlt = 'Crest app icon beside the words Your internet, under your colors';
+
+export const siteIcons: LinkDescriptor[] = [
+  { rel: 'icon', href: '/favicon.ico', sizes: '32x32' },
+  { rel: 'icon', type: 'image/svg+xml', href: '/assets/crest-logo.svg' },
+  { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/assets/crest-icon-32.png' },
+  { rel: 'apple-touch-icon', sizes: '180x180', href: '/assets/apple-touch-icon.png' },
+  { rel: 'mask-icon', href: '/assets/crest-logo.svg', color: '#101827' },
+  { rel: 'manifest', href: '/site.webmanifest' },
+];
+
+export type ProductPageMeta = {
+  path: string;
+  title: string;
+  description: string;
+  shareTitle: string;
+  shareDescription: string;
+  type: 'website' | 'article';
+  themeColor: string;
+  colorScheme: string;
+  extra?: MetaDescriptor[];
+};
+
+/** schema.org WebPage data for a page that sits one level below the homepage. */
+export function webPageStructuredData(page: {
+  path: string;
+  name: string;
+  description: string;
+  dateModified: string;
+}) {
+  const url = `${siteUrl}${page.path}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${url}#webpage`,
+    url,
+    name: page.name,
+    description: page.description,
+    dateModified: page.dateModified,
+    inLanguage: 'en-US',
+    isPartOf: { '@id': `${siteUrl}/#website` },
+    about: { '@id': `${siteUrl}/#software` },
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Crest', item: `${siteUrl}/` },
+        { '@type': 'ListItem', position: 2, name: page.name.replace(/^Crest /, ''), item: url },
+      ],
+    },
+  };
+}
+
+/** The head every product page shares: search, social cards and app identity. */
+export function productPageMeta(page: ProductPageMeta): MetaDescriptor[] {
+  const url = `${siteUrl}${page.path}`;
+  return [
+    { title: page.title },
+    { name: 'theme-color', content: page.themeColor },
+    { name: 'color-scheme', content: page.colorScheme },
+    { name: 'description', content: page.description },
+    { name: 'robots', content: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' },
+    { name: 'author', content: 'Paul Davis' },
+    { name: 'application-name', content: 'Crest' },
+    { name: 'apple-mobile-web-app-title', content: 'Crest' },
+    ...(page.extra ?? []),
+    { tagName: 'link', rel: 'canonical', href: url },
+    { property: 'og:site_name', content: 'Crest' },
+    { property: 'og:locale', content: 'en_US' },
+    { property: 'og:type', content: page.type },
+    { property: 'og:url', content: url },
+    { property: 'og:title', content: page.shareTitle },
+    { property: 'og:description', content: page.shareDescription },
+    { property: 'og:image', content: ogImage },
+    { property: 'og:image:type', content: 'image/jpeg' },
+    { property: 'og:image:width', content: '1200' },
+    { property: 'og:image:height', content: '630' },
+    { property: 'og:image:alt', content: ogImageAlt },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: page.shareTitle },
+    { name: 'twitter:description', content: page.shareDescription },
+    { name: 'twitter:image', content: ogImage },
+    { name: 'twitter:image:alt', content: ogImageAlt },
+  ];
+}

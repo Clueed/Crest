@@ -4,7 +4,7 @@ Crest 0.7 packages this engine with the native SwiftUI interface and portable
 core as the standard Mac app. Chromium is the default; WebKit remains available
 per page, per website, or as the default. The WebKit-only `Crest` Xcode scheme
 is a contributor build, not a second Mac download. iPhone and iPad use WebKit.
-See the [engine guide](../../HelpCenter/docs/browsing/engines.md) for migration,
+See the [engine guide](../../Website/content/guides/(get-started)/engines.md) for migration,
 supported features, and current limits, and [Distribution](../../Documentation/Distribution.md)
 for the stable release procedure.
 
@@ -551,7 +551,7 @@ composition, a restart that preserves profiles and session data, and the
 Sparkle update/relaunch path. Exercise permissions, download recovery, and
 notification delivery through the native app. A headless engine smoke check
 does not validate those host integrations. Keep the Google-free protection
-and Web Push limitations in the Help Center accurate when publishing.
+and Web Push limitations in the guides accurate when publishing.
 
 Desktop releases check for the engine matching their selected commit.
 If missing, `Ensure Chromium engine` builds it on the registered Apple Silicon

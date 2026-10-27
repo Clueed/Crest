@@ -1,0 +1,13 @@
+{
+  "title": "Spaces & organization",
+  "defaultOpen": true,
+  "pages": [
+    "spaces-and-isolation",
+    "customize-spaces",
+    "organize-tabs-and-folders",
+    "split-view",
+    "private-spaces",
+    "sync-across-devices",
+    "crest-passwords-per-space"
+  ]
+}

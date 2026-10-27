@@ -1,0 +1,5 @@
+{
+  "title": "Install extensions",
+  "defaultOpen": true,
+  "pages": ["install-chrome-web-store", "install-firefox-add-ons", "scan-safari-web-extensions"]
+}
