@@ -4,8 +4,6 @@ description: Build Air Traffic Control-style URL rules that send external links 
 keywords: [link routing, Air Traffic Control, URL rules, external links, Space]
 ---
 
-import createRoute from './link-routing/create-route.mp4';
-
 Link Routing is Crest’s equivalent of Arc’s Air Traffic Control: matching links opened from other apps can go to a specific Space before the normal external-link destination is considered.
 
 ## Create a route
@@ -16,20 +14,7 @@ Link Routing is Crest’s equivalent of Arc’s Air Traffic Control: matching li
 4. Next to **When URL**, choose **Contains** or **Is Exactly**.
 5. In **Open in Space**, choose the destination Space.
 
-![Settings, Links pane, with the Routing section and its New Route button](./link-routing/links-pane.png)
-
 ![A route in the Routing section: When URL Contains, URL or text github.com, Open in Space Work](./link-routing/route.png)
-
-<video
-  src={createRoute}
-  aria-label="Creating a route in Settings, Links: New Route, Contains, github.com, Work"
-  className="rounded-lg"
-  autoPlay
-  muted
-  loop
-  playsInline
-  controls
-/>
 
 Routes are evaluated from top to bottom. Reorder them when a narrow rule should win before a broad one.
 

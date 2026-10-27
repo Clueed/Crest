@@ -27,12 +27,11 @@ def polish(recording: Path, log: dict, destination: Path, lag=0.25, zoom=1.7, ta
     offset = log["started"] - log["recording_started"] + lag
     probe = json.loads(
         subprocess.check_output(
-            ["ffprobe", "-v", "error", "-select_streams", "v", "-show_entries", "stream=width,height:format=duration",
+            ["ffprobe", "-v", "error", "-select_streams", "v", "-show_entries", "stream=width",
              "-of", "json", str(recording)]
         )
     )
     video_width = probe["streams"][0]["width"]
-    duration = float(probe["format"]["duration"])
     scale = video_width / log["screen_points"][0]
     window = log["window"]
     left, top_edge = round(window["X"] * scale), round(window["Y"] * scale)
@@ -40,10 +39,14 @@ def polish(recording: Path, log: dict, destination: Path, lag=0.25, zoom=1.7, ta
 
     # Clicks in video seconds and window pixels; every step marks activity.
     clicks = [(c["t"] + offset, (c["x"] - window["X"]) * scale, (c["y"] - window["Y"]) * scale) for c in log["clicks"]]
+    approaches = [c.get("move", 0.35) for c in log["clicks"]]
     activity = sorted({s["t"] + offset for s in log["steps"]} | {c[0] for c in clicks})
-    # Play these at 1x: half a second around each click, and all of the typing.
-    active_spans = [(c[0] - 0.45, c[0] + 0.5) for c in clicks] + [
-        (s["t"] + offset, s["t"] + offset + s["seconds"]) for s in log["steps"] if s["action"] == "type"
+    # Play these at 1x: the pointer's approach to each click and half a second
+    # after it, all typing, dragging and pointer moves, and the final hold.
+    active_spans = [(c[0] - move - 0.15, c[0] + 0.5) for c, move in zip(clicks, approaches)] + [
+        (s["t"] + offset, s["t"] + offset + s["seconds"])
+        for s in log["steps"]
+        if s["action"] in ("type", "drag", "move")
     ]
 
     # Group clicks closer than 2.5 s so the camera stays in and pans between them.
@@ -74,7 +77,13 @@ def polish(recording: Path, log: dict, destination: Path, lag=0.25, zoom=1.7, ta
         return any(a <= t <= b for a, b in active_spans)
 
     # Active time plays at 1x; idle time is sped up so the clip lands near the target length.
-    first, last = max(activity[0] - 0.5, 0), min(activity[-1] + 2.6, duration)
+    # The clip ends when the last step's settle does, so a scenario sets its
+    # final hold, which plays at 1x.
+    # The recording only has frames while the screen changes, so a still
+    # ending may lie past its end; the last frame is held to fill it.
+    ending = max(s["t"] + offset + s["seconds"] for s in log["steps"])
+    first, last = max(activity[0] - 0.5, 0), ending
+    active_spans.append((activity[-1], last))
     grid = np.arange(first, last, 1 / fps)
     active = sum(is_active(t) for t in grid) / fps
     idle = (last - first) - active
