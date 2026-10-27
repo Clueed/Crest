@@ -92,6 +92,9 @@ The same Spaces and browsing model carry across Mac, iPad, and iPhone, while the
   <Card title="History, Archive, downloads, and retention" href="/guides/history-archive-and-downloads/">
     Search, restore, remove, and retain browser records independently in each Space.
   </Card>
+  <Card title="Clear website data" href="/guides/clear-website-data/">
+    Clear one site's cookies or cache, manage each Space's website data, and clear browsing data by time range.
+  </Card>
 </Cards>
 
 ## Install extensions [#install-extensions]

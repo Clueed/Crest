@@ -161,7 +161,7 @@ the default and a shared browser core across Mac, iPhone, and iPad.
 - Mac requires Apple silicon and macOS 26.1 or later. iPhone and iPad continue to use WebKit on iOS and iPadOS 26.1 or later.
 - Spaces, tabs, history, and Crest Passwords carry over from the previous stable release. Chromium and WebKit keep separate website data, so switching engines can require signing in again.
 - Reinstall older WebKit extensions from the Chrome Web Store in the Spaces where you want them.
-- See the [engine guide](HelpCenter/docs/browsing/engines.md) for feature differences, screen-sharing limits, and notification support.
+- See the [engine guide](https://crestbrowser.com/guides/engines/) for feature differences, screen-sharing limits, and notification support.
 
 ## [0.6.33] - 2026-09-18
 
