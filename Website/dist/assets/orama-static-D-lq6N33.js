@@ -1,1 +1,0 @@
-export{t as oramaStaticClient,n as staticClient,r as useStaticSearch}from"./orama-static-6lnC62EQ.js";

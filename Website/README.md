@@ -12,7 +12,6 @@ privacy and support pages, and Crest Help at `/guides/`. It is a
 | `app/styles/` | `home.css` for the homepage, `site.css` for privacy and support. Help articles use Fumadocs' styles from `app/app.css` |
 | `content/guides/` | Help articles in Markdown or MDX. Folders in parentheses group the sidebar without changing URLs, and each `meta.json` sets a group's title and page order |
 | `public/` | Files served as-is: images, crests, demos, `CNAME`, `robots.txt`, and redirect pages |
-| `dist/` | The generated site that GitHub Pages publishes. Never edit it by hand |
 
 An article's URL comes from its file name: `content/guides/(browse-faster)/link-routing.md`
 is served at `/guides/link-routing/`. Link between articles with those URLs.
@@ -26,11 +25,10 @@ npm install
 npm run dev
 ```
 
-## Publish
+To check that the site builds:
 
 ```sh
-npm run build:website
+npm run build
 ```
 
-This rebuilds `dist/`. Commit the result with your change; pushing to `main`
-deploys `dist/` to GitHub Pages.
+The static site is written to `build/client/`, which Git ignores.
