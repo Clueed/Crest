@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import type { Route } from './+types/home';
 import { productPageMeta } from '@/lib/page-meta';
 import { startHomepage } from '@/lib/homepage.client';
+import { SiteFooter, SiteHeader, heroAttribute } from '@/components/site-chrome';
+import { DiscordIcon, GitHubIcon } from '@/components/icons';
 import homeStylesheet from '@/styles/home.css?url';
 
 export function meta(_: Route.MetaArgs) {
@@ -70,43 +72,11 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <a className="skip" href="#main">Skip to content</a>
-      <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
-        <symbol id="i-discord" viewBox="0 0 24 24"><path fill="currentColor" d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></symbol>
-        <symbol id="i-github" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></symbol>
-      </svg>
-
-      <header className="nav" id="nav">
-        <div className="wide">
-          <a className="brand" href="#"><img src="/assets/crest-logo.svg" alt="" />Crest</a>
-          <nav className="nav-links" aria-label="Site">
-            <a href="#tour">Features</a>
-            <a href="#crests">Crests</a>
-            <a href="#arc">From Arc</a>
-            <a href="#devices">Devices</a>
-            <span className="sep"></span>
-            <a href="/docs/">Help &amp; docs</a>
-            <a href="https://github.com/pauljoda/Crest" target="_blank" rel="noopener noreferrer"><svg className="ico" aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
-            <details className="links" id="links">
-              <summary>Links<svg className="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg></summary>
-              <div className="menu">
-                <a className="narrow" href="/docs/">Help &amp; docs</a>
-                <a className="narrow" href="https://github.com/pauljoda/Crest" target="_blank" rel="noopener noreferrer">GitHub</a>
-                <a href="https://github.com/pauljoda/Crest/releases" target="_blank" rel="noopener noreferrer">Mac releases</a>
-                <a href="https://www.reddit.com/r/CrestBrowser" target="_blank" rel="noopener noreferrer">Reddit</a>
-                <a href="https://discord.gg/gjrM5qMB6x" target="_blank" rel="noopener noreferrer">Discord</a>
-                <a href="/support/">Support</a>
-                <a href="/privacy/">Privacy</a>
-              </div>
-            </details>
-            <a className="cta" href="#get">Download</a>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main id="main">
 
-      <section className="hero" id="top">
+      <section className="hero" id="top" {...heroAttribute}>
         <div className="hero-bg" aria-hidden="true"><div className="pin"><i className="hb"></i><i className="hb"></i></div></div>
         <div className="hero-fade" aria-hidden="true"></div>
         <div className="hero-head">
@@ -120,7 +90,7 @@ export default function Home() {
               <div className="secondary">
                 <a className="sl alt-ios" href="https://apps.apple.com/us/app/crest-browser/id6797335023" target="_blank" rel="noopener noreferrer"><img src="/assets/app-store-official.png" alt="" />iPhone &amp; iPad</a>
                 <a className="sl alt-mac" href="https://github.com/pauljoda/Crest/releases/latest" target="_blank" rel="noopener noreferrer"><img src="/assets/crest-logo.svg" alt="" />Download for Mac</a>
-                <a className="sl" href="https://github.com/pauljoda/Crest" target="_blank" rel="noopener noreferrer"><svg className="ico" aria-hidden="true"><use href="#i-github"/></svg>Source on GitHub</a>
+                <a className="sl" href="https://github.com/pauljoda/Crest" target="_blank" rel="noopener noreferrer"><GitHubIcon className="ico" />Source on GitHub</a>
               </div>
             </div>
             <p className="fine">Early access. Security not independently audited. MPL 2.0. Not affiliated with Arc.</p>
@@ -292,23 +262,16 @@ export default function Home() {
               <li><a href="https://testflight.apple.com/join/vV1CM49Q" target="_blank" rel="noopener noreferrer"><img className="pad" src="/assets/testflight-official.png" alt="" /><span><b>Beta</b><small>TestFlight</small></span><span className="go">Join ↗</span></a></li>
             </ul>
             <ul className="getlist" aria-label="Community">
-              <li><a href="https://github.com/pauljoda/Crest/issues/new/choose" target="_blank" rel="noopener noreferrer"><span className="mk gh"><svg className="ico" aria-hidden="true"><use href="#i-github"/></svg></span><span><b>GitHub</b><small>Bug reports</small></span><span className="go">Report ↗</span></a></li>
+              <li><a href="https://github.com/pauljoda/Crest/issues/new/choose" target="_blank" rel="noopener noreferrer"><span className="mk gh"><GitHubIcon className="ico" /></span><span><b>GitHub</b><small>Bug reports</small></span><span className="go">Report ↗</span></a></li>
               <li><a href="https://www.reddit.com/r/CrestBrowser" target="_blank" rel="noopener noreferrer"><img className="pad" src="/assets/reddit-official.png" alt="" /><span><b>Reddit</b><small>r/CrestBrowser</small></span><span className="go">Visit ↗</span></a></li>
-              <li><a href="https://discord.gg/gjrM5qMB6x" target="_blank" rel="noopener noreferrer"><span className="mk"><svg className="ico" aria-hidden="true"><use href="#i-discord"/></svg></span><span><b>Discord</b><small>Chat and questions</small></span><span className="go">Join ↗</span></a></li>
+              <li><a href="https://discord.gg/gjrM5qMB6x" target="_blank" rel="noopener noreferrer"><span className="mk"><DiscordIcon className="ico" /></span><span><b>Discord</b><small>Chat and questions</small></span><span className="go">Join ↗</span></a></li>
             </ul>
           </div>
         </div>
       </section>
       </main>
 
-      <footer>
-        <div className="wrap">
-          <div className="links">
-            <a href="#tour">Features</a><a href="#crests">Crests</a><a href="#arc">From Arc</a><a href="#devices">Devices</a><a href="#import">Import</a><a href="/docs/">Help &amp; docs</a><a href="/support/">Support</a><a href="/privacy/">Privacy</a><a href="https://github.com/pauljoda/Crest" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://www.reddit.com/r/CrestBrowser" target="_blank" rel="noopener noreferrer">Reddit</a><a href="https://discord.gg/gjrM5qMB6x" target="_blank" rel="noopener noreferrer">Discord</a><a href="https://ko-fi.com/pauljoda/tiers" target="_blank" rel="noopener noreferrer">Support open source software</a>
-          </div>
-          <p>Free and open source under the Mozilla Public License 2.0. Not affiliated with Arc. Crest Studio artwork by Lorc and Delapouite from <a href="https://game-icons.net" target="_blank" rel="noopener noreferrer">game-icons.net</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>. TestFlight, Reddit, and Discord are trademarks of their owners.</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }

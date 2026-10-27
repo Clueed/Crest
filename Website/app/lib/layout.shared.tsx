@@ -1,5 +1,6 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { appName, gitConfig } from './shared';
+import { github, isExternal, links } from './site-links';
+import { appName } from './shared';
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -12,12 +13,12 @@ export function baseOptions(): BaseLayoutProps {
       ),
       url: '/docs',
     },
-    links: [
-      { text: 'Home', url: '/', external: true },
-      { text: 'Download for Mac', url: 'https://github.com/pauljoda/Crest/releases/latest', external: true },
-      { text: 'Support', url: '/support/', external: true },
-    ],
+    links: [links.home, links.macDownload, links.support].map((link) => ({
+      text: link.text,
+      url: link.url,
+      external: isExternal(link.url),
+    })),
     themeSwitch: { enabled: false },
-    githubUrl: `https://github.com/${gitConfig.user}/${gitConfig.repo}`,
+    githubUrl: github,
   };
 }

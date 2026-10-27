@@ -1,6 +1,6 @@
 import type { Route } from './+types/support';
 import type { PageHandle } from '@/root';
-import { SiteFooter, SiteHeader, external } from '@/components/site-chrome';
+import { SiteFooter, SiteHeader, heroAttribute } from '@/components/site-chrome';
 import { productPageMeta, webPageStructuredData } from '@/lib/page-meta';
 import siteStylesheet from '@/styles/site.css?url';
 
@@ -40,10 +40,10 @@ export default function Support() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <SiteHeader skipTo="support-content" skipLabel="Skip to support" />
+      <SiteHeader />
 
-      <main id="support-content">
-        <section className="privacy-hero" aria-labelledby="support-title">
+      <main id="main">
+        <section className="privacy-hero" {...heroAttribute} aria-labelledby="support-title">
           <div className="privacy-hero-copy">
             <p className="eyebrow">Support · Crest field desk</p>
             <h1 id="support-title">Find your way<br /><em>forward.</em></h1>
@@ -117,10 +117,7 @@ export default function Support() {
         </div>
       </main>
 
-      <SiteFooter tagline="Focused troubleshooting for a browser built around clear boundaries.">
-        <a href="/privacy/">Privacy</a>
-        <a href="https://github.com/pauljoda/Crest/issues/new/choose" {...external}>GitHub Issues</a>
-      </SiteFooter>
+      <SiteFooter tagline="Focused troubleshooting for a browser built around clear boundaries." />
     </>
   );
 }

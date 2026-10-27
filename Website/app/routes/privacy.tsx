@@ -1,6 +1,6 @@
 import type { Route } from './+types/privacy';
 import type { PageHandle } from '@/root';
-import { SiteFooter, SiteHeader, external } from '@/components/site-chrome';
+import { SiteFooter, SiteHeader, heroAttribute } from '@/components/site-chrome';
 import { productPageMeta, webPageStructuredData } from '@/lib/page-meta';
 import siteStylesheet from '@/styles/site.css?url';
 
@@ -40,10 +40,10 @@ export default function Privacy() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <SiteHeader skipTo="privacy-content" skipLabel="Skip to privacy policy" />
+      <SiteHeader />
 
-      <main id="privacy-content">
-        <section className="privacy-hero" aria-labelledby="privacy-title">
+      <main id="main">
+        <section className="privacy-hero" {...heroAttribute} aria-labelledby="privacy-title">
           <div className="privacy-hero-copy">
             <p className="eyebrow">Privacy · Effective September 30, 2026</p>
             <h1 id="privacy-title">Your browsing<br />stays <em>yours.</em></h1>
@@ -136,10 +136,7 @@ export default function Privacy() {
         </div>
       </main>
 
-      <SiteFooter tagline="No account. No analytics. No browsing-data backend. Just a browser that keeps your internet under your colors.">
-        <a href="/support/">Support</a>
-        <a href="https://testflight.apple.com/join/vV1CM49Q" {...external}>TestFlight</a>
-      </SiteFooter>
+      <SiteFooter tagline="No account. No analytics. No browsing-data backend. Just a browser that keeps your internet under your colors." />
     </>
   );
 }
