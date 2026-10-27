@@ -93,8 +93,11 @@
 
 @layer base {
   html {
-    scrollbar-gutter: stable;
     -webkit-text-size-adjust: 100%;
+  }
+  /* Crest Help keeps room for the scrollbar so its dialogs don't shift the page. */
+  html:has(#nd-docs-layout, #nd-home-layout) {
+    scrollbar-gutter: stable;
   }
   html:not(.noanim) {
     scroll-behavior: smooth;

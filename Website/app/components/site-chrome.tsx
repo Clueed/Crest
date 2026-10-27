@@ -52,17 +52,17 @@ function useHeaderState() {
 /** The Links menu: closes on a click outside it, on Escape, and when a link in it is chosen. */
 function LinksMenu() {
   const ref = useRef<HTMLDetailsElement>(null);
-  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (!open) return;
     function onClick(e: MouseEvent) {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+      const menu = ref.current;
+      if (menu?.open && !menu.contains(e.target as Node)) menu.open = false;
     }
     function onKey(e: KeyboardEvent) {
-      if (e.key !== 'Escape') return;
-      setOpen(false);
-      ref.current?.querySelector('summary')?.focus();
+      const menu = ref.current;
+      if (e.key !== 'Escape' || !menu?.open) return;
+      menu.open = false;
+      menu.querySelector('summary')?.focus();
     }
     document.addEventListener('click', onClick);
     document.addEventListener('keydown', onKey);
@@ -70,18 +70,13 @@ function LinksMenu() {
       document.removeEventListener('click', onClick);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open]);
+  }, []);
 
   const item =
     'rounded-[9px] px-3 py-2 text-sm hover:bg-white/8 group-data-light:hover:bg-ink/6';
 
   return (
-    <details
-      ref={ref}
-      open={open}
-      onToggle={(e) => setOpen(e.currentTarget.open)}
-      className="relative"
-    >
+    <details ref={ref} className="relative">
       <summary className="inline-flex cursor-pointer list-none items-center gap-1 opacity-80 select-none hover:opacity-100 in-open:opacity-100 [&::-webkit-details-marker]:hidden">
         Links
         <svg className="size-3 transition-transform in-open:rotate-180" viewBox="0 0 12 12" aria-hidden="true">
@@ -90,7 +85,9 @@ function LinksMenu() {
       </summary>
       <div
         className="absolute top-[calc(100%+14px)] right-0 grid min-w-48 rounded-[14px] bg-[rgb(18_23_30/0.94)] p-1.5 text-white shadow-[0_20px_40px_-16px_rgb(0_0_0/0.5),inset_0_0_0_1px_rgb(255_255_255/0.1)] backdrop-blur-[18px] group-data-light:bg-[rgb(251_248_241/0.97)] group-data-light:text-ink group-data-light:shadow-[0_20px_40px_-16px_rgb(20_32_44/0.3),inset_0_0_0_1px_var(--color-rule)]"
-        onClick={(e) => (e.target as HTMLElement).closest('a') && setOpen(false)}
+        onClick={(e) => {
+          if ((e.target as HTMLElement).closest('a') && ref.current) ref.current.open = false;
+        }}
       >
         <SiteAnchor link={links.help} className={cn(item, 'tablet:hidden')} />
         <SiteAnchor link={links.github} className={cn(item, 'tablet:hidden')} />
