@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import type { Route } from './+types/home';
-import { productPageMeta, siteIcons } from '@/lib/page-meta';
+import { productPageMeta } from '@/lib/page-meta';
 import { startHomepage } from '@/lib/homepage.client';
 import homeStylesheet from '@/styles/home.css?url';
 
@@ -25,7 +25,6 @@ export function meta(_: Route.MetaArgs) {
 
 export const links: Route.LinksFunction = () => [
   { rel: 'stylesheet', href: homeStylesheet },
-  ...siteIcons,
 ];
 
 const structuredData = {

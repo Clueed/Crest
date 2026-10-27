@@ -4,15 +4,8 @@ import { RootProvider } from 'fumadocs-ui/provider/react-router';
 import type { Route } from './+types/fumadocs';
 import type { PageHandle } from '@/root';
 import SearchDialog from '@/components/search';
-import { siteIcons } from '@/lib/page-meta';
-import appStylesheet from '@/app.css?url';
 
 export const handle: PageHandle = { bodyClassName: 'flex flex-col min-h-screen' };
-
-export const links: Route.LinksFunction = () => [
-  { rel: 'stylesheet', href: appStylesheet },
-  ...siteIcons,
-];
 
 function Providers({ children }: { children: React.ReactNode }) {
   return (

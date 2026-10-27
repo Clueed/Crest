@@ -17,6 +17,7 @@ export function baseOptions(): BaseLayoutProps {
       { text: 'Download for Mac', url: 'https://github.com/pauljoda/Crest/releases/latest', external: true },
       { text: 'Support', url: '/support/', external: true },
     ],
+    themeSwitch: { enabled: false },
     githubUrl: `https://github.com/${gitConfig.user}/${gitConfig.repo}`,
   };
 }

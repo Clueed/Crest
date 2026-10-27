@@ -1,7 +1,7 @@
 import type { Route } from './+types/privacy';
 import type { PageHandle } from '@/root';
 import { SiteFooter, SiteHeader, external } from '@/components/site-chrome';
-import { productPageMeta, siteIcons, webPageStructuredData } from '@/lib/page-meta';
+import { productPageMeta, webPageStructuredData } from '@/lib/page-meta';
 import siteStylesheet from '@/styles/site.css?url';
 
 export const handle: PageHandle = { bodyClassName: 'privacy-body' };
@@ -23,7 +23,6 @@ export function meta(_: Route.MetaArgs) {
 
 export const links: Route.LinksFunction = () => [
   { rel: 'stylesheet', href: siteStylesheet },
-  ...siteIcons,
 ];
 
 const structuredData = webPageStructuredData({
