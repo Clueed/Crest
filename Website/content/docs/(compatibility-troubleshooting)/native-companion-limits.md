@@ -16,8 +16,8 @@ Most companion apps register only with Google Chrome. When Chromium's own lookup
 
 Some companion apps check the browser's code signature before they answer.
 
-- **1Password** accepts a browser you add through its **Add Browser** setting, and checks that browser's signature. See [Set up 1Password in Crest](/guides/onepassword/).
-- **iCloud Passwords** uses Apple's password helper, which Apple protects with a launch constraint on the browser's identity and entitlements. See [iCloud Passwords in Crest](/guides/icloud-passwords/).
+- **1Password** accepts a browser you add through its **Add Browser** setting, and checks that browser's signature. See [Set up 1Password in Crest](/docs/onepassword/).
+- **iCloud Passwords** uses Apple's password helper, which Apple protects with a launch constraint on the browser's identity and entitlements. See [iCloud Passwords in Crest](/docs/icloud-passwords/).
 
 Use the signed and notarized Crest release in `/Applications`. A development build carries a different signature, and companion apps that check the signature reject it.
 

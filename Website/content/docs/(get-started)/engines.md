@@ -10,7 +10,7 @@ Your Spaces, tabs, history, passwords and settings are the same whichever engine
 
 ## Chromium
 
-Crest's Chromium engine is built on [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium), which removes Google integrations from Chromium. It runs [Chrome Web Store extensions](/guides/install-chrome-web-store/).
+Crest's Chromium engine is built on [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium), which removes Google integrations from Chromium. It runs [Chrome Web Store extensions](/docs/install-chrome-web-store/).
 
 Chromium starts the first time you need it. If WebKit is your default and no page uses Chromium, it stays unloaded. Opening a Chromium page or an extension starts it, and it stays running until you quit Crest.
 
@@ -60,7 +60,7 @@ Extensions installed in earlier versions do not carry over. Install them again f
 | Save Web Archive | `.mhtml` file | `.webarchive` file |
 | Inspect a page | Chromium DevTools | Web Inspector |
 
-Tabs, Spaces, Split View, Peek, Crest Passwords, site permissions, Picture in Picture and downloads are available in both. Their engine controls can differ; Chromium downloads also offer pause and resume. See [Translate, read, and use page tools](/guides/page-tools/) and [Downloads](/guides/history-archive-and-downloads/#downloads) for details.
+Tabs, Spaces, Split View, Peek, Crest Passwords, site permissions, Picture in Picture and downloads are available in both. Their engine controls can differ; Chromium downloads also offer pause and resume. See [Translate, read, and use page tools](/docs/page-tools/) and [Downloads](/docs/history-archive-and-downloads/#downloads) for details.
 
 ## Current Chromium limits
 
@@ -68,4 +68,4 @@ Tabs, Spaces, Split View, Peek, Crest Passwords, site permissions, Picture in Pi
 - Screen sharing offers your tabs in the same Space first, with their audio when the site asks for it. A window or your screen goes through the macOS picker, which shares no audio.
 - Local service-worker and extension notifications work while Crest runs. Remote Web Push is not available.
 
-See [Site permissions and notifications](/guides/content-blocking-and-site-permissions/) for permission controls and the Google-free engine's site and download protection limits.
+See [Site permissions and notifications](/docs/content-blocking-and-site-permissions/) for permission controls and the Google-free engine's site and download protection limits.

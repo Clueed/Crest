@@ -220,12 +220,12 @@ export function startHomepage() {
   /* ---------------------------------------------------------- feature tour */
   var TOUR=[
     {tab:'Crest',space:'work',page:'northstar',cap:'A sidebar, Spaces, and the page.'},
-    {tab:'Spaces',space:'personal',page:'desc',url:'crestbrowser.com<small>/guides/spaces-and-isolation/</small>',act:['◈','Spaces'],desc:{kk:'Spaces',h:'Each Space is its own browser.',body:['Separate cookies, history, passwords, and extensions.']}},
-    {tab:'Sidebar',space:'work',page:'desc',url:'crestbrowser.com<small>/guides/organize-tabs-and-folders/</small>',act:['▤','Sidebar'],desc:{kk:'Sidebar',h:'Tabs down the side.',body:['Pinned sites, folders, and tabs, one Space at a time.']}},
+    {tab:'Spaces',space:'personal',page:'desc',url:'crestbrowser.com<small>/docs/spaces-and-isolation/</small>',act:['◈','Spaces'],desc:{kk:'Spaces',h:'Each Space is its own browser.',body:['Separate cookies, history, passwords, and extensions.']}},
+    {tab:'Sidebar',space:'work',page:'desc',url:'crestbrowser.com<small>/docs/organize-tabs-and-folders/</small>',act:['▤','Sidebar'],desc:{kk:'Sidebar',h:'Tabs down the side.',body:['Pinned sites, folders, and tabs, one Space at a time.']}},
     {tab:'Split View',space:'personal',page:'split',group:true,cap:'Up to four tabs side by side.'},
     {tab:'Peek',space:'personal',page:'peek',url:'localhost:4321<small>/demos/source/</small>',act:['☀️','Personal Field Guide'],cap:'Preview a link, then close it or keep it.'},
-    {tab:'Quick Window',space:'personal',page:'desc',url:'crestbrowser.com<small>/guides/peek-and-quick-window/</small>',act:['▢','Quick Window'],desc:{kk:'Quick Window',h:'Links from other apps open small.',body:['Keep it as a tab, or close it.'],qw:true}},
-    {tab:'Link Routing',space:'work',page:'desc',url:'crestbrowser.com<small>/guides/link-routing/</small>',act:['⇢','Link Routing'],desc:{kk:'Link Routing',h:'Links land in the right Space.',body:['Match a URL, pick a Space.'],routes:[['github.com','Contains','work'],['docs.northstar.studio/launch','Exact','work'],['allrecipes.com','Contains','personal']]}},
+    {tab:'Quick Window',space:'personal',page:'desc',url:'crestbrowser.com<small>/docs/peek-and-quick-window/</small>',act:['▢','Quick Window'],desc:{kk:'Quick Window',h:'Links from other apps open small.',body:['Keep it as a tab, or close it.'],qw:true}},
+    {tab:'Link Routing',space:'work',page:'desc',url:'crestbrowser.com<small>/docs/link-routing/</small>',act:['⇢','Link Routing'],desc:{kk:'Link Routing',h:'Links land in the right Space.',body:['Match a URL, pick a Space.'],routes:[['github.com','Contains','work'],['docs.northstar.studio/launch','Exact','work'],['allrecipes.com','Contains','personal']]}},
     {tab:'Command palette',space:'work',page:'palette',cap:'Tabs, history, and commands in one field.'},
     {tab:'Developer tools',space:'personal',page:'localhost',url:'localhost:4321<small>/demos/source/</small>',act:['✨','Personal Field Guide'],cap:'Viewports, Console, and Network.'}
   ];

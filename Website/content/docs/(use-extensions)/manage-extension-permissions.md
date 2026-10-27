@@ -8,7 +8,7 @@ Every Space keeps its own extension installations, permissions and website acces
 
 ## At installation
 
-The install review lists the permission warnings Chromium reports for the extension. Where the extension allows it, turn on **Withhold website access until I grant it** so the extension reaches a site only after you allow it. See [Install from the Chrome Web Store](/guides/install-chrome-web-store/).
+The install review lists the permission warnings Chromium reports for the extension. Where the extension allows it, turn on **Withhold website access until I grant it** so the extension reaches a site only after you allow it. See [Install from the Chrome Web Store](/docs/install-chrome-web-store/).
 
 ## Review access later
 

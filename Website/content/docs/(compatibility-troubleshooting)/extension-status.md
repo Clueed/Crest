@@ -29,4 +29,4 @@ The manager shows what Chrome's does, including errors the extension reported. I
 
 If an extension is still turned on but its files are missing, Crest shows no toolbar tile and no settings row for it. Selecting its action reports that the extension is unavailable. Reinstall it from the Chrome Web Store.
 
-Continue with [Troubleshoot an extension](/guides/troubleshoot-extension-compatibility/).
+Continue with [Troubleshoot an extension](/docs/troubleshoot-extension-compatibility/).

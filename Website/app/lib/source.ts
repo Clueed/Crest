@@ -3,7 +3,7 @@ import { defineDocs } from 'fumadocs-mdx/macro';
 import { docsRoute } from './shared';
 
 export const docs = defineDocs({
-  dir: 'content/guides',
+  dir: 'content/docs',
   docs: {
     async: true,
     postprocess: {

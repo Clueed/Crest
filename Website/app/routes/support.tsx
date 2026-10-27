@@ -73,7 +73,7 @@ export default function Support() {
               <h2>Use the smallest reset<br />that fits the problem.</h2>
               <p>Reload the affected page first. If only one Space is involved, switch away and back. If a page remains unresponsive, close that tab and open it again. Relaunch Crest only after those focused steps fail.</p>
               <p>Before clearing history, website data, passwords, or a Space, confirm that the problem is not limited to one page or one signed-in account. Those actions remove useful state and may not address a compatibility issue.</p>
-              <a className="privacy-source" href="/guides/">Open the Crest guides <span aria-hidden="true">→</span></a>
+              <a className="privacy-source" href="/docs/">Open the Crest guides <span aria-hidden="true">→</span></a>
             </section>
 
             <section id="spaces-sync">

@@ -4,7 +4,7 @@ Crest 0.7 packages this engine with the native SwiftUI interface and portable
 core as the standard Mac app. Chromium is the default; WebKit remains available
 per page, per website, or as the default. The WebKit-only `Crest` Xcode scheme
 is a contributor build, not a second Mac download. iPhone and iPad use WebKit.
-See the [engine guide](../../Website/content/guides/(get-started)/engines.md) for migration,
+See the [engine guide](../../Website/content/docs/(get-started)/engines.md) for migration,
 supported features, and current limits, and [Distribution](../../Documentation/Distribution.md)
 for the stable release procedure.
 

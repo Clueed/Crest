@@ -10,7 +10,7 @@ export function SiteHeader({ skipTo, skipLabel }: { skipTo: string; skipLabel: s
       <a className="skip-link" href={`#${skipTo}`}>{skipLabel}</a>
       <header className="site-header scrolled">
         <a className="wordmark" href="/" aria-label="Crest home"><img className="brand-mark" src="/assets/crest-logo.svg" alt="" aria-hidden="true" /><span>Crest</span></a>
-        <nav aria-label="Primary navigation"><a href="/#crests">Spaces</a><a href="/#more">Features</a><a href="/guides/">Help &amp; guides</a><a className="nav-cta" href="/">Product site</a></nav>
+        <nav aria-label="Primary navigation"><a href="/#crests">Spaces</a><a href="/#more">Features</a><a href="/docs/">Help &amp; guides</a><a className="nav-cta" href="/">Product site</a></nav>
       </header>
     </>
   );
@@ -24,7 +24,7 @@ export function SiteFooter({ tagline, children }: { tagline: string; children: R
       <p>{tagline}</p>
       <div>
         <a href="/">Product site</a>
-        <a href="/guides/">Guides</a>
+        <a href="/docs/">Guides</a>
         {children}
         <a href="https://www.reddit.com/r/CrestBrowser" {...external}>Reddit</a>
         <a href="https://discord.gg/gjrM5qMB6x" {...external}>Discord</a>

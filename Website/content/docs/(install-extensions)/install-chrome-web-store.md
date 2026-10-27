@@ -24,9 +24,9 @@ Once installed, the listing's button reads **Added to Crest**, and it offers **R
 
 ## Use it after installation
 
-- Open **Site Controls** beside the address field to find the extension's action, and pin it if you want it in the Space's extension strip. See [Pin extensions and use popups](/guides/pin-extensions-and-popups/).
+- Open **Site Controls** beside the address field to find the extension's action, and pin it if you want it in the Space's extension strip. See [Pin extensions and use popups](/docs/pin-extensions-and-popups/).
 - Open **Crest Settings**, select the Space in the sidebar, then select **Extensions**. Expand the extension to turn it on or off, open its settings, manage its permissions, copy it to other Spaces, or remove it.
-- If the extension has keyboard commands, see [Set extension keyboard shortcuts](/guides/extension-keyboard-shortcuts/).
+- If the extension has keyboard commands, see [Set extension keyboard shortcuts](/docs/extension-keyboard-shortcuts/).
 
 ## Updates
 
@@ -38,4 +38,4 @@ Chromium updates Chrome Web Store extensions on its own and checks each update's
 - A locked Space, or one that has been deleted, cannot receive an extension or a copy.
 - Crest does not install Firefox add-ons or Safari Web Extensions. Look for the extension's Chrome version.
 
-Next: [Manage permissions and website access](/guides/manage-extension-permissions/).
+Next: [Manage permissions and website access](/docs/manage-extension-permissions/).

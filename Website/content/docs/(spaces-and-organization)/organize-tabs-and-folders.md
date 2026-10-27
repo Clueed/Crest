@@ -24,7 +24,7 @@ Folders work in both Saved and Current Tabs. Rename them, choose a color or symb
 
 Both kinds restore and sync with their section. Moving a folder preserves its name, color, hierarchy, and contents. Drag a tab onto another current tab to create a folder, or use its context menu to create or choose a folder.
 
-When an extension groups tabs, as Claude does with the tabs it works in, the group appears as a current folder with the group's name and color. Editing that folder changes the group the extension sees. See [Extension compatibility](/guides/extension-api-compatibility/).
+When an extension groups tabs, as Claude does with the tabs it works in, the group appears as a current folder with the group's name and color. Editing that folder changes the group the extension sees. See [Extension compatibility](/docs/extension-api-compatibility/).
 
 Drop along a folder’s top or bottom edge to place a tab beside it, including between empty folders. Drop inside the folder to file the tab.
 

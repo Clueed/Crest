@@ -4,7 +4,7 @@ description: Download Crest directly, install it in Applications, and understand
 keywords: [download, install, update, macOS, GitHub Releases, Sparkle]
 ---
 
-Crest for Mac requires Apple silicon and macOS 26.1 or later. It is distributed directly as a signed and notarized app with Chromium and WebKit; see [Chromium and WebKit on Mac](/guides/engines/). Crest for iPhone and iPad is on the App Store and continues to use WebKit.
+Crest for Mac requires Apple silicon and macOS 26.1 or later. It is distributed directly as a signed and notarized app with Chromium and WebKit; see [Chromium and WebKit on Mac](/docs/engines/). Crest for iPhone and iPad is on the App Store and continues to use WebKit.
 
 ## Install the latest Mac release
 
@@ -37,7 +37,7 @@ Changing channels changes which future update is offered; it does not move or du
 
 ## Updating from an older Crest
 
-The same installer updates older WebKit-only versions and versions that already include Chromium. Your Spaces and browser records stay in place. Chromium and WebKit keep separate website sign-ins, and older WebKit extension installations do not carry over. See [Upgrading from a WebKit-only Crest](/guides/engines/#after-updating-from-a-webkit-only-crest) before switching engines.
+The same installer updates older WebKit-only versions and versions that already include Chromium. Your Spaces and browser records stay in place. Chromium and WebKit keep separate website sign-ins, and older WebKit extension installations do not carry over. See [Upgrading from a WebKit-only Crest](/docs/engines/#after-updating-from-a-webkit-only-crest) before switching engines.
 
 Crest checks pages for unsaved work before an update restart. Choose **Stay on Page** to keep working, then retry the restart when ready. Updates are offered only when your Mac meets the whole app's macOS requirement.
 

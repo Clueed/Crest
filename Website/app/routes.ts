@@ -8,14 +8,15 @@ export default [
   route('sitemap.xml', 'routes/sitemap.ts'),
 
   layout('routes/fumadocs.tsx', [
-    route('guides/*', 'routes/docs.tsx'),
+    route('docs/*', 'routes/docs.tsx'),
     route('*', 'routes/not-found.tsx'),
   ]),
+  route('guides/*', 'routes/legacy-docs.tsx'),
   route('api/search', 'routes/search.ts'),
-  route('og/guides/*', 'routes/og.docs.tsx'),
+  route('og/docs/*', 'routes/og.docs.tsx'),
 
   // LLM integration:
   route('llms.txt', 'llms/index.ts'),
   route('llms-full.txt', 'llms/full.ts'),
-  route('llms.mdx/guides/*', 'llms/mdx.ts'),
+  route('llms.mdx/docs/*', 'llms/mdx.ts'),
 ] satisfies RouteConfig;

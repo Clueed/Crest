@@ -2,9 +2,11 @@ import { createGetUrl } from 'fumadocs-core/source';
 
 export const appName = 'Crest';
 export const siteUrl = 'https://crestbrowser.com';
-export const docsRoute = '/guides';
-export const docsImageRoute = '/og/guides';
-export const docsContentRoute = '/llms.mdx/guides';
+export const docsRoute = '/docs';
+export const docsImageRoute = '/og/docs';
+export const docsContentRoute = '/llms.mdx/docs';
+/** Help articles lived here before they moved to `docsRoute`; each old URL redirects. */
+export const legacyDocsRoute = '/guides';
 
 export const gitConfig = {
   user: 'pauljoda',

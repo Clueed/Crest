@@ -86,12 +86,12 @@ export default function Home() {
             <a href="#arc">From Arc</a>
             <a href="#devices">Devices</a>
             <span className="sep"></span>
-            <a href="/guides/">Help &amp; docs</a>
+            <a href="/docs/">Help &amp; docs</a>
             <a href="https://github.com/pauljoda/Crest" target="_blank" rel="noopener noreferrer"><svg className="ico" aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
             <details className="links" id="links">
               <summary>Links<svg className="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg></summary>
               <div className="menu">
-                <a className="narrow" href="/guides/">Help &amp; docs</a>
+                <a className="narrow" href="/docs/">Help &amp; docs</a>
                 <a className="narrow" href="https://github.com/pauljoda/Crest" target="_blank" rel="noopener noreferrer">GitHub</a>
                 <a href="https://github.com/pauljoda/Crest/releases" target="_blank" rel="noopener noreferrer">Mac releases</a>
                 <a href="https://www.reddit.com/r/CrestBrowser" target="_blank" rel="noopener noreferrer">Reddit</a>
@@ -158,7 +158,7 @@ export default function Home() {
             <div className="personalize-copy">
               <h3>Crest Studio</h3>
               <p>Shape, artwork, trim, and colors, with a live preview.</p>
-              <a className="text-link" href="/guides/customize-spaces/">Customize a Space →</a>
+              <a className="text-link" href="/docs/customize-spaces/">Customize a Space →</a>
             </div>
           </div>
           <div className="personalize-row reverse rv">
@@ -168,7 +168,7 @@ export default function Home() {
             <div className="personalize-copy">
               <h3>Appearance</h3>
               <p>Sidebar side, tab shape, pins, and address colors.</p>
-              <a className="text-link" href="/guides/settings-reference/#appearance">Appearance settings →</a>
+              <a className="text-link" href="/docs/settings-reference/#appearance">Appearance settings →</a>
             </div>
           </div>
         </div>
@@ -262,8 +262,8 @@ export default function Home() {
             <h2 className="h2">Also in Crest</h2>
           </div>
           <div className="rest rv">
-            <div><b>Two engines<span className="tag">Mac</span></b><p>Chromium, plus WebKit per site. <a href="/guides/engines/">More</a></p></div>
-            <div><b>Extensions<span className="tag">Mac</span></b><p>From the Chrome Web Store, per Space. <a href="/guides/extension-compatibility/">More</a></p></div>
+            <div><b>Two engines<span className="tag">Mac</span></b><p>Chromium, plus WebKit per site. <a href="/docs/engines/">More</a></p></div>
+            <div><b>Extensions<span className="tag">Mac</span></b><p>From the Chrome Web Store, per Space. <a href="/docs/extension-compatibility/">More</a></p></div>
             <div><b>Crest Passwords</b><p>In the Keychain, matched per Space.</p></div>
             <div><b>Private Spaces</b><p>Nothing kept. Optional Face ID or Touch ID lock.</p></div>
             <div><b>Content blocking</b><p>uBlock Origin Lite or the built-in list.</p></div>
@@ -305,7 +305,7 @@ export default function Home() {
       <footer>
         <div className="wrap">
           <div className="links">
-            <a href="#tour">Features</a><a href="#crests">Crests</a><a href="#arc">From Arc</a><a href="#devices">Devices</a><a href="#import">Import</a><a href="/guides/">Help &amp; docs</a><a href="/support/">Support</a><a href="/privacy/">Privacy</a><a href="https://github.com/pauljoda/Crest" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://www.reddit.com/r/CrestBrowser" target="_blank" rel="noopener noreferrer">Reddit</a><a href="https://discord.gg/gjrM5qMB6x" target="_blank" rel="noopener noreferrer">Discord</a><a href="https://ko-fi.com/pauljoda/tiers" target="_blank" rel="noopener noreferrer">Support open source software</a>
+            <a href="#tour">Features</a><a href="#crests">Crests</a><a href="#arc">From Arc</a><a href="#devices">Devices</a><a href="#import">Import</a><a href="/docs/">Help &amp; docs</a><a href="/support/">Support</a><a href="/privacy/">Privacy</a><a href="https://github.com/pauljoda/Crest" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://www.reddit.com/r/CrestBrowser" target="_blank" rel="noopener noreferrer">Reddit</a><a href="https://discord.gg/gjrM5qMB6x" target="_blank" rel="noopener noreferrer">Discord</a><a href="https://ko-fi.com/pauljoda/tiers" target="_blank" rel="noopener noreferrer">Support open source software</a>
           </div>
           <p>Free and open source under the Mozilla Public License 2.0. Not affiliated with Arc. Crest Studio artwork by Lorc and Delapouite from <a href="https://game-icons.net" target="_blank" rel="noopener noreferrer">game-icons.net</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>. TestFlight, Reddit, and Discord are trademarks of their owners.</p>
         </div>

@@ -13,7 +13,7 @@ export function loader() {
   const guides: Entry[] = source.getPages().map((page) => ({
     path: `${page.url}/`,
     changefreq: 'weekly',
-    priority: page.url === '/guides' ? '0.8' : '0.7',
+    priority: page.url === '/docs' ? '0.8' : '0.7',
   }));
 
   const urls = [...productPages, ...guides]

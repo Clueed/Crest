@@ -36,13 +36,13 @@ The search providers come last:
 
 Search providers and their settings stay on this device.
 
-See [Use the command palette](/guides/command-palette/).
+See [Use the command palette](/docs/command-palette/).
 
 ## Appearance
 
 Customize the browser on this device with a live preview. Choose sidebar position, the window border, tab shape and scale, pinned-tab layout, address-field style, folder display, and an app icon palette. With **Follow Space accent** on, selected tabs, pins, and the address field use the current Space's color; turn it off to pick a custom color. **Default page zoom** offers fixed levels from **50% to 300%**. Use presets to get started or reset individual changed settings.
 
-A Space's crest, colors, and sidebar background live on the Space's Appearance page. See [Spaces](#spaces) and [Customize and arrange Spaces](/guides/customize-spaces/).
+A Space's crest, colors, and sidebar background live on the Space's Appearance page. See [Spaces](#spaces) and [Customize and arrange Spaces](/docs/customize-spaces/).
 
 ## Links
 
@@ -50,7 +50,7 @@ Choose what happens to links from other apps, which Space supplies their signed-
 
 ## Engines
 
-On Mac, choose whether new pages open in Chromium or WebKit, and manage website rules that send particular websites to one engine. Chromium is the recommended default. See [Chromium and WebKit on Mac](/guides/engines/).
+On Mac, choose whether new pages open in Chromium or WebKit, and manage website rules that send particular websites to one engine. Chromium is the recommended default. See [Chromium and WebKit on Mac](/docs/engines/).
 
 ## Shortcuts
 
@@ -84,7 +84,7 @@ Right-click a Space, or use the **…** menu on its page, for **Rename**, **Edit
 
 ## Agents
 
-On Mac, choose whether coding agents on your Mac may use Crest, which Spaces they reach, and whether they may run scripts in pages; connect an agent, and see the agents connected now and the ones you allowed. See [Let coding agents use Crest](/guides/coding-agents/).
+On Mac, choose whether coding agents on your Mac may use Crest, which Spaces they reach, and whether they may run scripts in pages; connect an agent, and see the agents connected now and the ones you allowed. See [Let coding agents use Crest](/docs/coding-agents/).
 
 ## Advanced
 

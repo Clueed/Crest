@@ -8,7 +8,7 @@ Extensions run on Chromium, so most behave as they do in Chrome. When one doesn'
 
 ## Try these first
 
-1. Check that you are in the Space where you installed it. Each Space has its own installations. See [Spaces and profile isolation](/guides/spaces-and-isolation/).
+1. Check that you are in the Space where you installed it. Each Space has its own installations. See [Spaces and profile isolation](/docs/spaces-and-isolation/).
 2. In **Crest Settings**, select the Space in the sidebar, then **Extensions**. Turn the extension off and back on.
 3. Expand its row, select **Manage Permissions in Chromium**, and check whether its site access covers the page you are on.
 4. Open **Extension Settings** if the extension has them, and check its own options.
@@ -16,7 +16,7 @@ Extensions run on Chromium, so most behave as they do in Chrome. When one doesn'
 
 ## Read the error
 
-Choose **Manage Extension…** from the extension's action menu to open Chromium's extension manager. It lists errors the extension reported. See [Check an extension's status and details](/guides/extension-status/).
+Choose **Manage Extension…** from the extension's action menu to open Chromium's extension manager. It lists errors the extension reported. See [Check an extension's status and details](/docs/extension-status/).
 
 ## In a private window
 
@@ -24,8 +24,8 @@ Private windows use a fresh profile and do not inherit a Space's installed exten
 
 ## Password managers and companion apps
 
-If the extension needs a Mac app, such as 1Password or iCloud Passwords, the app decides whether to trust Crest. Use the signed and notarized Crest release, not a development build. See [Native companions](/guides/native-companion-limits/).
+If the extension needs a Mac app, such as 1Password or iCloud Passwords, the app decides whether to trust Crest. Use the signed and notarized Crest release, not a development build. See [Native companions](/docs/native-companion-limits/).
 
 ## Features Crest draws differently
 
-Crest shows popups, side panels, extension windows and keyboard shortcuts in its own interface. An extension that expects part of Chrome's window that Crest does not draw may lose that feature. See [Extension compatibility](/guides/extension-api-compatibility/).
+Crest shows popups, side panels, extension windows and keyboard shortcuts in its own interface. An extension that expects part of Chrome's window that Crest does not draw may lose that feature. See [Extension compatibility](/docs/extension-api-compatibility/).

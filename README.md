@@ -11,7 +11,7 @@
   <p>
     <a href="https://crestbrowser.com/"><strong>Visit the product site</strong></a>
     ·
-    <a href="https://crestbrowser.com/guides/">Read the guides</a>
+    <a href="https://crestbrowser.com/docs/">Read the guides</a>
     ·
     <a href="https://github.com/pauljoda/Crest/releases/latest">Download for Mac</a>
     ·
@@ -45,7 +45,7 @@ translation, built-in content blocking, and FairPlay video. When a page needs
 protected video, Crest switches to WebKit automatically, respecting any
 unsaved-changes prompt before moving it. Choose the default engine and
 per-website rules in **Settings → Engines**. iPhone and iPad use WebKit. The
-[engine guide](https://crestbrowser.com/guides/engines/) lists what each engine
+[engine guide](https://crestbrowser.com/docs/engines/) lists what each engine
 supports.
 
 ## Crest Studio and Appearance
@@ -77,7 +77,7 @@ supports.
 | --- | --- |
 | On-device translation | On iPhone, iPad, and WebKit pages, detect a page’s language, translate it, or show the original. On Chromium pages, translate selected text. Optional automatic translation uses downloaded languages. Apple may ask to download additional languages. |
 | Reader and page tools | Read supported articles with fewer distractions on WebKit pages, find text, adjust zoom, share links, copy Markdown links, print, and export PDF or web archives where supported. |
-| Extensions on Mac | Install Chrome Web Store extensions in each Space. They run on Chromium pages, with popups and tab-specific side panels. [Compatibility varies.](https://crestbrowser.com/guides/extension-compatibility/) |
+| Extensions on Mac | Install Chrome Web Store extensions in each Space. They run on Chromium pages, with popups and tab-specific side panels. [Compatibility varies.](https://crestbrowser.com/docs/extension-compatibility/) |
 | Developer tools on Mac | Preview phone, desktop, and custom viewport sizes; capture pages; open Chromium DevTools or Web Inspector for the page's engine. The toolbar appears on localhost, or on any site with **Shift-Command-I**. |
 | Media | Control eligible active media from the sidebar. On Mac, keep supported videos visible with Picture in Picture, including optional automatic PiP. |
 | Downloads and uploads | Follow download progress and revisit files in Downloads. Pause and resume Chromium transfers when the server supports recovery. On iPhone and iPad, upload through Photos, camera, or Files. |
@@ -90,7 +90,7 @@ Site permissions and content blocking are controlled per Space. Built-in ad and 
 
 Optional **iCloud sync** carries durable Spaces, tabs, folders, Split View groups, appearance, history, and Archive between devices. Password values stay out of CloudKit; eligible passwords can use iCloud Keychain separately. Start a browser import on Mac, review each destination Space, or export a portable Crest archive.
 
-Read the [privacy policy](https://crestbrowser.com/privacy/), [Space isolation guide](https://crestbrowser.com/guides/spaces-and-isolation/), and [sync guide](https://crestbrowser.com/guides/sync-across-devices/) for the boundaries and controls.
+Read the [privacy policy](https://crestbrowser.com/privacy/), [Space isolation guide](https://crestbrowser.com/docs/spaces-and-isolation/), and [sync guide](https://crestbrowser.com/docs/sync-across-devices/) for the boundaries and controls.
 
 ## Get Crest
 
@@ -154,7 +154,7 @@ When updating from a WebKit-only release, your Spaces, tabs, history, and Crest
 Passwords carry over. Chromium has separate website storage, so sites may ask
 you to sign in again. You can keep WebKit as your default. Reinstall older
 WebKit extensions from the Chrome Web Store in each Space. The
-[upgrade guide](https://crestbrowser.com/guides/engines/#after-updating-from-a-webkit-only-crest)
+[upgrade guide](https://crestbrowser.com/docs/engines/#after-updating-from-a-webkit-only-crest)
 explains these changes and the engine feature limits.
 
 macOS releases are distributed directly through GitHub Releases as signed,

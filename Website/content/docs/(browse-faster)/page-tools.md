@@ -6,7 +6,7 @@ keywords: [translate, translation, languages, Reader, find, zoom, share, Markdow
 
 Page actions operate on the focused page. In Split View, click or tap a card first so the intended page owns the command.
 
-On Mac, each page runs in Chromium or WebKit. Crest on iPhone and iPad uses WebKit. A few page tools depend on the page's engine, and this page notes where. To switch a page, see [Chromium and WebKit on Mac](/guides/engines/).
+On Mac, each page runs in Chromium or WebKit. Crest on iPhone and iPad uses WebKit. A few page tools depend on the page's engine, and this page notes where. To switch a page, see [Chromium and WebKit on Mac](/docs/engines/).
 
 ## Translate a page
 

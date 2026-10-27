@@ -10,7 +10,7 @@ export function baseOptions(): BaseLayoutProps {
           {appName} Help
         </>
       ),
-      url: '/guides',
+      url: '/docs',
     },
     links: [
       { text: 'Home', url: '/', external: true },

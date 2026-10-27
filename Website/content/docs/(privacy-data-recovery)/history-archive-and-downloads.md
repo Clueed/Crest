@@ -22,7 +22,7 @@ Open Downloads with **Shift-Command-J**. Crest tracks status, destination, failu
 
 Chromium downloads offer **Pause Download** while transferring and **Resume Download** when the engine can continue a paused or interrupted transfer. Depending on the server, resuming may restart the file. The same download record keeps its chosen destination. Cancel ends the transfer; removing a failed record does not retry it. WebKit downloads do not offer these pause and resume controls.
 
-An unsafe-file warning requires its own decision. Resuming a transfer does not approve a warning or bypass a block. See [Malicious sites and downloads](/guides/content-blocking-and-site-permissions/#malicious-sites-and-downloads) for the limits of Chromium's Google-free protection.
+An unsafe-file warning requires its own decision. Resuming a transfer does not approve a warning or bypass a block. See [Malicious sites and downloads](/docs/content-blocking-and-site-permissions/#malicious-sites-and-downloads) for the limits of Chromium's Google-free protection.
 
 ## Retention per Space
 

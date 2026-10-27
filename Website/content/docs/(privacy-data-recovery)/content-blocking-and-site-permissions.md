@@ -45,8 +45,8 @@ Remote Web Push delivery is not available in this Google-free Chromium build. Lo
 
 ## Reset a site
 
-If a site behaves as though an old choice still applies, first reset its saved permission rather than deleting the entire Space. [Clearing a site's data](/guides/clear-website-data/) is broader: it signs you out and removes what the site stored in that Space.
+If a site behaves as though an old choice still applies, first reset its saved permission rather than deleting the entire Space. [Clearing a site's data](/docs/clear-website-data/) is broader: it signs you out and removes what the site stored in that Space.
 
 ## Extension site access
 
-Extension permissions are a separate layer. An extension may be installed but still blocked from the current host, or it may require approval for additional sites. See [Manage extension permissions and site access](/guides/manage-extension-permissions/) for the extension-specific controls.
+Extension permissions are a separate layer. An extension may be installed but still blocked from the current host, or it may require approval for additional sites. See [Manage extension permissions and site access](/docs/manage-extension-permissions/) for the extension-specific controls.
