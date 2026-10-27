@@ -81,14 +81,13 @@ export function useHome() {
   return state;
 }
 
-/** The template a Space wears: Work wears the page's template, Personal a contrasting one. */
-export function useSpaceTemplate() {
+type SpaceTemplate = { id: TemplateId; mode: BackgroundMode };
+
+/** The template each Space wears: Work wears the page's template, Personal a contrasting one. */
+export function useSpaceTemplates(): Record<'work' | 'personal', SpaceTemplate> {
   const { work, mode } = useHome();
-  return useCallback(
-    (space: 'work' | 'personal') =>
-      space === 'work'
-        ? { id: work, mode }
-        : { id: (work === 'lion' ? 'winter' : 'lion') as TemplateId, mode: 'diagonal' as BackgroundMode },
+  return useMemo(
+    () => ({ work: { id: work, mode }, personal: { id: work === 'lion' ? 'winter' : 'lion', mode: 'diagonal' } }),
     [work, mode],
   );
 }
@@ -104,12 +103,11 @@ export function HomeProvider({ children }: { children: ReactNode }) {
     mode: 'diagonal',
   });
   const [params, setParams] = useState<ShotParams | null>(null);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
 
   useEffect(() => {
     const p = readShotParams();
     setParams(p);
-    setReducedMotion(matchMedia('(prefers-reduced-motion: reduce)').matches);
     if (p.crest) {
       setTemplateState({ work: p.crest, mode: p.mode ?? 'diagonal' });
     } else {
@@ -130,9 +128,10 @@ export function HomeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!params?.shot) return;
     const root = document.documentElement;
+    const y = params.y;
     function place() {
       root.style.scrollBehavior = 'auto';
-      document.body.style.marginTop = `${-(params?.y ?? 0)}px`;
+      document.body.style.marginTop = `${-y}px`;
       scrollTo(0, 0);
     }
     place();
@@ -161,6 +160,9 @@ export function HomeProvider({ children }: { children: ReactNode }) {
     </HomeContext>
   );
 }
+
+/** Phones: matches `max-phone:`, which `--breakpoint-phone` in app.css sets. Change both together. */
+export const phoneQuery = '(max-width: 760px)';
 
 /** Whether a media query matches; false until the page is running. */
 export function useMediaQuery(query: string) {

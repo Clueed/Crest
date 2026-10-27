@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { cn } from '@/lib/cn';
-import { useHome, useMediaQuery } from './home-state';
+import { phoneQuery, useHome, useMediaQuery } from './home-state';
 import { MacWindow, type WindowView } from './mac-window';
 import { Segmented } from './segmented';
 
@@ -129,7 +129,7 @@ function TourList({ step }: { step: number }) {
  */
 export function FeatureTour() {
   const { params, still } = useHome();
-  const phone = useMediaQuery('(max-width: 760px)');
+  const phone = useMediaQuery(phoneQuery);
   const tourRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
@@ -148,22 +148,29 @@ export function FeatureTour() {
     }
 
     const n = steps.length;
+    // Every layout read comes before the writes, so a scroll costs one layout, once a frame.
     function update() {
       const r = tour!.getBoundingClientRect();
       const stageHeight = stage!.offsetHeight;
-      const p = Math.min(0.9999, Math.max(0, -r.top / (r.height - stageHeight)));
-      inner!.style.setProperty('--grow', Math.min(1, Math.max(0, p * n)).toFixed(3));
       const available = document.documentElement.clientHeight - 64;
+      const p = Math.min(0.9999, Math.max(0, -r.top / (r.height - stageHeight)));
       const stick = `${Math.round(64 + Math.max(0, (available - stageHeight) * 0.5))}px`;
+      inner!.style.setProperty('--grow', Math.min(1, Math.max(0, p * n)).toFixed(3));
       if (stage!.style.getPropertyValue('--stick') !== stick) stage!.style.setProperty('--stick', stick);
       setStep(Math.floor(p * n));
     }
+    let frame = 0;
+    function schedule() {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    }
     update();
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
     return () => {
-      window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
     };
   }, [params, still]);
 

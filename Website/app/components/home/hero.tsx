@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type CSSProperties, type RefObject } from 'react';
-import { heroAttribute } from '@/components/site-chrome';
+import { heroAttribute, SiteAnchor } from '@/components/site-chrome';
 import { GitHubIcon } from '@/components/icons';
 import { cn } from '@/lib/cn';
 import { links } from '@/lib/site-links';
 import { FeatureTour } from './feature-tour';
-import { bannerModes, useHome } from './home-state';
+import { bannerModes, phoneQuery, useHome, useMediaQuery } from './home-state';
 import { backgroundModes, CrestArt, spaceField, templateOrder, templates, type TemplateId } from './templates';
 
 /** Where each floating banner hangs: x and y as percentages of the hero, scale, tilt, bob period. */
@@ -40,15 +40,12 @@ function HeroBackground() {
   const field = spaceField(work, mode, 1600, 1000, { fit: 'xMidYMid slice' });
   const [layers, setLayers] = useState<{ fields: [string, string]; on: 0 | 1 }>({ fields: [field, ''], on: 0 });
 
-  useEffect(() => {
-    setLayers((l) => {
-      if (l.fields[l.on] === field) return l;
-      const next = (1 - l.on) as 0 | 1;
-      const fields: [string, string] = [...l.fields];
-      fields[next] = field;
-      return { fields, on: next };
-    });
-  }, [field]);
+  if (layers.fields[layers.on] !== field) {
+    const next = (1 - layers.on) as 0 | 1;
+    const fields: [string, string] = [...layers.fields];
+    fields[next] = field;
+    setLayers({ fields, on: next });
+  }
 
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-1 overflow-clip">
@@ -77,11 +74,11 @@ function TemplateChips({ heroHead, platform }: { heroHead: RefObject<HTMLDivElem
   const { work, mode, setTemplate } = useHome();
   const chipRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [crowded, setCrowded] = useState<TemplateId[]>([]);
+  const phone = useMediaQuery(phoneQuery);
 
   useEffect(() => {
     const head = heroHead.current;
     if (!head) return;
-    const phone = matchMedia('(max-width: 760px)');
 
     /** The lines the words fill, not the full-width blocks that centre them. */
     function wordBoxes() {
@@ -96,7 +93,7 @@ function TemplateChips({ heroHead, platform }: { heroHead: RefObject<HTMLDivElem
     }
 
     function clearWords() {
-      if (phone.matches) return setCrowded([]);
+      if (phone) return setCrowded([]);
       const chips = chipRefs.current;
       // A banner already set aside is measured where it would hang.
       const setAside = chips.filter((c) => c?.classList.contains('hidden'));
@@ -115,15 +112,24 @@ function TemplateChips({ heroHead, platform }: { heroHead: RefObject<HTMLDivElem
       setCrowded((prev) => (prev.join() === next.join() ? prev : next));
     }
 
+    // Resizes come many to a frame; measure once per frame, and never after unmounting.
+    let frame = 0;
+    let live = true;
+    function schedule() {
+      cancelAnimationFrame(frame);
+      if (live) frame = requestAnimationFrame(clearWords);
+    }
     clearWords();
-    window.addEventListener('resize', clearWords);
-    window.addEventListener('load', clearWords);
-    document.fonts?.ready.then(clearWords);
+    window.addEventListener('resize', schedule);
+    window.addEventListener('load', schedule);
+    document.fonts?.ready.then(schedule);
     return () => {
-      window.removeEventListener('resize', clearWords);
-      window.removeEventListener('load', clearWords);
+      live = false;
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('load', schedule);
     };
-  }, [heroHead, platform]);
+  }, [heroHead, platform, phone]);
 
   return (
     <div
@@ -216,47 +222,34 @@ function usePlatform() {
   return platform;
 }
 
-const external = { target: '_blank', rel: 'noopener noreferrer' } as const;
+/** Each platform's download: the leading button's note and label, and the shorter link's label. */
+const platformDownloads = {
+  mac: { link: links.macDownload, icon: '/assets/crest-logo.svg', note: 'Apple silicon Mac', label: 'Download for Mac', short: 'Download for Mac' },
+  ios: { link: links.appStore, icon: '/assets/app-store-official.png', note: 'App Store', label: 'Get it for iPhone & iPad', short: 'iPhone & iPad' },
+};
 
 function Downloads({ platform }: { platform: Platform }) {
-  const mac = (
-    <a key="mac" data-hero-button href={links.macDownload.url} {...external} className={button}>
-      <img src="/assets/crest-logo.svg" alt="" className="size-7.5" />
-      <span>
-        <small className={buttonNote}>Apple silicon Mac</small>
-        <b className="block leading-[1.15]">Download for Mac</b>
-      </span>
-    </a>
-  );
-  const ios = (
-    <a key="ios" data-hero-button href={links.appStore.url} {...external} className={button}>
-      <img src="/assets/app-store-official.png" alt="" className="size-7.5" />
-      <span>
-        <small className={buttonNote}>App Store</small>
-        <b className="block leading-[1.15]">Get it for iPhone &amp; iPad</b>
-      </span>
-    </a>
-  );
+  const lead = platformDownloads[platform];
+  const other = platformDownloads[platform === 'mac' ? 'ios' : 'mac'];
 
   return (
     <div className="flex flex-col items-center gap-4">
-      {platform === 'mac' ? mac : ios}
+      <SiteAnchor key={platform} data-hero-button link={lead.link} className={button}>
+        <img src={lead.icon} alt="" className="size-7.5" />
+        <span>
+          <small className={buttonNote}>{lead.note}</small>
+          <b className="block leading-[1.15]">{lead.label}</b>
+        </span>
+      </SiteAnchor>
       <div className="flex flex-wrap justify-center gap-[0.55rem]">
-        {platform === 'mac' ? (
-          <a data-hero-button href={links.appStore.url} {...external} className={secondary}>
-            <img src="/assets/app-store-official.png" alt="" className="size-5 rounded-[5px]" />
-            iPhone &amp; iPad
-          </a>
-        ) : (
-          <a data-hero-button href={links.macDownload.url} {...external} className={secondary}>
-            <img src="/assets/crest-logo.svg" alt="" className="size-5 rounded-[5px]" />
-            Download for Mac
-          </a>
-        )}
-        <a data-hero-button href={links.github.url} {...external} className={secondary}>
+        <SiteAnchor key={platform} data-hero-button link={other.link} className={secondary}>
+          <img src={other.icon} alt="" className="size-5 rounded-[5px]" />
+          {other.short}
+        </SiteAnchor>
+        <SiteAnchor data-hero-button link={links.github} className={secondary}>
           <GitHubIcon className="size-4.5" />
           Source on GitHub
-        </a>
+        </SiteAnchor>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import type { Route } from './+types/support';
-import { SiteFooter, SiteHeader } from '@/components/site-chrome';
+import { SiteAnchor, SiteFooter, SiteHeader } from '@/components/site-chrome';
 import { ArticleAside, ArticleHero, ArticleLayout, ArticleSection, ContactNote, SourceLink } from '@/components/article-page';
+import { links } from '@/lib/site-links';
 import { productPageMeta, webPageStructuredData } from '@/lib/page-meta';
 
 export function meta(_: Route.MetaArgs) {
@@ -83,13 +84,13 @@ export default function Support() {
           <ArticleSection id="contact" index="04" title={<>Bring a trail someone else can follow.</>}>
             <p>Include the Apple device model, operating-system version, Crest version, the page’s engine on Mac, active Space, the page or feature involved, exact steps, what you expected, and what happened instead. A screenshot is useful only after removing private tabs, account details, URLs, and messages.</p>
             <ContactNote label="Community, questions, and compatibility">
-              <p>Use <a href="https://www.reddit.com/r/CrestBrowser" target="_blank" rel="noopener noreferrer">r/CrestBrowser</a> for questions, feedback, early ideas, and website or extension compatibility discussion. Reddit is public; do not include passwords, account details, private URLs, browsing history, or other sensitive information.</p>
+              <p>Use <SiteAnchor link={links.reddit}>r/CrestBrowser</SiteAnchor> for questions, feedback, early ideas, and website or extension compatibility discussion. Reddit is public; do not include passwords, account details, private URLs, browsing history, or other sensitive information.</p>
             </ContactNote>
             <ContactNote label="Reproducible engineering reports">
-              <p>Use <a href="https://github.com/pauljoda/Crest/issues/new/choose" target="_blank" rel="noopener noreferrer">GitHub Issues</a> when you can provide a Crest version, Apple platform, repeatable steps, expected result, and actual result. Suspected security vulnerabilities belong in a <a href="https://github.com/pauljoda/Crest/security/advisories/new" target="_blank" rel="noopener noreferrer">private report</a>, never Reddit or a public issue.</p>
+              <p>Use <SiteAnchor link={links.issues}>GitHub Issues</SiteAnchor> when you can provide a Crest version, Apple platform, repeatable steps, expected result, and actual result. Suspected security vulnerabilities belong in a <SiteAnchor link={links.securityReport}>private report</SiteAnchor>, never Reddit or a public issue.</p>
             </ContactNote>
             <ContactNote label="Chat and quick questions">
-              <p>Join the <a href="https://discord.gg/gjrM5qMB6x" target="_blank" rel="noopener noreferrer">Crest Discord</a> to ask questions, share ideas, and talk with other people using Crest. Discord is for discussion; bugs you can reproduce belong in GitHub Issues so they can be tracked. Do not post passwords, account details, or private URLs.</p>
+              <p>Join the <SiteAnchor link={links.discord}>Crest Discord</SiteAnchor> to ask questions, share ideas, and talk with other people using Crest. Discord is for discussion; bugs you can reproduce belong in GitHub Issues so they can be tracked. Do not post passwords, account details, or private URLs.</p>
             </ContactNote>
           </ArticleSection>
         </ArticleLayout>

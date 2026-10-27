@@ -1,6 +1,7 @@
 import type { Route } from './+types/privacy';
-import { SiteFooter, SiteHeader } from '@/components/site-chrome';
+import { SiteAnchor, SiteFooter, SiteHeader } from '@/components/site-chrome';
 import { ArticleAside, ArticleHero, ArticleLayout, ArticleSection, ContactNote, SourceLink } from '@/components/article-page';
+import { links } from '@/lib/site-links';
 import { productPageMeta, webPageStructuredData } from '@/lib/page-meta';
 
 export function meta(_: Route.MetaArgs) {
@@ -104,7 +105,7 @@ export default function Privacy() {
             <p>You can clear site data and history, remove saved credentials, delete a Space, disable iCloud sync, or turn off iCloud Keychain syncing for an individual Space. Data kept on your devices remains until you clear it, remove the app and its data, or the operating system removes it. Synced data remains in your iCloud account until it is deleted through Crest or your Apple account.</p>
             <p>If this policy changes, the new version will be posted here with a revised effective date. A future feature that changes what Crest collects would require this policy to change first.</p>
             <ContactNote label="Questions or concerns?">
-              <p>Reach the developer through the <a href="https://www.reddit.com/r/CrestBrowser" target="_blank" rel="noopener noreferrer">Crest community on Reddit</a> or the <a href="https://discord.gg/gjrM5qMB6x" target="_blank" rel="noopener noreferrer">Crest Discord</a>. Both are public, so do not include passwords, account details, private URLs, or other sensitive information.</p>
+              <p>Reach the developer through the <SiteAnchor link={links.reddit}>Crest community on Reddit</SiteAnchor> or the <SiteAnchor link={links.discord}>Crest Discord</SiteAnchor>. Both are public, so do not include passwords, account details, private URLs, or other sensitive information.</p>
             </ContactNote>
           </ArticleSection>
         </ArticleLayout>

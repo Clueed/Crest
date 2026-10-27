@@ -1,6 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
-import { heroAttribute } from './site-chrome';
+import { isExternal } from '@/lib/site-links';
+import { external, heroAttribute } from './site-chrome';
 
 /** The small uppercase line above a heading. */
 export function Eyebrow({ className, ...props }: ComponentProps<'p'>) {
@@ -178,10 +179,10 @@ export function ArticleAside({
 
 /** A link to an outside source, underlined in gold. */
 export function SourceLink({ className, children, ...props }: ComponentProps<'a'>) {
-  const isExternal = props.href?.startsWith('http');
+  const leaves = isExternal(props.href ?? '');
   return (
     <a
-      {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      {...(leaves && external)}
       className={cn(
         'mt-4 inline-flex w-fit max-w-full gap-2 border-b border-gold pb-1 text-[0.72rem] leading-[1.45] font-extrabold tracking-[0.04em] wrap-anywhere text-current hover:text-coral',
         className,
@@ -189,7 +190,7 @@ export function SourceLink({ className, children, ...props }: ComponentProps<'a'
       {...props}
     >
       {children}
-      <span aria-hidden="true">{isExternal ? '↗' : '→'}</span>
+      <span aria-hidden="true">{leaves ? '↗' : '→'}</span>
     </a>
   );
 }

@@ -1,6 +1,6 @@
-import { useEffect, useLayoutEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import { memo, useLayoutEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
-import { useSpaceTemplate } from './home-state';
+import { useSpaceTemplates } from './home-state';
 import { CrestArt, spaceField, windowSize } from './templates';
 
 /*
@@ -136,7 +136,7 @@ const activeRow = 'bg-white/10 font-medium opacity-100 shadow-[inset_0_0_0_var(-
 const rowGlyph = 'w-16 flex-none text-center text-pt-13 not-italic';
 
 function Sidebar({ view, onPick }: { view: WindowView; onPick: (space: Space) => void }) {
-  const spaceTemplate = useSpaceTemplate();
+  const spaceTemplates = useSpaceTemplates();
   const s = spaces[view.space];
   const url = view.url ?? s.url;
 
@@ -166,7 +166,7 @@ function Sidebar({ view, onPick }: { view: WindowView; onPick: (space: Space) =>
         ))}
       </div>
       <div className={cn(row, 'h-34 pl-6 font-bold')}>
-        <CrestArt id={spaceTemplate(view.space).id} className="size-20" />
+        <CrestArt id={spaceTemplates[view.space].id} className="size-20" />
         {s.name}
         <span className="ml-auto tracking-[0.08em] opacity-75">···</span>
       </div>
@@ -224,7 +224,7 @@ function Sidebar({ view, onPick }: { view: WindowView; onPick: (space: Space) =>
               className="group/pick grid h-30 w-38 cursor-pointer place-items-center rounded-pt-7 p-0 transition-colors duration-200 focus-visible:outline-[calc(2*var(--spacing))] focus-visible:outline-offset-1 focus-visible:outline-white aria-pressed:bg-white/18 aria-pressed:shadow-[inset_0_0_0_var(--spacing)_rgb(255_255_255/0.12)]"
             >
               <CrestArt
-                id={spaceTemplate(space).id}
+                id={spaceTemplates[space].id}
                 className="size-24 opacity-72 transition-opacity duration-200 group-hover/pick:opacity-100 group-aria-pressed/pick:opacity-100"
               />
             </button>
@@ -357,8 +357,7 @@ function Pill({ children }: { children: ReactNode }) {
 
 /** A Quick Window, 720×460 points; inside it `--spacing` is one of its points. */
 function QuickWindow() {
-  const spaceTemplate = useSpaceTemplate();
-  const personal = spaceTemplate('personal');
+  const personal = useSpaceTemplates().personal;
 
   return (
     <div className="absolute top-120 right-44 w-[48%] @container @max-[720px]:hidden">
@@ -388,9 +387,12 @@ function QuickWindow() {
   );
 }
 
+const routeRow =
+  'grid grid-cols-[1fr_auto_calc(120*var(--spacing))] items-center gap-16 border-t border-black/10 px-16 py-10 text-pt-12.5';
+
 /** A page that describes a feature, with Link Routing's rules or a Quick Window when it has them. */
 function DescriptionPage({ desc }: { desc: Description }) {
-  const spaceTemplate = useSpaceTemplate();
+  const spaceTemplates = useSpaceTemplates();
   const float = desc.quickWindow;
 
   return (
@@ -424,30 +426,19 @@ function DescriptionPage({ desc }: { desc: Description }) {
         </div>
         {desc.routes && (
           <div className="col-span-full mt-34 border border-black/14 bg-white/50">
-            {[['URL pattern', 'Match', 'Space'] as const, ...desc.routes].map(([pattern, match, space], i) => (
-              <div
-                key={pattern}
-                className={cn(
-                  'grid grid-cols-[1fr_auto_calc(120*var(--spacing))] items-center gap-16 border-t border-black/10 px-16 py-10 text-pt-12.5',
-                  i === 0 && 'border-t-0 text-pt-10 font-bold tracking-[0.12em] text-(--pmute) uppercase',
-                )}
-              >
-                {i === 0 ? (
-                  <>
-                    <span>{pattern}</span>
-                    <span>{match}</span>
-                    <span>{space}</span>
-                  </>
-                ) : (
-                  <>
-                    <code className="font-mono text-pt-12">{pattern}</code>
-                    <em className="rounded-full border border-black/20 px-8 py-2 text-pt-9.5 tracking-[0.06em] not-italic uppercase">{match}</em>
-                    <span className="inline-flex items-center gap-6 font-semibold">
-                      <CrestArt id={spaceTemplate(space as Space).id} className="size-16" />
-                      {spaces[space as Space].name}
-                    </span>
-                  </>
-                )}
+            <div className={cn(routeRow, 'border-t-0 text-pt-10 font-bold tracking-[0.12em] text-(--pmute) uppercase')}>
+              <span>URL pattern</span>
+              <span>Match</span>
+              <span>Space</span>
+            </div>
+            {desc.routes.map(([pattern, match, space]) => (
+              <div key={pattern} className={routeRow}>
+                <code className="font-mono text-pt-12">{pattern}</code>
+                <em className="rounded-full border border-black/20 px-8 py-2 text-pt-9.5 tracking-[0.06em] not-italic uppercase">{match}</em>
+                <span className="inline-flex items-center gap-6 font-semibold">
+                  <CrestArt id={spaceTemplates[space].id} className="size-16" />
+                  {spaces[space].name}
+                </span>
               </div>
             ))}
           </div>
@@ -466,7 +457,7 @@ const fieldGuide = {
 };
 
 function Page({ view, peekHidden }: { view: WindowView; peekHidden: boolean }) {
-  const spaceTemplate = useSpaceTemplate();
+  const spaceTemplates = useSpaceTemplates();
 
   switch (view.page) {
     case 'desc':
@@ -547,7 +538,7 @@ function Page({ view, peekHidden }: { view: WindowView; peekHidden: boolean }) {
                     primary ? 'bg-[#1a2438]' : 'bg-[#5b6472]',
                   )}
                 >
-                  {primary && <CrestArt id={spaceTemplate(view.space).id} className="size-18" />}
+                  {primary && <CrestArt id={spaceTemplates[view.space].id} className="size-18" />}
                   {label}
                 </span>
               ))}
@@ -642,14 +633,14 @@ function CommandPalette() {
  * The Mac window drawing. Picking the other Space in its sidebar switches the window to that
  * Space's home page until the view changes. Peek slides its page up each time it is shown.
  */
-export function MacWindow({ view, className }: { view: WindowView; className?: string }) {
-  const spaceTemplate = useSpaceTemplate();
-  const [picked, setPicked] = useState<WindowView | null>(null);
+export const MacWindow = memo(function MacWindow({ view, className }: { view: WindowView; className?: string }) {
+  const spaceTemplates = useSpaceTemplates();
+  const [picked, setPicked] = useState<{ over: WindowView; view: WindowView } | null>(null);
   const [peekHidden, setPeekHidden] = useState(view.page === 'peek');
 
-  useEffect(() => setPicked(null), [view]);
-
-  const shown = picked ?? view;
+  // A pick lasts until the view changes, even if the view later comes back.
+  if (picked && picked.over !== view) setPicked(null);
+  const shown = picked?.over === view ? picked.view : view;
 
   useLayoutEffect(() => {
     if (shown.page !== 'peek') return;
@@ -666,14 +657,16 @@ export function MacWindow({ view, className }: { view: WindowView; className?: s
 
   function pick(space: Space) {
     if (space === shown.space) return;
-    setPicked(
-      space === 'work'
-        ? { space: 'work', page: 'northstar' }
-        : { space: 'personal', page: 'fieldnotes', act: ['☀️', 'A slower Saturday'] },
-    );
+    setPicked({
+      over: view,
+      view:
+        space === 'work'
+          ? { space: 'work', page: 'northstar' }
+          : { space: 'personal', page: 'fieldnotes', act: ['☀️', 'A slower Saturday'] },
+    });
   }
 
-  const template = spaceTemplate(shown.space);
+  const template = spaceTemplates[shown.space];
 
   return (
     <div className={cn('relative mx-auto w-full @container', className)}>
@@ -686,4 +679,4 @@ export function MacWindow({ view, className }: { view: WindowView; className?: s
       </div>
     </div>
   );
-}
+});

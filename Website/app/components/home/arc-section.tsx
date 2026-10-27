@@ -46,8 +46,9 @@ function Track({ rows, hidden }: { rows: typeof parity; hidden?: boolean }) {
 }
 
 /** Two belts of cards drifting in opposite directions; hovering or focusing holds them. */
+const belts = [parity.filter((_, i) => i % 2 === 0), parity.filter((_, i) => i % 2 === 1)];
+
 function Ticker() {
-  const belts = [parity.filter((_, i) => i % 2 === 0), parity.filter((_, i) => i % 2 === 1)];
   return (
     <Reveal
       aria-label="Arc features in Crest"
