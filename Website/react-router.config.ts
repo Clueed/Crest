@@ -1,7 +1,7 @@
 import type { Config } from '@react-router/dev/config';
 import { glob } from 'node:fs/promises';
 import { createGetUrl, getSlugs } from 'fumadocs-core/source';
-import { docsRoute, getPageImageUrl, getPageMarkdownUrl, legacyDocsRoute, renamedDocs } from './app/lib/shared';
+import { docsRoute, getPageImageUrl, legacyDocsRoute, renamedDocs } from './app/lib/shared';
 
 const getUrl = createGetUrl(docsRoute);
 const getLegacyUrl = createGetUrl(legacyDocsRoute);
@@ -20,7 +20,6 @@ export default {
         `${getUrl(slugs)}/`,
         getLegacyUrl(slugs),
         getPageImageUrl({ slugs }).url,
-        getPageMarkdownUrl({ slugs }).url,
       );
     }
 

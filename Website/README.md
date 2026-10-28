@@ -27,7 +27,8 @@ under `/guides/`.
 ## Write articles
 
 Write articles in plain Markdown, which agents read as written at
-`/llms.txt`, `/llms-full.txt`, and each article's Markdown address. Use MDX
+`/llms.txt`, `/llms-full.txt`, and beside each article at `/docs/<article>.md`.
+Use MDX
 only where an article needs a component, such as the cards on the Help home
 page.
 

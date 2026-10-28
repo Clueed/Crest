@@ -68,7 +68,9 @@ export function helpPageMeta(page: {
     { title: page.title },
     { name: 'description', content: description },
     { tagName: 'link', rel: 'canonical', href: page.url },
+    // llms.txt's link relations: this article's Markdown, and the index that covers it.
     { tagName: 'link', rel: 'alternate', type: 'text/markdown', href: `${siteUrl}${page.markdownUrl}` },
+    { tagName: 'link', rel: 'describedby', type: 'text/plain', href: `${siteUrl}/llms.txt` },
     { property: 'og:site_name', content: 'Crest' },
     { property: 'og:locale', content: 'en_US' },
     { property: 'og:type', content: 'article' },
