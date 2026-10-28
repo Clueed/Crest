@@ -53,16 +53,31 @@ class StepFailed(Exception):
 
 
 class Media:
-    """The Swift helper for captures and clips, `media.swift`, built into the work folder on first use."""
+    """The Swift helper for recordings, captures, clips and the pointer, `media.swift`, built into the work
+    folder on first use."""
 
     SOURCE = Path(__file__).resolve().with_name("media.swift")
 
     def __init__(self, work: Path):
         self.path = work.resolve() / "media"
 
-    def __call__(self, *arguments, capture_output: bool = False) -> str:
+    def build(self):
         if not self.path.exists() or self.path.stat().st_mtime < self.SOURCE.stat().st_mtime:
             subprocess.run(["xcrun", "swiftc", "-O", str(self.SOURCE), "-o", str(self.path)], check=True)
+
+    def record(self, movie: Path) -> tuple[subprocess.Popen, float]:
+        """Start recording the screen into `movie`; answers the recorder and the wall-clock time of its
+        first frame. Stop it with SIGINT."""
+        self.build()
+        recorder = subprocess.Popen([str(self.path), "record", str(movie)], stdout=subprocess.PIPE, text=True)
+        line = recorder.stdout.readline()
+        if not line.startswith("recording "):
+            recorder.kill()
+            raise StepFailed("the screen recording did not start")
+        return recorder, float(line.split()[1])
+
+    def __call__(self, *arguments, capture_output: bool = False) -> str:
+        self.build()
         result = subprocess.run(
             [str(self.path), *map(str, arguments)], stdout=subprocess.PIPE if capture_output else None, text=True
         )
@@ -181,6 +196,12 @@ class TestApp:
         with open(self.derived_data.parent / "build.log", "w") as log:
             if subprocess.run(command, stdout=log, stderr=subprocess.STDOUT).returncode != 0:
                 raise StepFailed(f"build failed; see {log.name}")
+        # macOS announces each new build's Dock tile plugin with a banner that
+        # stays over the window's top right, where XCUITest finds nothing under
+        # it. No article shows the Dock tile, so the test copy goes without.
+        shutil.rmtree(self.path / "Contents/PlugIns/CrestDockTilePlugin.docktileplugin", ignore_errors=True)
+        subprocess.run(["codesign", "--force", "--sign", "-", "--preserve-metadata=entitlements", str(self.path)],
+                       check=True, capture_output=True)
         print(f"ok  build ({time.time() - started:.0f} s)")
 
     def xcodebuild(self) -> list[str]:
@@ -195,6 +216,7 @@ class TestApp:
         if not self.runner.exists():
             raise StepFailed("no test build; run the build stage first")
         self.quit()
+        self.media.build()
         (out / "input.json").write_text(json.dumps(input))
         results = out / "results.xcresult"
         shutil.rmtree(results, ignore_errors=True)
@@ -208,6 +230,8 @@ class TestApp:
                 log.write(line)
                 if line.startswith("helpdocs-capture "):
                     self.capture(json.loads(line.split(" ", 1)[1]), out)
+                elif line.startswith("helpdocs-glide "):
+                    self.glide(json.loads(line.split(" ", 1)[1]), out)
                 elif line.startswith(("ok  ", "    ")) and " t = " not in line:
                     print(line, end="")
                 elif " error: " in line and failure is None:
@@ -242,6 +266,13 @@ class TestApp:
         self.media("capture", pid, partial, *(request.get("crop") or []))
         # Renamed whole, so the test never reads a half-written file.
         partial.rename(out / f"{request['name']}.png")
+
+    def glide(self, request: dict, out: Path):
+        """Glide the pointer to a point for a test, which waits for the answer file.
+
+        The sandboxed test may not move the pointer itself, and XCUITest's hover moves it unevenly."""
+        self.media("glide", request["x"], request["y"])
+        (out / f"{request['name']}.done").touch()
 
     def remove(self):
         """Quit, unregister every bundle inside the build, then delete it."""
@@ -286,14 +317,14 @@ class Run:
     def capture(self):
         """Record the screen while the scenario's `testCapture` runs.
 
-        The test logs its steps on the same clock, so the clip lines up however
-        long the launch and setup took."""
+        The test logs its steps on the wall clock, and the recorder reports when
+        its first frame was taken, so the clip lines up however long the launch
+        and setup took."""
         out = self.out / "capture"
         shutil.rmtree(out, ignore_errors=True)
         out.mkdir(parents=True)
         with self.scenario.fixture_server() as variables:
-            recording_started = time.time()
-            recorder = subprocess.Popen(["screencapture", "-v", "-k", "-x", str(out / "raw.mov")])
+            recorder, recording_started = self.app.media.record(out / "raw.mov")
             try:
                 self.app.run_test(self.test("testCapture"), self.test_input(variables), out)
             finally:

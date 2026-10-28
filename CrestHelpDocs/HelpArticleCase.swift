@@ -9,8 +9,9 @@ import XCTest
 /// runner turns into the article's clip and checks the article against.
 ///
 /// The runner is sandboxed and may only read outside its container, so a
-/// screenshot is a request: the test prints it, the runner captures the window
-/// beside `HELPDOCS_RUN`, and the test waits for the file.
+/// screenshot or a pointer move is a request: the test prints it, the runner
+/// does it and writes a file beside `HELPDOCS_RUN`, and the test waits for the
+/// file.
 @MainActor
 class HelpArticleCase: XCTestCase {
 
@@ -54,6 +55,13 @@ class HelpArticleCase: XCTestCase {
         let crop: [Double]?
     }
 
+    /// A pointer move the runner makes to `x`, `y` in screen points, answered in `name`.done.
+    struct Glide: Encodable {
+        let name: String
+        let x: Double
+        let y: Double
+    }
+
     /// A step that could not run as written.
     struct StepFailed: Error, CustomStringConvertible {
         let description: String
@@ -68,6 +76,7 @@ class HelpArticleCase: XCTestCase {
     private var seen: Set<String> = []
     /// Whether each step records the window's text, for unrecorded setup.
     private var collectsText = false
+    private var glides = 0
 
     // MARK: - Initializers
 
@@ -174,7 +183,7 @@ class HelpArticleCase: XCTestCase {
     func click(_ name: String, _ target: XCUIElement, right: Bool = false, settle: TimeInterval = 0.6) throws {
         try step(name, "click", settle: settle) {
             let target = try require(target, name)
-            let moved = glide(to: target.center)
+            let moved = try glide(to: target.center)
             logClick(name, at: target.center, move: moved)
             right ? target.rightClick() : target.click()
         }
@@ -187,7 +196,7 @@ class HelpArticleCase: XCTestCase {
         try step(name, "type", settle: settle) {
             if let field {
                 let field = try require(field, name)
-                logClick(name, at: field.center, move: glide(to: field.center))
+                logClick(name, at: field.center, move: try glide(to: field.center))
                 field.click()
                 Thread.sleep(forTimeInterval: 0.3)
                 guard field.value(forKey: "hasKeyboardFocus") as? Bool == true else {
@@ -214,7 +223,7 @@ class HelpArticleCase: XCTestCase {
             let destination = try require(destination, name)
             let start = target.center
             let end = destination.center
-            logClick(name, at: start, move: glide(to: start))
+            logClick(name, at: start, move: try glide(to: start))
             let distance = hypot(end.x - start.x, end.y - start.y)
             target.click(
                 forDuration: 0.25, thenDragTo: destination,
@@ -232,7 +241,7 @@ class HelpArticleCase: XCTestCase {
         try step(name, "drag", settle: settle) {
             let target = try require(target, name)
             let start = target.center
-            logClick(name, at: start, move: glide(to: start))
+            logClick(name, at: start, move: try glide(to: start))
             let from = target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             from.click(
                 forDuration: 0.25, thenDragTo: from.withOffset(offset),
@@ -248,7 +257,7 @@ class HelpArticleCase: XCTestCase {
     ) throws {
         try step(name, "move", settle: settle) {
             let frame = try require(target, name).frame
-            _ = glide(
+            _ = try glide(
                 to: CGPoint(x: frame.minX + frame.width * fraction.dx, y: frame.minY + frame.height * fraction.dy))
         }
     }
@@ -299,34 +308,21 @@ class HelpArticleCase: XCTestCase {
 
     // MARK: - Actions - Pointer
 
-    /// Glides the pointer to `point` through a run of hovers, so a click in
-    /// the clip follows a visible approach, for a second at most. Answers the
-    /// seconds it took.
-    /// XCUITest has no pointer path of its own, and the runner may not post
-    /// events directly.
-    private func glide(to point: CGPoint) -> Double {
+    /// Has the runner glide the pointer to `point`, so a click in the clip
+    /// follows a person's approach, then hovers there so the app sees the
+    /// pointer arrive. Answers the seconds it took.
+    /// XCUITest's hover moves the pointer in uneven steps, each waiting for
+    /// the app to idle, and the sandboxed test may not move it itself.
+    private func glide(to point: CGPoint) throws -> Double {
         let started = Date()
-        let start = CGEvent(source: nil)?.location ?? point
-        let distance = hypot(point.x - start.x, point.y - start.y)
+        glides += 1
+        let request = Glide(name: "glide-\(glides)", x: point.x, y: point.y)
+        try ask("helpdocs-glide", request, answer: "\(request.name).done", timeout: 10)
         let window = app.windows.firstMatch
-        let origin = window.coordinate(withNormalizedOffset: .zero)
-        let corner = window.frame.origin
-        let moves = max(Int(distance / 40), 1)
-        var index = 1
-        while index <= moves {
-            // Each hover waits for the app to idle, which on a busy screen takes
-            // far longer than on a page; past a second, finish in one move.
-            if Date().timeIntervalSince(started) > 1.0 { index = moves }
-            var t = Double(index) / Double(moves)
-            t = t * t * (3 - 2 * t)
-            origin.withOffset(
-                CGVector(
-                    dx: start.x + (point.x - start.x) * t - corner.x, dy: start.y + (point.y - start.y) * t - corner.y)
-            ).hover()
-            index += 1
-        }
-        let seconds = Date().timeIntervalSince(started)
-        return seconds
+        window.coordinate(withNormalizedOffset: .zero).withOffset(
+            CGVector(dx: point.x - window.frame.minX, dy: point.y - window.frame.minY)
+        ).hover()
+        return Date().timeIntervalSince(started)
     }
 
     private func logClick(_ name: String, at point: CGPoint, move: Double?) {
@@ -376,17 +372,24 @@ class HelpArticleCase: XCTestCase {
                 .insetBy(dx: -pad, dy: -pad)
             crop = [frame.minX, frame.minY, frame.width, frame.height]
         }
-        let request = String(decoding: try JSONEncoder().encode(Capture(name: name, crop: crop)), as: UTF8.self)
-        let file = folder.appendingPathComponent("\(name).png")
-        try? FileManager.default.removeItem(at: file)
-        print("helpdocs-capture \(request)")
-        let deadline = Date().addingTimeInterval(15)
-        while !FileManager.default.fileExists(atPath: file.path) {
-            guard Date() < deadline else { throw StepFailed(description: "\(name): the runner took no screenshot") }
-            Thread.sleep(forTimeInterval: 0.1)
-        }
+        try ask("helpdocs-capture", Capture(name: name, crop: crop), answer: "\(name).png", timeout: 15)
         collectText()
         print("ok  capture \(name)")
+    }
+
+    // MARK: - Actions - Runner
+
+    /// Prints `request` for the runner as `command`, then waits for the runner's
+    /// `answer`, a file beside `HELPDOCS_RUN`.
+    private func ask(_ command: String, _ request: some Encodable, answer: String, timeout: TimeInterval) throws {
+        let file = folder.appendingPathComponent(answer)
+        try? FileManager.default.removeItem(at: file)
+        print("\(command) \(String(decoding: try JSONEncoder().encode(request), as: UTF8.self))")
+        let deadline = Date().addingTimeInterval(timeout)
+        while !FileManager.default.fileExists(atPath: file.path) {
+            guard Date() < deadline else { throw StepFailed(description: "the runner never answered \(command)") }
+            Thread.sleep(forTimeInterval: 0.02)
+        }
     }
 
     // MARK: - Actions - Log

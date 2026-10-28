@@ -35,12 +35,15 @@ The stages run in this order:
 
 1. **build**: builds an unsigned Debug copy of Crest and the `CrestHelpDocs`
    test runner into the work folder.
-2. **capture**: records the screen while the scenario's `testCapture` runs.
-   It takes a window-only PNG for each `capture`, and reports which ones
-   differ from the published images.
-3. **polish**: turns the recording into the article's clip. It zooms in on
-   clicks, speeds up idle time, and frames the window on the docs page
-   background, the same margin on every side. It renders one clip per site
+2. **capture**: records the screen with ScreenCaptureKit while the
+   scenario's `testCapture` runs. The recorder reports when its first frame
+   was taken, so the clip lines up with the test's steps exactly. It takes a
+   window-only PNG for each `capture`, and reports which ones differ from the
+   published images.
+3. **polish**: turns the recording into the article's clip. It speeds up
+   idle time, easing in and out of it, zooms in on clicks, timed on the clip
+   so a speed-up never hurries the zoom, and frames the window on the docs
+   page background, the same margin on every side. It renders one clip per site
    theme, using the `--color-fd-background` values in `Website/app/app.css`:
    the `@theme` value for light and the `.dark` value for dark. Each clip's
    first frame is saved beside it as `<clip>.poster.png`, which the page
@@ -66,8 +69,9 @@ deleted, unless you pass `--keep`. Recordings, captures, `run.json` and
 `$TMPDIR/crest-helpdocs`), outside the repository.
 
 The runner uses only the Python standard library, like the other tools in
-`Scripts/`. Captures, image comparison and clips are in `media.swift`, which
-the runner compiles into the work folder with `xcrun swiftc` on first use.
+`Scripts/`. Recording, captures, image comparison, clips and pointer moves
+are in `media.swift`, which the runner compiles into the work folder with
+`xcrun swiftc` on first use.
 
 ## Scenario metadata
 
@@ -135,10 +139,12 @@ runner app is sandboxed and may only read outside its container, so:
 - `capture` prints a request; the runner takes the window with
   `screencapture -l`, which leaves its corners transparent, and the test
   waits for the file.
-
-The test runner has no Accessibility access, so it moves the pointer by
-hovering along the path, for a second at most. The approach to a click is
-stepped, and on a busy screen such as Settings it can jump.
+- before each click, drag and `move`, the test asks the runner to glide the
+  pointer to the target. The runner eases it there over a time that grows
+  with the distance, taking each position from the clock, then answers with
+  a file. The test then hovers on the target so the app sees the pointer
+  arrive. XCUITest's own hover moves the pointer in uneven steps, and the
+  sandboxed test may not move it itself.
 
 ## Writing a scenario
 

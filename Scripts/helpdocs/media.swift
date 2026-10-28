@@ -1,12 +1,16 @@
+import AVFoundation
 import CoreGraphics
 import CoreImage
 import Foundation
 import ImageIO
+import ScreenCaptureKit
 import UniformTypeIdentifiers
 
-// The image and video work of Scripts/helpdocs/helpdocs.py, which compiles
-// this file with `xcrun swiftc` into its work folder and runs:
+// The image, video and pointer work of Scripts/helpdocs/helpdocs.py, which
+// compiles this file with `xcrun swiftc` into its work folder and runs:
 //
+//   media record <mov>
+//   media glide <x> <y>
 //   media capture <pid> <png> [<left> <top> <width> <height>]
 //   media compare <published png> <new png>
 //   media polish <recording> <run.json> <zoom> (<clip> <poster> <#rrggbb>)...
@@ -98,6 +102,128 @@ extension CGImage {
     }
 }
 
+// MARK: - Record
+
+/// Records the main display with ScreenCaptureKit until interrupted.
+///
+/// Prints `recording <seconds since 1970>` once the first frame arrives: the
+/// wall-clock time of the video's zero, from the frame's own host-clock
+/// timestamp, so the runner lines the run log up with the video exactly.
+final class Recorder: NSObject, SCStreamOutput {
+
+    // MARK: - Variables
+
+    private let output: URL
+    private let queue = DispatchQueue(label: "media.record")
+    private var stream: SCStream?
+    private var writer: AVAssetWriter?
+    private var input: AVAssetWriterInput?
+    private var started = false
+
+    // MARK: - Initializers
+
+    init(output: String) {
+        self.output = URL(fileURLWithPath: output)
+    }
+
+    // MARK: - Actions - Recording
+
+    func start() async throws {
+        let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+        guard let display = content.displays.first(where: { $0.displayID == CGMainDisplayID() }) else {
+            throw Failure(description: "no main display to record")
+        }
+        let mode = CGDisplayCopyDisplayMode(display.displayID)
+        let (width, height) = (mode?.pixelWidth ?? display.width, mode?.pixelHeight ?? display.height)
+        let configuration = SCStreamConfiguration()
+        configuration.width = width
+        configuration.height = height
+        configuration.minimumFrameInterval = CMTime(value: 1, timescale: 60)
+        configuration.pixelFormat = kCVPixelFormatType_32BGRA
+        configuration.colorSpaceName = CGColorSpace.sRGB
+        configuration.showsCursor = true
+        if #available(macOS 15, *) { configuration.showMouseClicks = true }
+
+        try? FileManager.default.removeItem(at: output)
+        let writer = try AVAssetWriter(outputURL: output, fileType: .mov)
+        let input = AVAssetWriterInput(
+            mediaType: .video,
+            outputSettings: [
+                AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: width, AVVideoHeightKey: height,
+                AVVideoCompressionPropertiesKey: [AVVideoAverageBitRateKey: width * height * 24],
+                AVVideoColorPropertiesKey: [
+                    AVVideoColorPrimariesKey: AVVideoColorPrimaries_ITU_R_709_2,
+                    AVVideoTransferFunctionKey: AVVideoTransferFunction_ITU_R_709_2,
+                    AVVideoYCbCrMatrixKey: AVVideoYCbCrMatrix_ITU_R_709_2,
+                ],
+            ])
+        input.expectsMediaDataInRealTime = true
+        writer.add(input)
+        self.writer = writer
+        self.input = input
+
+        let stream = SCStream(
+            filter: SCContentFilter(display: display, excludingWindows: []), configuration: configuration,
+            delegate: nil)
+        try stream.addStreamOutput(self, type: .screen, sampleHandlerQueue: queue)
+        try await stream.startCapture()
+        self.stream = stream
+    }
+
+    /// Stops capturing and finishes the file.
+    func stop() async {
+        try? await stream?.stopCapture()
+        await withCheckedContinuation { continuation in
+            queue.async { continuation.resume() }
+        }
+        guard started, let writer, let input else { return }
+        input.markAsFinished()
+        await writer.finishWriting()
+    }
+
+    func stream(_ stream: SCStream, didOutputSampleBuffer buffer: CMSampleBuffer, of type: SCStreamOutputType) {
+        // Only complete frames carry an image; idle ones mean nothing changed.
+        guard type == .screen, buffer.isValid, let writer, let input,
+            let attachments = CMSampleBufferGetSampleAttachmentsArray(buffer, createIfNecessary: false)
+                as? [[SCStreamFrameInfo: Any]],
+            let status = attachments.first?[.status] as? Int, SCFrameStatus(rawValue: status) == .complete
+        else { return }
+        let time = buffer.presentationTimeStamp
+        if !started {
+            started = true
+            writer.startWriting()
+            writer.startSession(atSourceTime: time)
+            let age = CMTimeSubtract(CMClockGetTime(CMClockGetHostTimeClock()), time).seconds
+            print("recording \(Date().timeIntervalSince1970 - age)")
+            fflush(stdout)
+        }
+        if input.isReadyForMoreMediaData { input.append(buffer) }
+    }
+}
+
+// MARK: - Pointer
+
+/// Moves the pointer to `target`, in screen points, as a person would: easing
+/// in and out over a time that grows with the distance. Each position is
+/// taken from the clock, so a late sample never changes the pointer's speed.
+func glide(to target: CGPoint) {
+    let start = CGEvent(source: nil)?.location ?? target
+    let distance = hypot(target.x - start.x, target.y - start.y)
+    guard distance >= 1 else { return }
+    let duration = min(0.3 + distance / 1500, 0.8)
+    // Ahead of the recorder's encoding, so a sample is rarely late.
+    pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0)
+    let started = Date()
+    while true {
+        let progress = min(Date().timeIntervalSince(started) / duration, 1)
+        let eased = progress * progress * progress * (progress * (progress * 6 - 15) + 10)
+        CGWarpMouseCursorPosition(
+            CGPoint(x: start.x + (target.x - start.x) * eased, y: start.y + (target.y - start.y) * eased))
+        if progress == 1 { return }
+        Thread.sleep(forTimeInterval: 1.0 / 120)
+    }
+}
+
 // MARK: - Capture
 
 /// The test copy's main window, which `screencapture -l` takes alone, with
@@ -163,8 +289,8 @@ func compare(published: String, new: String) throws {
 
 // MARK: - Polish
 
-/// The run log a recording test attaches, with the time the runner started
-/// recording added.
+/// The run log a recording test attaches, with the wall-clock time of the
+/// recording's first frame added.
 struct RunLog: Decodable {
     struct Step: Decodable {
         let action: String
@@ -189,9 +315,10 @@ struct RunLog: Decodable {
 
 /// Turns a raw screen recording and its run log into a short framed clip.
 ///
-/// Crops to the Crest window, eases a zoom in around each group of clicks and
-/// back out, speeds up idle stretches, and frames the result with rounded
-/// corners on the docs page background, once for each site theme.
+/// Crops to the Crest window, speeds up idle stretches, easing in and out of
+/// them, eases a zoom in around each group of clicks and back out, and frames
+/// the result with rounded corners on the docs page background, once for each
+/// site theme. The zoom is timed on the clip, so a speed-up never hurries it.
 struct Clip {
 
     // MARK: - Types
@@ -203,7 +330,7 @@ struct Clip {
         let background: (red: UInt8, green: UInt8, blue: UInt8)
     }
 
-    /// A click in video seconds and window pixels.
+    /// A click in seconds, of the recording or the clip, and window pixels.
     struct Click {
         let t: Double
         let x: Double
@@ -220,10 +347,10 @@ struct Clip {
     /// window to it so no desktop shows at the corners.
     static let windowRadius = 26.0
     static let fps = 30.0
-    /// How far the run log trails the recording, measured once by eye.
-    static let lag = 0.25
     /// The length idle stretches are sped up towards.
     static let target = 13.0
+    /// Recording seconds over which playback eases between 1x and the idle speed.
+    static let ramp = 0.4
 
     // MARK: - Variables
 
@@ -235,7 +362,8 @@ struct Clip {
     /// Recording pixels per screen point.
     let scale: Double
     let zoom: Double
-    let clusters: [[Click]]
+    /// The clicks in recording seconds.
+    let clicks: [Click]
     var activeSpans: [(start: Double, end: Double)]
     let first: Double
     let last: Double
@@ -251,10 +379,13 @@ struct Clip {
             let videoWidth = Double(
                 String(decoding: probe, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines))
         else { throw Failure(description: "cannot read the width of \(recording)") }
-        let offset = log.started - log.recordingStarted + Self.lag
+        let offset = log.started - log.recordingStarted
         let scale = videoWidth / log.screenPoints[0]
+        // Two points in from the window's frame: its outermost rows are
+        // blended with the desktop, which would show along the edges.
         let frame = log.window
-        let (x, y, width, height) = (frame["X"] ?? 0, frame["Y"] ?? 0, frame["Width"] ?? 0, frame["Height"] ?? 0)
+        let (x, y) = ((frame["X"] ?? 0) + 2, (frame["Y"] ?? 0) + 2)
+        let (width, height) = ((frame["Width"] ?? 0) - 4, (frame["Height"] ?? 0) - 4)
         self.recording = recording
         self.scale = scale
         self.zoom = zoom
@@ -276,17 +407,7 @@ struct Clip {
             + log.steps.filter { ["type", "drag", "move"].contains($0.action) }.map {
                 ($0.t + offset, $0.t + offset + $0.seconds)
             }
-
-        // Group clicks closer than 2.5 s so the camera stays in and pans between them.
-        var clusters: [[Click]] = []
-        for click in clicks {
-            if let previous = clusters.last?.last, click.t - previous.t < 2.5 {
-                clusters[clusters.count - 1].append(click)
-            } else {
-                clusters.append([click])
-            }
-        }
-        self.clusters = clusters
+        self.clicks = clicks
 
         // The clip ends when the last step's settle does, so a scenario sets
         // its final hold. The recording only has frames while the screen
@@ -307,8 +428,22 @@ struct Clip {
         return x * x * (3 - 2 * x)
     }
 
-    /// Zoom factor and centre, in window pixels, at video time `t`.
-    func camera(at t: Double) -> (factor: Double, x: Double, y: Double) {
+    /// Groups clicks closer than 2.5 s, so the camera stays in and pans between them.
+    private static func clusters(of clicks: [Click]) -> [[Click]] {
+        var clusters: [[Click]] = []
+        for click in clicks {
+            if let previous = clusters.last?.last, click.t - previous.t < 2.5 {
+                clusters[clusters.count - 1].append(click)
+            } else {
+                clusters.append([click])
+            }
+        }
+        return clusters
+    }
+
+    /// Zoom factor and centre, in window pixels, at clip time `t`, for click
+    /// `clusters` in clip time.
+    func camera(at t: Double, in clusters: [[Click]]) -> (factor: Double, x: Double, y: Double) {
         let (width, height) = (Double(window.width), Double(window.height))
         for group in clusters {
             let start = group[0].t - 0.6
@@ -331,28 +466,35 @@ struct Clip {
         return (1, width / 2, height / 2)
     }
 
-    func isActive(_ t: Double) -> Bool {
-        activeSpans.contains { $0.start <= t && t <= $0.end }
+    /// How idle recording time `t` is: 0 within an active span, rising to 1
+    /// a ramp away from the nearest one.
+    func idleness(at t: Double) -> Double {
+        let distance = activeSpans.map { max($0.start - t, t - $0.end, 0) }.min() ?? .infinity
+        return Self.smooth(distance / Self.ramp)
     }
 
     /// The recording time of each clip frame. Active time plays at 1x; idle
-    /// time is sped up so the clip lands near the target length.
+    /// time is sped up, between 2x and 8x, so the clip lands near the target
+    /// length, and playback eases between the two speeds.
     func frameTimes() -> [Double] {
-        let count = Int(((last - first) * Self.fps).rounded(.up))
-        let active = Double((0..<count).filter { isActive(first + Double($0) / Self.fps) }.count) / Self.fps
-        let idle = (last - first) - active
-        let idleSpeed = min(max(idle / max(Self.target - active, 1), 2), 8)
-        var times: [Double] = []
-        var t = first
-        while t < last {
-            times.append(t)
-            t += (isActive(t) ? 1 : idleSpeed) / Self.fps
+        func times(idleSpeed: Double) -> [Double] {
+            var times: [Double] = []
+            var t = first
+            while t < last {
+                times.append(t)
+                t += (1 + (idleSpeed - 1) * idleness(at: t)) / Self.fps
+            }
+            return times
         }
+        let speeds = stride(from: 2.0, through: 8.0, by: 0.25)
+        let idleSpeed = speeds.first { Double(times(idleSpeed: $0).count) / Self.fps <= Self.target } ?? 8
+        let result = times(idleSpeed: idleSpeed)
+        let active = Double(result.filter { idleness(at: $0) == 0 }.count) / Self.fps
         print(
             String(
-                format: "    source %.1fs, active %.1fs, idle x%.1f -> %.1fs", last - first, active, idleSpeed,
-                Double(times.count) / Self.fps))
-        return times
+                format: "    source %.1fs, active %.1fs, idle x%.2f -> %.1fs", last - first, active, idleSpeed,
+                Double(result.count) / Self.fps))
+        return result
     }
 
     // MARK: - Actions - Rendering
@@ -360,6 +502,12 @@ struct Clip {
     /// Writes one clip per destination, and its first frame as the poster.
     func render(to destinations: [Destination]) throws {
         let times = frameTimes()
+        // The clip time of each click: the first frame that reaches it.
+        let clusters = Self.clusters(
+            of: clicks.map { click in
+                Click(
+                    t: Double(times.firstIndex { $0 >= click.t } ?? times.count) / Self.fps, x: click.x, y: click.y)
+            })
         let (width, height) = (Double(window.width), Double(window.height))
         let inner = (width: size.width - 2 * Self.pad, height: size.height - 2 * Self.pad)
         let radius = (Self.windowRadius * scale * Double(inner.width) / width).rounded(.toNearestOrEven)
@@ -419,7 +567,7 @@ struct Clip {
             guard let current else { throw Failure(description: "\(recording) has no frames") }
 
             // Scale the part of the window the camera shows onto the inner frame.
-            let camera = camera(at: t)
+            let camera = camera(at: Double(number) / Self.fps, in: clusters)
             let (cropWidth, cropHeight) = (width / camera.factor, height / camera.factor)
             let x = min(max(camera.x - cropWidth / 2, 0), width - cropWidth)
             let y = min(max(camera.y - cropHeight / 2, 0), height - cropHeight)
@@ -493,6 +641,31 @@ signal(SIGPIPE, SIG_IGN)
 let arguments = Array(CommandLine.arguments.dropFirst())
 do {
     switch arguments.first {
+    case "record" where arguments.count == 2:
+        let recorder = Recorder(output: arguments[1])
+        signal(SIGINT, SIG_IGN)
+        let interrupt = DispatchSource.makeSignalSource(signal: SIGINT, queue: .main)
+        interrupt.setEventHandler {
+            Task {
+                await recorder.stop()
+                exit(0)
+            }
+        }
+        interrupt.resume()
+        Task {
+            do {
+                try await recorder.start()
+            } catch {
+                FileHandle.standardError.write(Data("media: \(error)\n".utf8))
+                exit(1)
+            }
+        }
+        dispatchMain()
+    case "glide" where arguments.count == 3:
+        guard let x = Double(arguments[1]), let y = Double(arguments[2]) else {
+            throw Failure(description: "bad point \(arguments[1]) \(arguments[2])")
+        }
+        glide(to: CGPoint(x: x, y: y))
     case "capture" where [3, 7].contains(arguments.count):
         guard let pid = pid_t(arguments[1]) else { throw Failure(description: "bad process ID \(arguments[1])") }
         let box = arguments.dropFirst(3).compactMap(Double.init)
