@@ -2,7 +2,7 @@ import XCTest
 
 /// Crest Studio on a Space's Appearance page: the crest on the Space's sidebar
 /// background, its Crest and Sidebar colors, and the steps.
-/// Scenario: Website/helpdocs/customize-spaces.yaml.
+/// Scenario: Website/helpdocs/customize-spaces.json.
 final class CustomizeSpacesArticle: HelpArticleCase {
 
     // MARK: - Variables

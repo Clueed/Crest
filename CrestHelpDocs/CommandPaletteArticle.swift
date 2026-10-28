@@ -2,7 +2,9 @@ import XCTest
 
 /// Search a site from the command palette: type a provider's shortcut, see its
 /// chips, press Tab to choose it, and type a query. The clip stops before
-/// Return, so it needs no network. Scenario: Website/helpdocs/command-palette.yaml.
+/// Return, so it needs no network. The palette is wide, so the clip keeps the
+/// whole window rather than zooming in on the field.
+/// Scenario: Website/helpdocs/command-palette.json.
 final class CommandPaletteArticle: HelpArticleCase {
 
     // MARK: - Variables

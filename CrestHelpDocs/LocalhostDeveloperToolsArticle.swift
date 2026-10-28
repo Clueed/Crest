@@ -1,8 +1,8 @@
 import XCTest
 
 /// Preview a local page at the Phone viewport from the developer toolbar,
-/// which local addresses show automatically.
-/// Scenario: Website/helpdocs/localhost-developer-tools.yaml.
+/// which local addresses show automatically. Its fixture is served on one.
+/// Scenario: Website/helpdocs/localhost-developer-tools.json.
 final class LocalhostDeveloperToolsArticle: HelpArticleCase {
 
     // MARK: - Variables

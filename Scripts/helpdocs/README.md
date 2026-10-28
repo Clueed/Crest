@@ -2,7 +2,7 @@
 
 These scripts keep Crest Help articles in `Website/content/docs/` true to the
 app. Each covered article has a scenario: its metadata in
-`Website/helpdocs/<slug>.yaml` and its steps in a Swift UI test in
+`Website/helpdocs/<slug>.json` and its steps in a Swift UI test in
 `CrestHelpDocs/`. The runner builds a test copy of Crest, replays the
 scenario through XCUITest, and then:
 
@@ -17,18 +17,18 @@ or an agent fixes the wording.
 
 - A Mac GUI session that has granted Screen Recording to the terminal. The
   runner can't run in CI.
-- uv, ffmpeg and Xcode. Run `npm ci` in `Website` so the check stage can
-  build the site.
+- Xcode and ffmpeg. Run `npm ci` in `Website` so the check stage can build
+  the site.
 - A display of at least 1440×900. On smaller displays the window shrinks to
   fit, and captures no longer match a typical Mac.
 
 ## Run
 
 ```sh
-Scripts/helpdocs/run link-routing             # every stage, then remove the test build
-Scripts/helpdocs/run --changed --base main    # only articles whose sources changed
-Scripts/helpdocs/run link-routing --publish   # also copy fresh captures next to the article
-Scripts/helpdocs/run link-routing --stage check --stage verify --keep
+Scripts/helpdocs/helpdocs.py link-routing             # every stage, then remove the test build
+Scripts/helpdocs/helpdocs.py --changed --base main    # only articles whose sources changed
+Scripts/helpdocs/helpdocs.py link-routing --publish   # also copy fresh captures next to the article
+Scripts/helpdocs/helpdocs.py link-routing --stage check --stage verify --keep
 ```
 
 The stages run in this order:
@@ -64,6 +64,10 @@ Afterwards the test copy is quit, unregistered from Launch Services, and
 deleted, unless you pass `--keep`. Recordings, captures, `run.json` and
 `report.json` stay in the work folder (`--work`, default
 `$TMPDIR/crest-helpdocs`), outside the repository.
+
+The runner uses only the Python standard library, like the other tools in
+`Scripts/`. Captures, image comparison and clips are in `media.swift`, which
+the runner compiles into the work folder with `xcrun swiftc` on first use.
 
 ## Scenario metadata
 

@@ -1,0 +1,28 @@
+{
+  "article": "content/docs/(browse-faster)/link-routing.md",
+  "sources": [
+    "CrestShared/Features/Settings/BrowserLinkSettingsPane/**",
+    "CrestShared/Features/Settings/BrowserPlatformLinkRouteEditor/**"
+  ],
+  "labels": {
+    "links": "Links",
+    "routing": "Routing",
+    "new_route": "New Route",
+    "when_url": "When URL",
+    "contains": "Contains",
+    "is_exactly": "Is Exactly",
+    "pattern": "URL or text",
+    "open_in_space": "Open in Space",
+    "destination": "Destination, Destination",
+    "external_links": "Links from other apps",
+    "personal": "Personal",
+    "work": "Work"
+  },
+  "test": "LinkRoutingArticle",
+  "launch": {
+    "window": [1280, 800]
+  },
+  "assets": {
+    "route": "link-routing/route.png"
+  }
+}

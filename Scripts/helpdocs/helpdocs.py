@@ -1,6 +1,6 @@
+#!/usr/bin/env python3
 """Regenerate and check Crest Help articles by replaying their scenarios.
 
-Run through `Scripts/helpdocs/run`, which supplies the Python dependencies.
 See Scripts/helpdocs/README.md for the scenario format and the stages.
 """
 
@@ -20,8 +20,6 @@ import sys
 import time
 from pathlib import Path
 
-import yaml
-
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent.parent
 WEBSITE = REPOSITORY_ROOT / "Website"
@@ -32,21 +30,45 @@ LSREGISTER = (
 )
 
 
-def site_backgrounds() -> dict[str, tuple[int, int, int]]:
-    """The docs page background for each site theme, as Website/app/app.css declares it."""
+def site_backgrounds() -> dict[str, str]:
+    """The docs page background for each site theme, as Website/app/app.css declares it, in hex."""
     css = (WEBSITE / "app/app.css").read_text()
     pattern = r"(@theme|\.dark)\s*\{[^}]*?--color-fd-background:\s*hsl\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%\)"
     backgrounds = {}
     for selector, hue, saturation, lightness in re.findall(pattern, css):
         rgb = colorsys.hls_to_rgb(float(hue) / 360, float(lightness) / 100, float(saturation) / 100)
-        backgrounds["dark" if selector == ".dark" else "light"] = tuple(round(c * 255) for c in rgb)
+        backgrounds["dark" if selector == ".dark" else "light"] = "#" + "".join(f"{round(c * 255):02x}" for c in rgb)
     if "light" not in backgrounds:
         raise SystemExit("Website/app/app.css declares no --color-fd-background in @theme")
     return backgrounds
 
 
+def poster_path(clip: Path) -> Path:
+    """Where a clip's first frame is saved: `name.mp4` -> `name.poster.png`."""
+    return clip.with_suffix(".poster.png")
+
+
 class StepFailed(Exception):
     """A stage could not run as written."""
+
+
+class Media:
+    """The Swift helper for captures and clips, `media.swift`, built into the work folder on first use."""
+
+    SOURCE = Path(__file__).resolve().with_name("media.swift")
+
+    def __init__(self, work: Path):
+        self.path = work.resolve() / "media"
+
+    def __call__(self, *arguments, capture_output: bool = False) -> str:
+        if not self.path.exists() or self.path.stat().st_mtime < self.SOURCE.stat().st_mtime:
+            subprocess.run(["xcrun", "swiftc", "-O", str(self.SOURCE), "-o", str(self.path)], check=True)
+        result = subprocess.run(
+            [str(self.path), *map(str, arguments)], stdout=subprocess.PIPE if capture_output else None, text=True
+        )
+        if result.returncode != 0:
+            raise StepFailed(f"media {arguments[0]} failed")
+        return result.stdout or ""
 
 
 # MARK: - Scenarios
@@ -58,14 +80,14 @@ class Scenario:
     def __init__(self, path: Path):
         self.path = path
         self.slug = path.stem
-        self.data = yaml.safe_load(path.read_text())
+        self.data = json.loads(path.read_text())
         self.article = WEBSITE / self.data["article"]
         self.labels: dict[str, str] = self.data.get("labels", {})
         self.assets: dict[str, str] = self.data.get("assets", {})
 
     @classmethod
     def all(cls) -> list[Scenario]:
-        return [cls(path) for path in sorted(SCENARIOS.glob("*.yaml"))]
+        return [cls(path) for path in sorted(SCENARIOS.glob("*.json"))]
 
     def sources(self) -> list[str]:
         own = [
@@ -130,7 +152,7 @@ class Scenario:
         result = subprocess.run(
             ["git", "-C", str(REPOSITORY_ROOT), "show", f"{ref}:{relative}"], capture_output=True, text=True
         )
-        return (yaml.safe_load(result.stdout) or {}).get("labels", {}) if result.returncode == 0 else {}
+        return json.loads(result.stdout).get("labels", {}) if result.returncode == 0 else {}
 
 
 # MARK: - Test app
@@ -144,6 +166,7 @@ class TestApp:
         self.path = self.derived_data / "Build/Products/Debug/Crest.app"
         self.executable = self.path / "Contents/MacOS/Crest"
         self.runner = self.derived_data / "Build/Products/Debug/CrestHelpDocs-Runner.app"
+        self.media = Media(work)
 
     def build(self):
         entitlements = Path(
@@ -213,33 +236,10 @@ class TestApp:
     def capture(self, request: dict, out: Path):
         """Screenshot the test copy's window for a test, which waits for the file.
 
-        `screencapture -l` takes the window alone, with transparent corners and
-        nothing that overlaps it. A `crop` keeps that frame, in screen points."""
-        import Quartz
-
+        A `crop` keeps only that frame, in screen points."""
         pid = int(subprocess.check_output(["pgrep", "-nf", str(self.executable)]).split()[0])
-        windows = Quartz.CGWindowListCopyWindowInfo(
-            Quartz.kCGWindowListOptionOnScreenOnly | Quartz.kCGWindowListExcludeDesktopElements,
-            Quartz.kCGNullWindowID,
-        )
-        candidates = [w for w in windows if w["kCGWindowOwnerPID"] == pid and w["kCGWindowLayer"] == 0]
-        info = max(candidates, key=lambda w: w["kCGWindowBounds"]["Width"] * w["kCGWindowBounds"]["Height"])
         partial = out / f"{request['name']}.partial.png"
-        subprocess.run(["screencapture", "-x", "-o", f"-l{info['kCGWindowNumber']}", str(partial)], check=True)
-        if request.get("crop"):
-            from PIL import Image
-
-            left, top, width, height = request["crop"]
-            bounds = info["kCGWindowBounds"]
-            image = Image.open(partial)
-            scale = image.width / bounds["Width"]
-            box = (
-                max(round((left - bounds["X"]) * scale), 0),
-                max(round((top - bounds["Y"]) * scale), 0),
-                min(round((left + width - bounds["X"]) * scale), image.width),
-                min(round((top + height - bounds["Y"]) * scale), image.height),
-            )
-            image.crop(box).save(partial)
+        self.media("capture", pid, partial, *(request.get("crop") or []))
         # Renamed whole, so the test never reads a half-written file.
         partial.rename(out / f"{request['name']}.png")
 
@@ -305,8 +305,6 @@ class Run:
         self.compare_captures(out)
 
     def compare_captures(self, out: Path):
-        from PIL import Image, ImageChops
-
         for name in self.scenario.assets:
             new = out / f"{name}.png"
             if not new.exists():
@@ -315,25 +313,21 @@ class Run:
             if not published.exists():
                 self.notes.append(f"{name}: new image, not yet published")
                 continue
-            old_image, new_image = Image.open(published).convert("L"), Image.open(new).convert("L")
-            if old_image.size != new_image.size:
-                self.notes.append(f"{name}: size changed {old_image.size} -> {new_image.size}")
-                continue
-            histogram = ImageChops.difference(old_image, new_image).histogram()
-            changed = sum(histogram[16:]) / (old_image.size[0] * old_image.size[1])
-            if changed > 0.002:
-                self.notes.append(f"{name}: {changed:.1%} of pixels changed")
+            change = self.app.media("compare", published, new, capture_output=True).strip()
+            if change:
+                self.notes.append(f"{name}: {change}")
 
     def polish(self):
         if "clip" not in self.scenario.data:
             return
-        from polish import polish
-
         backgrounds = site_backgrounds()
-        polish(
-            self.out / "capture/raw.mov", json.loads(self.run_log.read_text()),
-            {self.clip_capture(theme): backgrounds[theme] for theme in self.scenario.clips()},
-            zoom=self.scenario.data.get("clip_zoom", 1.7),
+        destinations = [
+            (self.clip_capture(theme), poster_path(self.clip_capture(theme)), backgrounds[theme])
+            for theme in self.scenario.clips()
+        ]
+        self.app.media(
+            "polish", self.out / "capture/raw.mov", self.run_log, self.scenario.data.get("clip_zoom", 1.7),
+            *(part for destination in destinations for part in destination),
         )
 
     def clip_capture(self, theme: str) -> Path:
@@ -341,8 +335,6 @@ class Run:
 
     def publish(self):
         """Copy the fresh captures, clips and clip posters next to the article."""
-        from polish import poster_path
-
         sources = {self.out / f"capture/{name}.png": relative for name, relative in self.scenario.assets.items()}
         for theme, relative in self.scenario.clips().items():
             sources[self.clip_capture(theme)] = relative
@@ -371,8 +363,6 @@ class Run:
         for name, old in self.scenario.committed_labels(self.base).items():
             if self.scenario.labels.get(name) != old and old in article:
                 self.problems.append(f"article still says {old!r}; label {name} is now {self.scenario.labels.get(name)!r}")
-        from polish import poster_path
-
         clips = self.scenario.clips().values()
         for relative in [*self.scenario.assets.values(), *clips, *(str(poster_path(Path(c))) for c in clips)]:
             if f"./{relative}" not in self.scenario.article.read_text():

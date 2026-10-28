@@ -2,7 +2,8 @@ import XCTest
 
 /// Pull a link into Peek on Mac: drag a page link, watch the live preview
 /// follow the pointer, and release to keep it open as a Peek.
-/// Scenario: Website/helpdocs/peek-and-quick-window.yaml.
+/// The preview sits beside the pointer, so the clip keeps the whole window
+/// rather than zooming in. Scenario: Website/helpdocs/peek-and-quick-window.json.
 final class PeekArticle: HelpArticleCase {
 
     // MARK: - Variables
