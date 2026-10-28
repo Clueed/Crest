@@ -2,7 +2,7 @@
 
 Crops to the Crest window, eases a zoom in around each group of clicks and
 back out, speeds up idle stretches, and frames the result with rounded
-corners on a plain background.
+corners on the docs page background, once for each site theme.
 """
 
 from __future__ import annotations
@@ -14,7 +14,10 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
-OUT_W, OUT_H, PAD, RADIUS = 1280, 900, 56, 22
+OUT_W, OUT_H, PAD = 1280, 900, 56
+# The corner radius of a Crest window, in points; the frame masks the window
+# to it so no desktop shows at the corners.
+WINDOW_RADIUS = 26
 
 
 def smooth(x):
@@ -22,8 +25,12 @@ def smooth(x):
     return x * x * (3 - 2 * x)
 
 
-def polish(recording: Path, log: dict, destination: Path, lag=0.25, zoom=1.7, target=13.0, fps=30):
-    """`lag` is how far the run log trails the recording, measured once by eye."""
+def polish(recording: Path, log: dict, destinations: dict[Path, tuple[int, int, int]], lag=0.25, zoom=1.7, target=13.0,
+           fps=30):
+    """Write one clip per destination, framed on its background colour.
+
+    `lag` is how far the run log trails the recording, measured once by eye.
+    """
     offset = log["started"] - log["recording_started"] + lag
     probe = json.loads(
         subprocess.check_output(
@@ -97,24 +104,37 @@ def polish(recording: Path, log: dict, destination: Path, lag=0.25, zoom=1.7, ta
     inner_w = OUT_W - 2 * PAD
     inner_h = round(inner_w * H / W) // 2 * 2
     top = (OUT_H - inner_h) // 2
-    background = Image.new("RGB", (OUT_W, OUT_H), (236, 238, 243))
+    radius = round(WINDOW_RADIUS * scale * inner_w / W)
     mask = Image.new("L", (inner_w, inner_h), 0)
-    ImageDraw.Draw(mask).rounded_rectangle((0, 0, inner_w - 1, inner_h - 1), RADIUS, fill=255)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, inner_w - 1, inner_h - 1), radius, fill=255)
     shadow = Image.new("L", (OUT_W, OUT_H), 0)
-    ImageDraw.Draw(shadow).rounded_rectangle((PAD, top + 8, PAD + inner_w, top + 8 + inner_h), RADIUS, fill=70)
-    background.paste((40, 44, 60), (0, 0), shadow.filter(ImageFilter.GaussianBlur(18)))
+    ImageDraw.Draw(shadow).rounded_rectangle((PAD, top + 8, PAD + inner_w, top + 8 + inner_h), radius, fill=70)
+    shadow = shadow.filter(ImageFilter.GaussianBlur(18))
+    backgrounds = []
+    for colour in destinations.values():
+        background = Image.new("RGB", (OUT_W, OUT_H), colour)
+        background.paste((0, 0, 0), (0, 0), shadow)
+        backgrounds.append(background)
 
     decode = subprocess.Popen(
         ["ffmpeg", "-v", "error", "-i", str(recording), "-vf", f"fps={fps},crop={W}:{H}:{left}:{top_edge}",
          "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
         stdout=subprocess.PIPE,
     )
-    encode = subprocess.Popen(
-        ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{OUT_W}x{OUT_H}", "-r", str(fps),
-         "-i", "-", "-c:v", "libx264", "-preset", "slow", "-crf", "22", "-pix_fmt", "yuv420p",
-         "-movflags", "+faststart", str(destination)],
-        stdin=subprocess.PIPE,
-    )
+    # Full range with sRGB tags, so browsers show the background exactly as
+    # the page's own CSS colour.
+    encoders = [
+        subprocess.Popen(
+            ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{OUT_W}x{OUT_H}",
+             "-r", str(fps), "-i", "-",
+             "-vf", "scale=out_color_matrix=bt709:out_range=full,"
+             "setparams=range=pc:colorspace=bt709:color_primaries=bt709:color_trc=iec61966-2-1",
+             "-c:v", "libx264", "-preset", "slow", "-crf", "22", "-pix_fmt", "yuv420p",
+             "-movflags", "+faststart", str(destination)],
+            stdin=subprocess.PIPE,
+        )
+        for destination in destinations
+    ]
     frame_bytes, index, current = W * H * 3, -1, None
     for t in times:
         # Variable frame rate source: look frames up by time, not by index.
@@ -130,10 +150,13 @@ def polish(recording: Path, log: dict, destination: Path, lag=0.25, zoom=1.7, ta
         image = Image.frombuffer("RGB", (W, H), current).resize(
             (inner_w, inner_h), Image.Resampling.LANCZOS, box=(x, y, x + cw, y + ch)
         )
-        frame = background.copy()
-        frame.paste(image, (PAD, top), mask)
-        encode.stdin.write(frame.tobytes())
-    encode.stdin.close()
-    encode.wait()
+        for background, encode in zip(backgrounds, encoders):
+            frame = background.copy()
+            frame.paste(image, (PAD, top), mask)
+            encode.stdin.write(frame.tobytes())
+    for encode in encoders:
+        encode.stdin.close()
+        encode.wait()
     decode.kill()
-    print(f"    {destination.name}: {destination.stat().st_size / 1e6:.2f} MB")
+    for destination in destinations:
+        print(f"    {destination.name}: {destination.stat().st_size / 1e6:.2f} MB")

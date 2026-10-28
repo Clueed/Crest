@@ -7,6 +7,7 @@ See Scripts/helpdocs/README.md for the scenario format and the stages.
 from __future__ import annotations
 
 import argparse
+import colorsys
 import contextlib
 import fnmatch
 import json
@@ -31,6 +32,19 @@ LSREGISTER = (
     "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
 )
 MENU_BAR, DOCK = 33, 55
+
+
+def site_backgrounds() -> dict[str, tuple[int, int, int]]:
+    """The docs page background for each site theme, as Website/app/app.css declares it."""
+    css = (WEBSITE / "app/app.css").read_text()
+    pattern = r"(@theme|\.dark)\s*\{[^}]*?--color-fd-background:\s*hsl\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%\)"
+    backgrounds = {}
+    for selector, hue, saturation, lightness in re.findall(pattern, css):
+        rgb = colorsys.hls_to_rgb(float(hue) / 360, float(lightness) / 100, float(saturation) / 100)
+        backgrounds["dark" if selector == ".dark" else "light"] = tuple(round(c * 255) for c in rgb)
+    if "light" not in backgrounds:
+        raise SystemExit("Website/app/app.css declares no --color-fd-background in @theme")
+    return backgrounds
 
 
 # MARK: - Scenarios
@@ -89,6 +103,19 @@ class Scenario:
         finally:
             server.terminate()
             server.wait()
+
+    def clips(self) -> dict[str, str]:
+        """The clip for each site theme, relative to the article's folder.
+
+        The light clip is `clip`; another theme adds its name before the extension.
+        """
+        if "clip" not in self.data:
+            return {}
+        clip = Path(self.data["clip"])
+        return {
+            theme: str(clip if theme == "light" else clip.with_suffix(f".{theme}{clip.suffix}"))
+            for theme in site_backgrounds()
+        }
 
     def asset_path(self, name: str) -> Path:
         return self.article.parent / self.assets[name]
@@ -261,20 +288,22 @@ class Run:
             return
         from polish import polish
 
+        backgrounds = site_backgrounds()
         polish(
-            self.out / "capture/raw.mov", json.loads(self.run_log.read_text()), self.out / "capture/clip.mp4",
+            self.out / "capture/raw.mov", json.loads(self.run_log.read_text()),
+            {self.clip_capture(theme): backgrounds[theme] for theme in self.scenario.clips()},
             zoom=self.scenario.data.get("clip_zoom", 1.7),
         )
 
+    def clip_capture(self, theme: str) -> Path:
+        return self.out / f"capture/clip.{theme}.mp4"
+
     def publish(self):
         """Copy the fresh captures and clip next to the article."""
-        sources = {name: self.out / f"capture/{name}.png" for name in self.scenario.assets}
-        if "clip" in self.scenario.data:
-            sources["clip"] = self.out / "capture/clip.mp4"
-        for name, source in sources.items():
-            target = self.scenario.article.parent / (
-                self.scenario.data["clip"] if name == "clip" else self.scenario.assets[name]
-            )
+        sources = {self.out / f"capture/{name}.png": relative for name, relative in self.scenario.assets.items()}
+        sources |= {self.clip_capture(theme): relative for theme, relative in self.scenario.clips().items()}
+        for source, relative in sources.items():
+            target = self.scenario.article.parent / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source, target)
             print(f"ok  published {target.relative_to(REPOSITORY_ROOT)}")
@@ -295,8 +324,8 @@ class Run:
         for name, old in self.scenario.committed_labels(self.base).items():
             if self.scenario.labels.get(name) != old and old in article:
                 self.problems.append(f"article still says {old!r}; label {name} is now {self.scenario.labels.get(name)!r}")
-        for relative in [*self.scenario.assets.values(), self.scenario.data.get("clip")]:
-            if relative and f"./{relative}" not in self.scenario.article.read_text():
+        for relative in [*self.scenario.assets.values(), *self.scenario.clips().values()]:
+            if f"./{relative}" not in self.scenario.article.read_text():
                 self.problems.append(f"article does not show {relative}")
         print(f"ok  check ({len(self.problems)} problems)")
 

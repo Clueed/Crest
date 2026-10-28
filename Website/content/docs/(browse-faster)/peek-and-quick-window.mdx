@@ -5,6 +5,7 @@ keywords: [Peek, Quick Window, Tiny Arc, preview, external links, transient brow
 ---
 
 import pullLinkIntoPeek from './peek-and-quick-window/pull-link-into-peek.mp4';
+import pullLinkIntoPeekDark from './peek-and-quick-window/pull-link-into-peek.dark.mp4';
 
 Peek and Quick Window are transient browsing surfaces. Both use a real Crest Space profile so the page can access the right signed-in session and Crest Passwords, but neither has to become a durable tab.
 
@@ -20,15 +21,10 @@ Peek stays attached to its source tab when you open another tab or switch Spaces
 
 Drag a webpage link to pull out a live preview that follows your gesture and fades in as the page loads. Release to keep the preview open, then close it or promote it into a tab using Peek’s controls.
 
-<video
+<Clip
   src={pullLinkIntoPeek}
-  aria-label="Dragging a link on a webpage: a live preview of the linked page follows the pointer, releasing it opens the page in Peek, and Open In turns it into a full tab"
-  className="rounded-lg"
-  autoPlay
-  muted
-  loop
-  playsInline
-  controls
+  dark={pullLinkIntoPeekDark}
+  label="Dragging a link on a webpage: a live preview of the linked page follows the pointer, releasing it opens the page in Peek, and Open In turns it into a full tab"
 />
 
 Choose this behavior in **Settings → Links → Drag links to Peek**. Hold <kbd>Option</kbd> to drag the link normally; when the setting is off, Option-drag opens Peek instead.

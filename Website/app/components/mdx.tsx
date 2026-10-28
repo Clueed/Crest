@@ -2,6 +2,7 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 import type { ComponentProps } from 'react';
 import { cn } from '@/lib/cn';
+import { Clip } from './clip';
 
 // Numbered lists in help articles are procedures, so they render as steps.
 function StepList({ className, ...props }: ComponentProps<'ol'>) {
@@ -70,6 +71,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ...defaultMdxComponents,
     ol: StepList,
     kbd: Kbd,
+    Clip,
     ...components,
   } satisfies MDXComponents;
 }
