@@ -1,8 +1,8 @@
 import Foundation
 
 /// The session screenshots and the showcase show: a Work Space with pinned,
-/// saved and split current tabs and an archive, and a Personal one, each
-/// page drawn in place from its own markup.
+/// saved and split current tabs, an archive and history, and a Personal one
+/// with its own history, each page drawn in place from its own markup.
 enum SessionShowcaseSeed {
     // MARK: - Actions - Building
 
@@ -48,7 +48,27 @@ enum SessionShowcaseSeed {
         ]
         return SpaceState.Seed(
             name: "Work", symbol: "hammer.fill", accent: .indigo, branding: SpaceAccent.rose.house, folders: [folder],
-            tabs: tabs, archivedTabs: archivedTabs)
+            tabs: tabs, archivedTabs: archivedTabs,
+            history: [
+                visit("https://github.com/", "GitHub", visits: 42, hoursAgo: 1),
+                visit(
+                    "https://github.com/pauljoda/Crest/pulls", "Pull requests · pauljoda/Crest", visits: 18, hoursAgo: 2
+                ),
+                visit(
+                    "https://linear.app/northstar/team/LAU/active", "Launch · Active issues", visits: 26, hoursAgo: 3),
+                visit("https://www.figma.com/files/recents", "Recents – Figma", visits: 14, hoursAgo: 5),
+                visit(
+                    "https://developer.apple.com/documentation/swiftui", "SwiftUI | Apple Developer Documentation",
+                    visits: 9, hoursAgo: 20),
+                visit(
+                    "https://www.youtube.com/watch?v=launch-keynote", "Product launch keynote - YouTube", visits: 3,
+                    hoursAgo: 26),
+                visit("https://news.ycombinator.com/", "Hacker News", visits: 12, hoursAgo: 30),
+                visit(
+                    "https://en.wikipedia.org/wiki/Product_launch", "Product launch - Wikipedia", visits: 2,
+                    hoursAgo: 52),
+                visit("https://calendar.google.com/", "Google Calendar - Week of launch", visits: 21, hoursAgo: 4),
+            ])
     }
 
     private static func makePersonalSpace() -> SpaceState.Seed {
@@ -65,7 +85,28 @@ enum SessionShowcaseSeed {
         ]
         return SpaceState.Seed(
             name: "Personal", symbol: "leaf.fill", accent: .teal, branding: SpaceAccent.indigo.house, folders: [folder],
-            tabs: tabs)
+            tabs: tabs,
+            history: [
+                visit("https://www.youtube.com/", "YouTube", visits: 30, hoursAgo: 2),
+                visit(
+                    "https://www.youtube.com/watch?v=northern-lights", "Northern lights over Iceland in 4K - YouTube",
+                    visits: 4, hoursAgo: 6),
+                visit("https://en.wikipedia.org/wiki/Aurora", "Aurora - Wikipedia", visits: 3, hoursAgo: 8),
+                visit(
+                    "https://cooking.nytimes.com/", "NYT Cooking - Recipes and Cooking Guides", visits: 11, hoursAgo: 24
+                ),
+                visit("https://www.rei.com/learn/expert-advice", "Expert Advice | REI", visits: 5, hoursAgo: 40),
+                visit("https://weather.com/", "Weekend forecast - The Weather Channel", visits: 16, hoursAgo: 3),
+            ])
+    }
+
+    private static func visit(_ address: String, _ title: String, visits: Int, hoursAgo: Double)
+        -> HistoryEntryState
+    {
+        let lastVisitedAt = Date.now.addingTimeInterval(-hoursAgo * 3600)
+        return HistoryEntryState(
+            url: URL(string: address)!, title: title, firstVisitedAt: lastVisitedAt.addingTimeInterval(-30 * 86400),
+            lastVisitedAt: lastVisitedAt, visitCount: visits)
     }
 
     private static func page(
