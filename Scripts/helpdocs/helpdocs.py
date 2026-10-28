@@ -315,6 +315,8 @@ class Run:
     def check(self):
         """Every UI string the reader sees must have been seen in the app."""
         seen = set(json.loads(self.run_log.read_text())["seen"])
+        # An element that combines its children, such as a palette row, joins their labels with ", ".
+        seen |= {part for text in seen for part in text.split(", ")}
         keys = set(self.scenario.data.get("keys", []))
         article = self.scenario.article_text()
         for name, value in self.scenario.labels.items():
