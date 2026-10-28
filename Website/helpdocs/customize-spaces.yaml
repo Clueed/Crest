@@ -1,0 +1,97 @@
+# Crest Studio on a Space's Appearance page: the crest on the Space's
+# sidebar background, its Crest and Sidebar colors, and the steps.
+# Format and actions: Scripts/helpdocs/README.md.
+article: content/docs/(spaces-and-organization)/customize-spaces.md
+section: Choose an identity
+sources:
+  - CrestShared/Features/Spaces/Components/Forge/**
+  - CrestShared/Features/Spaces/Models/BrowserCrestStudioStep.swift
+  - CrestMac/Features/Settings/Forge/**
+  - CrestMac/Features/Settings/Components/BrowserSettingsSpacePage.swift
+labels:
+  work: Work
+  appearance: Appearance
+  crest: Crest
+  sidebar: Sidebar
+  start_from: Start from
+  shape: Shape
+  field: Field
+  band: Band
+  emblem: Emblem
+  border: Border
+  finish: Finish
+  icon: Icon
+  shuffle: Shuffle
+  undo: Undo
+  solid: Solid
+  split: Split
+  chevron: Chevron
+  gradient: Gradient
+  space_actions: Space actions
+  reset_appearance: Reset Appearance
+  artwork_credits: Artwork Credits
+launch:
+  # Nothing is saved between runs; the showcase seed gives Work the Lion crest.
+  env: {CREST_ISOLATED_SESSION: 1, CREST_SHOWCASE_SESSION: 1}
+  window: [1280, 800]
+setup:
+  # Unrecorded. Open Work's Appearance page and visit the steps and the
+  # Space actions menu that the section names, then come back to the start.
+  - name: open-settings
+    action: key
+    keys: keystroke "," using command down
+    settle: 1.5
+  - {name: open-work, action: click, target: {identifier_prefix: settings-space-, label: $work}, settle: 1.0}
+  - {name: appearance, action: click, target: {role: AXRadioButton, label: $appearance, within: {identifier: space-settings-tabs}}}
+  - name: undock-sidebar          # a narrow window clips Crest Studio while the sidebar is docked
+    action: click
+    target: {identifier: browser-sidebar-toggle}
+    settle: 1.0
+  - name: emblem-step
+    action: click
+    target: {role: AXRadioButton, label: $emblem, within: {identifier: space-forge-steps}}
+  - {name: icon-choice, action: expect, target: {role: AXRadioButton, label: $icon, within: {identifier: space-forge-identity}}}
+  - name: sidebar-step
+    action: click
+    target: {role: AXRadioButton, label: $sidebar, within: {identifier: space-forge-steps}}
+  - {name: space-actions, action: click, target: {identifier: space-settings-menu}, settle: 1.0}
+  - {name: close-menu, action: key, keys: key code 53}
+steps:
+  - name: start-from
+    action: click
+    target: {role: AXRadioButton, label: $start_from, within: {identifier: space-forge-steps}}
+    settle: 1.0
+  - name: rest-pointer            # below the Settings list, so nothing shows a hover
+    action: move
+    target: {role: AXOutline}
+    at: [0.5, 0.97]
+    settle: 1.0
+    capture: studio
+assets:
+  studio: customize-spaces/crest-studio.png
+verify:
+  # After setup's unrecorded steps, the article followed: open the Space's
+  # Appearance page, choose Icon under Emblem, and step back with Undo.
+  - name: article-open-settings
+    action: key
+    keys: keystroke "," using command down
+    settle: 1.5
+  - {name: article-open-work, action: click, target: {identifier_prefix: settings-space-, label: $work}, settle: 1.0}
+  - {name: article-appearance, action: click, target: {role: AXRadioButton, label: $appearance, within: {identifier: space-settings-tabs}}}
+  - {name: crest-on-stage, action: expect, target: {role: AXHeading, label: $crest, within: {identifier: space-forge-stage}}}
+  - name: article-emblem
+    action: click
+    target: {role: AXRadioButton, label: $emblem, within: {identifier: space-forge-steps}}
+  - name: article-icon
+    action: click
+    target: {role: AXRadioButton, label: $icon, within: {identifier: space-forge-identity}}
+    settle: 1.0
+  - name: icon-chosen
+    action: expect
+    target: {role: AXRadioButton, label: $icon, within: {identifier: space-forge-identity}}
+    contains: "1"
+  - {name: article-undo, action: click, target: {identifier: space-forge-undo}, settle: 1.0}
+  - name: crest-restored
+    action: expect
+    target: {role: AXRadioButton, label: $crest, within: {identifier: space-forge-identity}}
+    contains: "1"
