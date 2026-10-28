@@ -2,9 +2,9 @@ import XCTest
 
 /// One Crest Help article replayed against a test copy of Crest.
 ///
-/// `Scripts/helpdocs/run` starts each test with `HELPDOCS_RUN`, the path of a
-/// JSON file naming the fixture server, the scenario's labels and the window
-/// size. A recording test attaches `run.json` to its result: the steps and
+/// `Scripts/helpdocs/helpdocs.py` starts each test with `HELPDOCS_RUN`, the
+/// path of a JSON file naming the fixture server, the scenario's labels and the
+/// window size. A recording test attaches `run.json` to its result: the steps and
 /// clicks of its recorded part, and every string the app showed, which the
 /// runner turns into the article's clip and checks the article against.
 ///
@@ -23,7 +23,7 @@ class HelpArticleCase: XCTestCase {
         let window: [Double]
     }
 
-    /// The run log `polish.py` and the check stage read.
+    /// The run log the polish and check stages read.
     struct Log: Encodable {
         struct Step: Encodable {
             let name: String
@@ -74,7 +74,7 @@ class HelpArticleCase: XCTestCase {
     override func setUp() async throws {
         continueAfterFailure = false
         guard let path = ProcessInfo.processInfo.environment["HELPDOCS_RUN"] else {
-            throw XCTSkip("run through Scripts/helpdocs/run")
+            throw XCTSkip("run through Scripts/helpdocs/helpdocs.py")
         }
         let url = URL(fileURLWithPath: path)
         input = try JSONDecoder().decode(Input.self, from: Data(contentsOf: url))

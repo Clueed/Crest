@@ -1,0 +1,23 @@
+{
+  "article": "content/docs/(spaces-and-organization)/split-view.mdx",
+  "section": "Create a Split View",
+  "sources": [
+    "CrestShared/Features/SplitView/**",
+    "CrestMac/Features/SplitView/**",
+    "CrestShared/Features/Sidebar/Components/BrowserSidebarSplitGroupRow/**",
+    "CrestMac/Features/Sidebar/Components/BrowserSidebarDrag/**"
+  ],
+  "labels": {
+    "split_view": "Split View",
+    "two_tabs": "Split View with 2 tabs",
+    "open_link_in_split_view": "Open Link in Split View",
+    "split_with_next_tab": "Split With Next Tab"
+  },
+  "serve": "fixtures/split-view",
+  "test": "SplitViewArticle",
+  "launch": {
+    "window": [1280, 800]
+  },
+  "clip": "split-view/create-split-view.mp4",
+  "clip_zoom": 1.0
+}

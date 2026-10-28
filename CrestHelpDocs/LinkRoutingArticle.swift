@@ -1,7 +1,7 @@
 import XCTest
 
 /// Create one link route: github.com, Contains, opens in Work.
-/// Scenario: Website/helpdocs/link-routing.yaml.
+/// Scenario: Website/helpdocs/link-routing.json.
 final class LinkRoutingArticle: HelpArticleCase {
 
     // MARK: - Actions - Article

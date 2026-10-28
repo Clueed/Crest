@@ -1,7 +1,9 @@
 import XCTest
 
 /// Create a Split View on Mac: drag a sidebar tab onto the page on show, then
-/// click the other card to focus it. Scenario: Website/helpdocs/split-view.yaml.
+/// click the other card to focus it. The drag crosses from the sidebar to the
+/// page, so the clip keeps the whole window rather than zooming in.
+/// Scenario: Website/helpdocs/split-view.json.
 final class SplitViewArticle: HelpArticleCase {
 
     // MARK: - Variables
