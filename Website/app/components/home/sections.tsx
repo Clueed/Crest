@@ -1,23 +1,25 @@
 import type { ComponentProps, CSSProperties, ReactNode } from 'react';
 import { Link } from 'react-router';
 import { DiscordIcon, GitHubIcon } from '@/components/icons';
-import { external } from '@/components/site-chrome';
+import { SiteAnchor } from '@/components/site-chrome';
 import { cn } from '@/lib/cn';
-import { links } from '@/lib/site-links';
+import { links, type SiteLink } from '@/lib/site-links';
 import { useHome } from './home-state';
 import { Reveal } from './reveal';
 import { spaceField, windowSize } from './templates';
 
 /** A homepage section: generous vertical padding, and room under the header when linked to. */
 export function Section({ className, ...props }: ComponentProps<'section'> & { id: string; 'data-night'?: '' }) {
-  return <section className={cn('relative scroll-mt-[72px] py-[clamp(4.5rem,9vw,7.5rem)]', className)} {...props} />;
+  return <section className={cn('relative scroll-mt-2 py-[clamp(4.5rem,9vw,7.5rem)]', className)} {...props} />;
 }
+
+const sectionTitle = 'text-[clamp(2rem,3.8vw,2.9rem)] leading-[1.1] font-normal tracking-[-0.02em]';
 
 /** A section's headline and lede. */
 export function SectionHead({ title, lede, titleId, center }: { title: string; lede?: ReactNode; titleId?: string; center?: boolean }) {
   return (
     <Reveal className={cn('mb-[clamp(2rem,4vw,3.2rem)] grid max-w-[44rem] gap-4', center && 'mx-auto text-center')}>
-      <h2 id={titleId} className="text-[clamp(2rem,3.8vw,2.9rem)] leading-[1.1] font-normal tracking-[-0.02em]">
+      <h2 id={titleId} className={sectionTitle}>
         {title}
       </h2>
       {lede && <p className="max-w-[40rem] text-[1.12rem] leading-[1.6] text-ink-2 in-data-night:text-mist/72">{lede}</p>}
@@ -117,16 +119,16 @@ export function MoreSection() {
   );
 }
 
-type GetLink = { title: string; note: string; action: string; url: string; icon: ReactNode };
+type GetLink = { title: string; note: string; action: string; link: SiteLink; icon: ReactNode };
 
 const tile = 'size-10 rounded-[10px]';
 const padded = cn(tile, 'bg-white p-[5px]');
 const mark = cn(tile, 'grid place-items-center');
 
 const downloads: GetLink[] = [
-  { title: 'Mac', note: 'Apple silicon', action: 'Download', url: links.macDownload.url, icon: <img src="/assets/crest-logo.svg" alt="" className={tile} /> },
-  { title: 'iPhone and iPad', note: 'App Store', action: 'Open', url: links.appStore.url, icon: <img src="/assets/app-store-official.png" alt="" className={padded} /> },
-  { title: 'Beta', note: 'TestFlight', action: 'Join', url: links.testFlight.url, icon: <img src="/assets/testflight-official.png" alt="" className={padded} /> },
+  { title: 'Mac', note: 'Apple silicon', action: 'Download', link: links.macDownload, icon: <img src="/assets/crest-logo.svg" alt="" className={tile} /> },
+  { title: 'iPhone and iPad', note: 'App Store', action: 'Open', link: links.appStore, icon: <img src="/assets/app-store-official.png" alt="" className={padded} /> },
+  { title: 'Beta', note: 'TestFlight', action: 'Join', link: links.testFlight, icon: <img src="/assets/testflight-official.png" alt="" className={padded} /> },
 ];
 
 const community: GetLink[] = [
@@ -134,19 +136,19 @@ const community: GetLink[] = [
     title: 'GitHub',
     note: 'Bug reports',
     action: 'Report',
-    url: links.issues.url,
+    link: links.issues,
     icon: (
       <span className={cn(mark, 'bg-mist text-ink')}>
         <GitHubIcon className="size-[22px]" />
       </span>
     ),
   },
-  { title: 'Reddit', note: 'r/CrestBrowser', action: 'Visit', url: links.reddit.url, icon: <img src="/assets/reddit-official.png" alt="" className={padded} /> },
+  { title: 'Reddit', note: 'r/CrestBrowser', action: 'Visit', link: links.reddit, icon: <img src="/assets/reddit-official.png" alt="" className={padded} /> },
   {
     title: 'Discord',
     note: 'Chat and questions',
     action: 'Join',
-    url: links.discord.url,
+    link: links.discord,
     icon: (
       <span className={cn(mark, 'bg-[#5865f2] text-white')}>
         <DiscordIcon className="size-[22px]" />
@@ -160,9 +162,8 @@ function GetList({ label, items }: { label: string; items: GetLink[] }) {
     <ul aria-label={label} className="border-t border-white/14">
       {items.map((item) => (
         <li key={item.title}>
-          <a
-            href={item.url}
-            {...external}
+          <SiteAnchor
+            link={item.link}
             className="group grid grid-cols-[40px_1fr_auto] items-center gap-[0.9rem] border-b border-white/14 py-[0.95rem]"
           >
             {item.icon}
@@ -171,7 +172,7 @@ function GetList({ label, items }: { label: string; items: GetLink[] }) {
               <small className="text-[0.8em] text-mist/62">{item.note}</small>
             </span>
             <span className="text-[0.88rem] text-sky">{item.action} ↗</span>
-          </a>
+          </SiteAnchor>
         </li>
       ))}
     </ul>
@@ -190,7 +191,7 @@ export function GetSection() {
         className="absolute inset-y-0 -right-[4%] w-[26%] bg-(image:--field) bg-size-[100%_100%] bg-no-repeat opacity-90 [clip-path:polygon(18%_0,100%_0,100%_100%,0_100%)] max-[900px]:hidden"
       />
       <div className="relative page-width">
-        <h2 className="text-[clamp(2rem,3.8vw,2.9rem)] leading-[1.1] font-normal tracking-[-0.02em]">Get Crest</h2>
+        <h2 className={sectionTitle}>Get Crest</h2>
         <div className="mt-[2.2rem] grid max-w-[min(54rem,70vw)] grid-cols-2 gap-x-12 gap-y-4 max-[900px]:max-w-none max-[900px]:grid-cols-1 max-[900px]:gap-8">
           <GetList label="Download" items={downloads} />
           <GetList label="Community" items={community} />

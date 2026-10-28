@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { cn } from '@/lib/cn';
+import { updateEachFrame } from '@/lib/each-frame';
 import { footerLinks, isExternal, links, menuLinks, sectionLinks, type SiteLink } from '@/lib/site-links';
 import { GitHubIcon } from './icons';
 
@@ -25,31 +26,22 @@ export function SiteAnchor({ link, children, ...props }: { link: SiteLink } & Om
 
 /** The element a page's header sits over until it scrolls past; the header is light after it. */
 export const heroAttribute = { 'data-site-hero': '' } as const;
+const heroSelector = '[data-site-hero]';
+
+/** The header's height in pixels; `--spacing-header` in app.css sets it. Change both together. */
+export const headerHeight = 64;
 
 /** Whether the page has scrolled at all, and whether it has scrolled past its hero. */
 function useHeaderState() {
   const [state, setState] = useState({ stuck: false, light: false });
 
   useEffect(() => {
-    const hero = document.querySelector('[data-site-hero]');
-    function update() {
+    const hero = document.querySelector(heroSelector);
+    return updateEachFrame(() => {
       const stuck = window.scrollY > 40;
-      const light = hero ? hero.getBoundingClientRect().bottom < 64 : true;
+      const light = hero ? hero.getBoundingClientRect().bottom < headerHeight : true;
       setState((s) => (s.stuck === stuck && s.light === light ? s : { stuck, light }));
-    }
-    let frame = 0;
-    function schedule() {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(update);
-    }
-    update();
-    window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', schedule);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener('scroll', schedule);
-      window.removeEventListener('resize', schedule);
-    };
+    }, ['scroll', 'resize']);
   }, []);
 
   return state;
@@ -108,9 +100,9 @@ function LinksMenu() {
 /**
  * The header every product page shares. It is clear over the page's dark hero, frosted once
  * the page scrolls, and light after the hero. Pages mark their hero with `heroAttribute` and
- * pull it up under the header with `-mt-16 pt-16`.
+ * pull it up under the header with `-mt-header pt-header`.
  */
-export function SiteHeader() {
+function SiteHeader() {
   const { stuck, light } = useHeaderState();
   const link = 'inline-flex items-center gap-1.5 opacity-80 hover:opacity-100 max-tablet:hidden';
 
@@ -130,7 +122,7 @@ export function SiteHeader() {
           stuck && light && 'border-rule bg-paper/88 text-ink',
         )}
       >
-        <div className="wide-width flex h-16 items-center justify-between">
+        <div className="wide-width flex h-header items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 font-serif text-[1.05rem] leading-none font-semibold tracking-[0.01em]">
             <img src="/assets/crest-logo.svg" alt="" className="size-7.5" />
             Crest
@@ -158,7 +150,7 @@ export function SiteHeader() {
 }
 
 /** The footer every product page shares; a page may lead it with its own line. */
-export function SiteFooter({ tagline }: { tagline?: ReactNode }) {
+function SiteFooter({ tagline }: { tagline?: ReactNode }) {
   return (
     <footer className="bg-night-2 pt-8 pb-12 text-sm text-mist/66">
       <div className="page-width grid gap-4.5">
@@ -177,5 +169,29 @@ export function SiteFooter({ tagline }: { tagline?: ReactNode }) {
         </p>
       </div>
     </footer>
+  );
+}
+
+/** A product page: its structured data, the shared header and footer, and the `main` the skip link targets. */
+export function ProductPage({
+  structuredData,
+  tagline,
+  className,
+  children,
+}: {
+  structuredData: object;
+  tagline?: ReactNode;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      <SiteHeader />
+      <main id="main" className={className}>
+        {children}
+      </main>
+      <SiteFooter tagline={tagline} />
+    </>
   );
 }

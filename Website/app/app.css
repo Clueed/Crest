@@ -29,6 +29,11 @@
 
   --container-page: 70rem;
   --container-wide: 81.25rem;
+  /* The hero headline and the feature tour's window before it grows. */
+  --container-stage: 77.5rem;
+
+  /* The sticky header's height. `headerHeight` in site-chrome.tsx matches it. */
+  --spacing-header: 4rem;
 
   --ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
 
@@ -94,6 +99,10 @@
   /* Crest Help keeps room for the scrollbar so its dialogs don't shift the page. */
   html:has(#nd-docs-layout, #nd-home-layout) {
     scrollbar-gutter: stable;
+  }
+  /* Sections a product page links to land below its sticky header. */
+  html:not(:has(#nd-docs-layout, #nd-home-layout)) {
+    scroll-padding-top: var(--spacing-header);
   }
   /* Product pages glide to the sections they link to; Crest Help jumps, as Fumadocs expects. */
   @media (prefers-reduced-motion: no-preference) {

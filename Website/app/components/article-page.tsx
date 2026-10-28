@@ -33,7 +33,7 @@ export function ArticleHero({
     <section
       {...heroAttribute}
       aria-labelledby={titleId}
-      className="-mt-16 grid min-h-[660px] items-center gap-[clamp(3rem,8vw,8rem)] bg-night px-[max(1.5rem,calc((100vw-1280px)/2))] pt-[calc(4rem+clamp(5rem,8vw,8rem))] pb-[clamp(5rem,8vw,8rem)] text-cream min-[1100px]:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)] max-phone:min-h-0 max-phone:gap-12 max-phone:px-4 max-phone:pt-36 max-phone:pb-20"
+      className="-mt-header grid min-h-[660px] items-center gap-[clamp(3rem,8vw,8rem)] bg-night px-[max(1.5rem,calc((100vw-1280px)/2))] pt-[calc(var(--spacing-header)+clamp(5rem,8vw,8rem))] pb-[clamp(5rem,8vw,8rem)] text-cream min-[1100px]:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)] max-phone:min-h-0 max-phone:gap-12 max-phone:px-4 max-phone:pt-36 max-phone:pb-20"
     >
       <div className="min-w-0">
         <Eyebrow className="text-gold">{eyebrow}</Eyebrow>
@@ -122,12 +122,12 @@ export function ArticleSection({
     <section
       id={id}
       className={cn(
-        'relative mb-18 scroll-mt-26 border-b border-rule pb-18 max-[520px]:mb-14 max-[520px]:pb-14 [&_p]:text-ink/72 [&_strong]:text-ink',
+        'relative mb-18 scroll-mt-10 border-b border-rule pb-18 max-[520px]:mb-14 max-[520px]:pb-14 [&_p]:text-ink/72 [&_strong]:text-ink',
         prose,
       )}
     >
       {index && (
-        <p className="mb-4! text-[0.68rem] font-extrabold tracking-[0.15em] text-coral!">{index}</p>
+        <span className="mb-4 block text-[0.68rem] leading-[1.78] font-extrabold tracking-[0.15em] text-coral">{index}</span>
       )}
       {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
       <h2 className="mt-2.5 mb-6 max-w-[720px] text-[clamp(2.8rem,4.8vw,5rem)] leading-[0.92] font-normal tracking-[-0.042em] max-[520px]:text-[clamp(2.7rem,13vw,4rem)]">
@@ -158,7 +158,7 @@ export function ArticleAside({
       id={id}
       aria-labelledby={titleId}
       className={cn(
-        'mb-18 grid scroll-mt-26 grid-cols-[170px_minmax(0,1fr)] gap-[clamp(1.5rem,4vw,3.5rem)] border-b-8 border-gold bg-night p-[clamp(1.5rem,3vw,2.5rem)] text-cream max-phone:grid-cols-1 max-[520px]:p-5.5',
+        'mb-18 grid scroll-mt-10 grid-cols-[170px_minmax(0,1fr)] gap-[clamp(1.5rem,4vw,3.5rem)] border-b-8 border-gold bg-night p-[clamp(1.5rem,3vw,2.5rem)] text-cream max-phone:grid-cols-1 max-[520px]:p-5.5',
         '[&_code]:rounded-sm [&_code]:bg-gold [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.86em] [&_code]:text-ink [&_p]:text-cream/70 [&_strong]:text-cream [&_a:hover]:text-gold',
         prose,
       )}

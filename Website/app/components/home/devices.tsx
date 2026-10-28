@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { cn } from '@/lib/cn';
 import { useHome } from './home-state';
 import { Reveal } from './reveal';
@@ -60,12 +60,8 @@ const bezel = 'overflow-hidden bg-[#111317] shadow-[0_30px_70px_-24px_rgb(0_0_0/
 /** Mac, iPad and iPhone stacked; the one picked comes forward. */
 export function DevicesSection() {
   const { params } = useHome();
-  const [device, setDevice] = useState<DeviceId>('mac');
-
-  useEffect(() => {
-    const dev = devices.find((d) => d.id === params?.dev);
-    if (dev) setDevice(dev.id);
-  }, [params]);
+  const [picked, setDevice] = useState<DeviceId | null>(null);
+  const device = picked ?? devices.find((d) => d.id === params?.dev)?.id ?? 'mac';
 
   const front = (id: DeviceId) => device === id;
 

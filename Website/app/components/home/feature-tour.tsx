@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
+import { headerHeight } from '@/components/site-chrome';
 import { cn } from '@/lib/cn';
+import { updateEachFrame } from '@/lib/each-frame';
 import { phoneQuery, useHome, useMediaQuery } from './home-state';
 import { MacWindow, type WindowView } from './mac-window';
 import { Segmented } from './segmented';
@@ -149,29 +151,16 @@ export function FeatureTour() {
 
     const n = steps.length;
     // Every layout read comes before the writes, so a scroll costs one layout, once a frame.
-    function update() {
-      const r = tour!.getBoundingClientRect();
-      const stageHeight = stage!.offsetHeight;
-      const available = document.documentElement.clientHeight - 64;
+    return updateEachFrame(() => {
+      const r = tour.getBoundingClientRect();
+      const stageHeight = stage.offsetHeight;
+      const available = document.documentElement.clientHeight - headerHeight;
       const p = Math.min(0.9999, Math.max(0, -r.top / (r.height - stageHeight)));
-      const stick = `${Math.round(64 + Math.max(0, (available - stageHeight) * 0.5))}px`;
-      inner!.style.setProperty('--grow', Math.min(1, Math.max(0, p * n)).toFixed(3));
-      if (stage!.style.getPropertyValue('--stick') !== stick) stage!.style.setProperty('--stick', stick);
+      const stick = `${Math.round(headerHeight + Math.max(0, (available - stageHeight) * 0.5))}px`;
+      inner.style.setProperty('--grow', Math.min(1, Math.max(0, p * n)).toFixed(3));
+      if (stage.style.getPropertyValue('--stick') !== stick) stage.style.setProperty('--stick', stick);
       setStep(Math.floor(p * n));
-    }
-    let frame = 0;
-    function schedule() {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(update);
-    }
-    update();
-    window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', schedule);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener('scroll', schedule);
-      window.removeEventListener('resize', schedule);
-    };
+    }, ['scroll', 'resize']);
   }, [params, still]);
 
   function goTo(i: number) {
@@ -188,16 +177,16 @@ export function FeatureTour() {
       ref={tourRef}
       id="tour"
       style={{ '--n': steps.length } as CSSProperties}
-      className="relative h-[calc(var(--n)*70svh+100svh)] scroll-mt-[72px] motion-reduce:h-auto"
+      className="relative h-[calc(var(--n)*70svh+100svh)] scroll-mt-2 motion-reduce:h-auto"
     >
-      <div ref={stageRef} className="sticky top-[var(--stick,64px)] motion-reduce:static">
+      <div ref={stageRef} className="sticky top-[var(--stick,var(--spacing-header))] motion-reduce:static">
         <div
           ref={innerRef}
-          className="mx-auto grid w-[min(calc(min(1240px,100vw_-_2.5rem)_+_(min(1520px,100vw_-_2rem)_-_min(1240px,100vw_-_2.5rem))_*_var(--grow)),calc((100svh_-_64px_-_6.5rem)_*_1.7305))] gap-[0.9rem] [--grow:0] max-phone:gap-[0.8rem]"
+          className="mx-auto grid w-[min(calc(min(var(--container-stage),100vw_-_2.5rem)_+_(min(1520px,100vw_-_2rem)_-_min(var(--container-stage),100vw_-_2.5rem))_*_var(--grow)),calc((100svh_-_var(--spacing-header)_-_6.5rem)_*_1.7305))] gap-[0.9rem] [--grow:0] max-phone:gap-[0.8rem]"
         >
           <MacWindow
             view={steps[step]}
-            className="max-h-[calc(100svh-64px-6rem)] animated:animate-rise max-phone:hidden"
+            className="max-h-[calc(100svh-var(--spacing-header)-6rem)] animated:animate-rise max-phone:hidden"
           />
           {phone && <TourList step={step} />}
           <div aria-hidden="true" className="absolute top-1/2 right-[0.35rem] hidden -translate-y-1/2 gap-[0.45rem] max-phone:grid">

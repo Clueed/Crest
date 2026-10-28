@@ -43,7 +43,7 @@ export type WindowView = {
 
 /* ------------------------------------------------------------------ icons */
 
-function Glyph({ children, className, style }: { children: ReactNode; className?: string; style?: CSSProperties }) {
+function Glyph({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -54,7 +54,6 @@ function Glyph({ children, className, style }: { children: ReactNode; className?
       strokeLinejoin="round"
       aria-hidden="true"
       className={className}
-      style={style}
     >
       {children}
     </svg>
@@ -109,11 +108,13 @@ function TrafficLights() {
 
 /* ------------------------------------------------------------------ sidebar */
 
+/** The address both Spaces' home pages show. */
+const homeUrl: Address = { host: 'data:text/html;…%2Fhtml%3E' };
+
 /** Work mirrors the app's own capture (crest-work-mac.png); Personal is the second Space. */
-const spaces: Record<Space, { name: string; url: Address; tiles: string[]; folder: string; kids: Row[]; open: number; group: Row[] }> = {
+const spaces: Record<Space, { name: string; tiles: string[]; folder: string; kids: Row[]; open: number; group: Row[] }> = {
   work: {
     name: 'Work',
-    url: { host: 'data:text/html;…%2Fhtml%3E' },
     tiles: ['🧭', '📐', '📅', '✍️'],
     folder: 'Launch Atlas',
     kids: [['🔬', 'Audience research'], ['🚩', 'Launch plan'], ['🎨', 'Design review']],
@@ -122,7 +123,6 @@ const spaces: Record<Space, { name: string; url: Address; tiles: string[]; folde
   },
   personal: {
     name: 'Personal',
-    url: { host: 'data:text/html;…%2Fhtml%3E' },
     tiles: ['🏠', '🗺️', '☕', '📚'],
     folder: 'Weekend Plans',
     kids: [['🏕️', 'Cabin ideas'], ['🌱', 'Garden notes'], ['📖', 'Sunday reading']],
@@ -138,7 +138,7 @@ const rowGlyph = 'w-16 flex-none text-center text-pt-13 not-italic';
 function Sidebar({ view, onPick }: { view: WindowView; onPick: (space: Space) => void }) {
   const spaceTemplates = useSpaceTemplates();
   const s = spaces[view.space];
-  const url = view.url ?? s.url;
+  const url = view.url ?? homeUrl;
 
   return (
     <aside className="relative flex min-w-0 flex-col px-8 pb-6">
@@ -304,30 +304,22 @@ const northstarCards: [string, string][] = [
   ['Notes', 'Seven ideas worth keeping'],
 ];
 
+/** Padding, headline and text classes for each place a page body is drawn. */
+const bodySizes = {
+  page: { pad: 'px-110 py-60', title: 'mt-40 mb-20 max-w-[11ch] text-pt-64', text: 'text-pt-15' },
+  peek: { pad: 'px-64 py-40', title: 'mt-28 mb-16 max-w-[12ch] text-pt-56', text: 'text-pt-15' },
+  quick: { pad: 'px-50 py-44', title: 'mt-34 mb-18 max-w-[11ch] text-pt-52', text: 'text-pt-14' },
+};
+
 /** A page's body text, sized for where it is drawn. */
-function PageBody({ size, kick, title, text, className, children }: { size: 'page' | 'peek' | 'quick'; kick: string; title: string; text: string; className?: string; children?: ReactNode }) {
+function PageBody({ size, kick, title, text, className, children }: { size: keyof typeof bodySizes; kick: string; title: string; text: string; className?: string; children?: ReactNode }) {
+  const sized = bodySizes[size];
   return (
-    <div
-      className={cn(
-        size === 'page' && 'px-110 py-60',
-        size === 'peek' && 'px-64 py-40',
-        size === 'quick' && 'px-50 py-44',
-        className,
-      )}
-    >
+    <div className={cn(sized.pad, className)}>
       <div className={cn(kicker, 'tracking-[0.17em]')}>{kick}</div>
-      <h4
-        className={cn(
-          'font-serif font-semibold tracking-[-0.05em]',
-          size === 'page' && 'mt-40 mb-20 max-w-[11ch] text-pt-64',
-          size === 'peek' && 'mt-28 mb-16 max-w-[12ch] text-pt-56',
-          size === 'quick' && 'mt-34 mb-18 max-w-[11ch] text-pt-52',
-          'leading-[0.92]',
-        )}
-      >
-        {title}
-      </h4>
-      <p className={cn('max-w-[34em] text-[#56675e]', size === 'quick' ? 'text-pt-14' : 'text-pt-15', 'leading-normal')}>{text}</p>
+      {/* `leading-*` follows the `text-pt-*` size, or the merge drops it. */}
+      <h4 className={cn('font-serif font-semibold tracking-[-0.05em]', sized.title, 'leading-[0.92]')}>{title}</h4>
+      <p className={cn('max-w-[34em] text-[#56675e]', sized.text, 'leading-normal')}>{text}</p>
       {children}
     </div>
   );
@@ -349,9 +341,11 @@ function LocalBar({ url, className }: { url: string; className?: string }) {
   );
 }
 
-function Pill({ children }: { children: ReactNode }) {
+function PeekPill() {
   return (
-    <span className="mt-30 inline-block rounded-full bg-[#1c3b2f] px-20 py-13 text-pt-13 font-semibold text-white">{children}</span>
+    <span className="mt-30 inline-block rounded-full bg-[#1c3b2f] px-20 py-13 text-pt-13 font-semibold text-white">
+      Peek at the trail note →
+    </span>
   );
 }
 
@@ -380,7 +374,7 @@ function QuickWindow() {
           </span>
         </div>
         <div className="absolute inset-x-10 top-64 bottom-10 overflow-hidden rounded-pt-12 bg-[#eef2e8] text-[#20372d]">
-          <PageBody size="quick" kick="Field note · Quick look" title="The trail is clear after noon." text="Opened from another app, in the Personal Space." />
+          <PageBody size="quick" {...trailNote} text="Opened from another app, in the Personal Space." />
         </div>
       </div>
     </div>
@@ -449,6 +443,7 @@ function DescriptionPage({ desc }: { desc: Description }) {
   );
 }
 
+const northstarIntro = { kick: 'Northstar Studio · Audience research', title: 'Make space for the work that matters.' };
 const trailNote = { kick: 'Field note · Quick look', title: 'The trail is clear after noon.', text: 'Saturday · 64° · Pack lunch and the green thermos.' };
 const fieldGuide = {
   kick: 'Weekend plans · Field guide',
@@ -466,8 +461,7 @@ function Page({ view, peekHidden }: { view: WindowView; peekHidden: boolean }) {
       return (
         <WebPage theme={northstar}>
           <Demo
-            kick="Northstar Studio · Audience research"
-            title="Make space for the work that matters."
+            {...northstarIntro}
             sub="A calm command center for launches, decisions, and the people moving them forward."
           >
             <Cards cards={northstarCards} on={1} />
@@ -514,7 +508,7 @@ function Page({ view, peekHidden }: { view: WindowView; peekHidden: boolean }) {
                 <div className={kicker}>{note.kick}</div>
                 <h3 className="mt-56 max-w-[12ch] font-serif text-pt-46 leading-[0.9] font-semibold tracking-[-0.055em]">{note.title}</h3>
                 <p className="mt-22 max-w-[34em] text-pt-14 leading-normal text-[#56675e]">{note.text}</p>
-                {pill && <Pill>Peek at the trail note →</Pill>}
+                {pill && <PeekPill />}
               </div>
             </div>
           ))}
@@ -558,7 +552,7 @@ function Page({ view, peekHidden }: { view: WindowView; peekHidden: boolean }) {
     case 'palette':
       return (
         <WebPage theme={northstar}>
-          <Demo kick="Northstar Studio · Audience research" title="Make space for the work that matters.">
+          <Demo {...northstarIntro}>
             <Cards cards={northstarCards} on={1} />
           </Demo>
           <div className="absolute inset-0 bg-[rgb(150_146_136/0.6)]" />
@@ -570,7 +564,7 @@ function Page({ view, peekHidden }: { view: WindowView; peekHidden: boolean }) {
         <WebPage theme={fieldnotes}>
           <LocalBar url="http://localhost:4321/demos/source/" className="absolute inset-x-0 top-0" />
           <PageBody size="page" {...fieldGuide} className="absolute inset-x-0 top-40 bottom-0 px-80 py-64">
-            <Pill>Peek at the trail note →</Pill>
+            <PeekPill />
           </PageBody>
         </WebPage>
       );

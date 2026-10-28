@@ -8,6 +8,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from 'react';
+import { useMediaQuery as useMediaQueryOrNull } from 'fumadocs-core/utils/use-media-query';
 import {
   isBackgroundMode,
   isTemplateId,
@@ -66,7 +67,7 @@ type HomeState = {
   /** The template the Work Space wears, and the background mode it draws in. */
   work: TemplateId;
   mode: BackgroundMode;
-  setTemplate: (id: TemplateId, mode?: BackgroundMode) => void;
+  setTemplate: (id: TemplateId, mode: BackgroundMode) => void;
   /** Animations are off for screenshots and reduced motion. */
   still: boolean;
   /** The URL's screenshot hooks, read once the page is running; null before. */
@@ -143,7 +144,7 @@ export function HomeProvider({ children }: { children: ReactNode }) {
     };
   }, [params]);
 
-  const setTemplate = useCallback((work: TemplateId, mode: BackgroundMode = 'diagonal') => {
+  const setTemplate = useCallback((work: TemplateId, mode: BackgroundMode) => {
     setTemplateState({ work, mode });
   }, []);
 
@@ -152,11 +153,11 @@ export function HomeProvider({ children }: { children: ReactNode }) {
     [template, setTemplate, still, params],
   );
 
-  const [t0, t1, t2] = templates[template.work].colors;
+  const [t0, , t2] = templates[template.work].colors;
 
   return (
     <HomeContext value={value}>
-      <div style={{ '--t0': t0, '--t1': t1, '--t2': t2 } as CSSProperties}>{children}</div>
+      <div style={{ '--t0': t0, '--t2': t2 } as CSSProperties}>{children}</div>
     </HomeContext>
   );
 }
@@ -166,13 +167,5 @@ export const phoneQuery = '(max-width: 760px)';
 
 /** Whether a media query matches; false until the page is running. */
 export function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(false);
-  useEffect(() => {
-    const list = matchMedia(query);
-    const update = () => setMatches(list.matches);
-    update();
-    list.addEventListener('change', update);
-    return () => list.removeEventListener('change', update);
-  }, [query]);
-  return matches;
+  return useMediaQueryOrNull(query) ?? false;
 }

@@ -1,4 +1,3 @@
-import { useEffect, useState, type SyntheticEvent } from 'react';
 import { cn } from '@/lib/cn';
 import { useHome } from './home-state';
 import { Reveal } from './reveal';
@@ -74,18 +73,13 @@ function Ticker() {
 /** Coming from Arc: the features as a ticker, and the full list in a table. */
 export function ArcSection() {
   const { params } = useHome();
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (params?.open) setOpen(true);
-  }, [params]);
 
   return (
     <Section id="arc" data-night="" className="bg-night text-mist">
       <div className="page-width">
         <SectionHead title="Coming from Arc?" lede="The features you used, some with new names." />
         <Ticker />
-        <Reveal as="details" open={open} onToggle={(e: SyntheticEvent<HTMLDetailsElement>) => setOpen(e.currentTarget.open)} className="mt-10 border-t border-white/14">
+        <Reveal as="details" open={params?.open || undefined} className="mt-10 border-t border-white/14">
           <summary className="flex cursor-pointer list-none items-center justify-between py-[1.2rem] font-semibold after:text-[1.4rem] after:font-light after:text-sky after:content-['+'] in-open:after:content-['–'] [&::-webkit-details-marker]:hidden">
             Full list
           </summary>

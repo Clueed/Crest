@@ -5,7 +5,7 @@ import { DevicesSection } from '@/components/home/devices';
 import { Hero } from '@/components/home/hero';
 import { HomeProvider } from '@/components/home/home-state';
 import { GetSection, ImportSection, MoreSection } from '@/components/home/sections';
-import { SiteFooter, SiteHeader } from '@/components/site-chrome';
+import { ProductPage } from '@/components/site-chrome';
 import { productPageMeta } from '@/lib/page-meta';
 
 export function meta(_: Route.MetaArgs) {
@@ -64,9 +64,7 @@ const structuredData = {
 export default function Home() {
   return (
     <HomeProvider>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
-      <SiteHeader />
-      <main id="main" className="leading-[1.55]">
+      <ProductPage structuredData={structuredData} className="leading-[1.55]">
         <Hero />
         <BannersSection />
         <ArcSection />
@@ -74,8 +72,7 @@ export default function Home() {
         <ImportSection />
         <MoreSection />
         <GetSection />
-      </main>
-      <SiteFooter />
+      </ProductPage>
     </HomeProvider>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type RefObject } from 
 import { heroAttribute, SiteAnchor } from '@/components/site-chrome';
 import { GitHubIcon } from '@/components/icons';
 import { cn } from '@/lib/cn';
+import { updateEachFrame } from '@/lib/each-frame';
 import { links } from '@/lib/site-links';
 import { FeatureTour } from './feature-tour';
 import { bannerModes, phoneQuery, useHome, useMediaQuery } from './home-state';
@@ -70,11 +71,10 @@ function HeroBackground() {
  * banner never covers the hero's words or hangs past the hero onto the window below: one that
  * would at this width stays off the page.
  */
-function TemplateChips({ heroHead, platform }: { heroHead: RefObject<HTMLDivElement | null>; platform: Platform }) {
+function TemplateChips({ heroHead, platform, phone }: { heroHead: RefObject<HTMLDivElement | null>; platform: Platform; phone: boolean }) {
   const { work, mode, setTemplate } = useHome();
   const chipRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [crowded, setCrowded] = useState<TemplateId[]>([]);
-  const phone = useMediaQuery(phoneQuery);
 
   useEffect(() => {
     const head = heroHead.current;
@@ -112,23 +112,7 @@ function TemplateChips({ heroHead, platform }: { heroHead: RefObject<HTMLDivElem
       setCrowded((prev) => (prev.join() === next.join() ? prev : next));
     }
 
-    // Resizes come many to a frame; measure once per frame, and never after unmounting.
-    let frame = 0;
-    let live = true;
-    function schedule() {
-      cancelAnimationFrame(frame);
-      if (live) frame = requestAnimationFrame(clearWords);
-    }
-    clearWords();
-    window.addEventListener('resize', schedule);
-    window.addEventListener('load', schedule);
-    document.fonts?.ready.then(schedule);
-    return () => {
-      live = false;
-      cancelAnimationFrame(frame);
-      window.removeEventListener('resize', schedule);
-      window.removeEventListener('load', schedule);
-    };
+    return updateEachFrame(clearWords, ['resize', 'load'], document.fonts?.ready);
   }, [heroHead, platform, phone]);
 
   return (
@@ -202,24 +186,18 @@ function TemplateChips({ heroHead, platform }: { heroHead: RefObject<HTMLDivElem
 /** The device the visitor is on picks which download leads. `?plat=` pins it. */
 type Platform = 'mac' | 'ios';
 
-function usePlatform() {
+function usePlatform(phone: boolean): Platform {
   const { params } = useHome();
-  const [platform, setPlatform] = useState<Platform>('mac');
+  const [iosDevice, setIosDevice] = useState(false);
 
   useEffect(() => {
-    if (!params) return;
-    function detect() {
-      if (params?.plat === 'ios' || params?.plat === 'mac') return setPlatform(params.plat);
-      const ua = navigator.userAgent || '';
-      const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) || innerWidth < 760;
-      setPlatform(ios ? 'ios' : 'mac');
-    }
-    detect();
-    window.addEventListener('resize', detect);
-    return () => window.removeEventListener('resize', detect);
-  }, [params]);
+    const ua = navigator.userAgent || '';
+    setIosDevice(/iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+  }, []);
 
-  return platform;
+  if (!params) return 'mac';
+  if (params.plat === 'ios' || params.plat === 'mac') return params.plat;
+  return iosDevice || phone ? 'ios' : 'mac';
 }
 
 /** Each platform's download: the leading button's note and label, and the shorter link's label. */
@@ -264,21 +242,22 @@ const secondary =
 /** The dark opening of the homepage: template banners around the headline, then the feature tour. */
 export function Hero() {
   const heroHead = useRef<HTMLDivElement>(null);
-  const platform = usePlatform();
+  const phone = useMediaQuery(phoneQuery);
+  const platform = usePlatform(phone);
 
   return (
     <section
       id="top"
       {...heroAttribute}
-      className="relative isolate -mt-16 bg-[color-mix(in_srgb,var(--t0)_74%,#000)] pt-16 pb-[150px] text-white transition-[background-color] duration-600"
+      className="relative isolate -mt-header bg-[color-mix(in_srgb,var(--t0)_74%,#000)] pt-header pb-[150px] text-white transition-[background-color] duration-600"
     >
       <HeroBackground />
       <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-1 h-30 bg-linear-to-b from-transparent to-paper" />
       <div
         ref={heroHead}
-        className="relative mx-auto grid min-h-[clamp(520px,64vh,620px)] w-[min(1240px,calc(100%-2.5rem))] place-items-center pt-10 pb-4 max-phone:block max-phone:min-h-0 max-phone:pt-6"
+        className="relative mx-auto grid min-h-[clamp(520px,64vh,620px)] w-[min(var(--container-stage),calc(100%-2.5rem))] place-items-center pt-10 pb-4 max-phone:block max-phone:min-h-0 max-phone:pt-6"
       >
-        <TemplateChips heroHead={heroHead} platform={platform} />
+        <TemplateChips heroHead={heroHead} platform={platform} phone={phone} />
         <div className="relative z-2 grid justify-items-center text-center">
           <h1 data-hero-words className="mb-[1.2rem] max-w-[13ch] text-[clamp(2.9rem,6.6vw,5.4rem)] leading-none font-normal tracking-[-0.03em]">
             The browser for life after Arc.

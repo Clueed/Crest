@@ -16,7 +16,7 @@ export const links: Route.LinksFunction = () => [
   ...siteIcons,
 ];
 
-/** A route sets `handle.bodyClassName` when its stylesheet styles the body. */
+/** A route sets `handle.bodyClassName` when it needs a class on `<body>`. */
 export type PageHandle = { bodyClassName?: string };
 
 function useBodyClassName() {
