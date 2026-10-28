@@ -38,7 +38,11 @@ The stages run in this order:
    window-only PNG for each `capture`, and reports which ones differ from
    the published images.
 3. **polish**: turns the recording into the article's clip. It zooms in on
-   clicks and speeds up idle time.
+   clicks, speeds up idle time, and frames the window on the docs page
+   background. It renders one clip per site theme, using the
+   `--color-fd-background` values in `Website/app/app.css`: the `@theme`
+   value for light and the `.dark` value for dark. Screenshots need no
+   frame; their corners are transparent.
 4. **check**: fails if any of these is true:
    - a declared label wasn't shown in the app;
    - a **bold** term in the article wasn't shown in the app;
@@ -71,7 +75,7 @@ accessibility tree when you choose targets for a new scenario.
 | `setup` | Steps that prepare the app without being recorded. The text they pass counts as seen |
 | `steps` | The recorded steps |
 | `assets` | Capture name to image path, relative to the article's folder |
-| `clip` | The clip's path, relative to the article's folder |
+| `clip` | The light clip's path, relative to the article's folder. The dark clip adds `.dark` before the extension. The article shows both with `<Clip src={…} dark={…} label="…" />` |
 | `clip_zoom` | How far the clip zooms in on clicks; `1.0` keeps the whole window (default `1.7`) |
 | `verify` | The article's own steps, followed by checks of the outcome |
 
