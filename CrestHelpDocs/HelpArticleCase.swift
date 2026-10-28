@@ -185,7 +185,7 @@ class HelpArticleCase: XCTestCase {
             let target = try require(target, name)
             let moved = try glide(to: target.center)
             logClick(name, at: target.center, move: moved)
-            right ? target.rightClick() : target.click()
+            right ? target.middle.rightClick() : target.middle.click()
         }
     }
 
@@ -197,7 +197,7 @@ class HelpArticleCase: XCTestCase {
             if let field {
                 let field = try require(field, name)
                 logClick(name, at: field.center, move: try glide(to: field.center))
-                field.click()
+                field.middle.click()
                 Thread.sleep(forTimeInterval: 0.3)
                 guard field.value(forKey: "hasKeyboardFocus") as? Bool == true else {
                     throw StepFailed(description: "\(name): field never took focus")
@@ -225,8 +225,8 @@ class HelpArticleCase: XCTestCase {
             let end = destination.center
             logClick(name, at: start, move: try glide(to: start))
             let distance = hypot(end.x - start.x, end.y - start.y)
-            target.click(
-                forDuration: 0.25, thenDragTo: destination,
+            target.middle.click(
+                forDuration: 0.25, thenDragTo: destination.middle,
                 withVelocity: XCUIGestureVelocity(distance / duration), thenHoldForDuration: hold)
             logClick(name, at: end, move: nil)
         }
@@ -242,7 +242,7 @@ class HelpArticleCase: XCTestCase {
             let target = try require(target, name)
             let start = target.center
             logClick(name, at: start, move: try glide(to: start))
-            let from = target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            let from = target.middle
             from.click(
                 forDuration: 0.25, thenDragTo: from.withOffset(offset),
                 withVelocity: XCUIGestureVelocity(hypot(offset.dx, offset.dy) / duration), thenHoldForDuration: hold)
@@ -270,7 +270,7 @@ class HelpArticleCase: XCTestCase {
 
     func scroll(_ name: String, _ target: XCUIElement, lines: Int, settle: TimeInterval = 0.6) throws {
         try step(name, "scroll", settle: settle) {
-            try require(target, name).scroll(byDeltaX: 0, deltaY: CGFloat(-lines * 10))
+            try require(target, name).middle.scroll(byDeltaX: 0, deltaY: CGFloat(-lines * 10))
         }
     }
 
@@ -437,6 +437,11 @@ class HelpArticleCase: XCTestCase {
 extension XCUIElement {
     /// The element's centre in screen points.
     fileprivate var center: CGPoint { CGPoint(x: frame.midX, y: frame.midY) }
+
+    /// The element's centre to act on. Acting there skips XCUITest's hit
+    /// test, which fails for every control in a Settings form even though
+    /// the form takes the click.
+    fileprivate var middle: XCUICoordinate { coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)) }
 
     /// The element's value as text: a switch's reads `1` when on.
     var valueText: String { value.map { "\($0)" } ?? "" }
