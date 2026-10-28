@@ -7,16 +7,18 @@ export interface ImageVariants {
   img: { src: string; w: number; h: number };
 }
 
-const sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px';
-
 /**
  * An article image, served as AVIF with a WebP fallback at the widths the
- * build made. Images load lazily except the first in an article, which the
- * build marks with a high fetch priority.
+ * build made. Captures are Retina, so an image shows at half its pixel width,
+ * as large as it looks in the app, and never wider than the column. Images
+ * load lazily except the first in an article, which the build marks with a
+ * high fetch priority.
  */
 export function Picture({ src, ...props }: Omit<ComponentProps<'img'>, 'src'> & { src?: string | ImageVariants }) {
   if (typeof src !== 'object') return <defaultMdxComponents.img src={src} {...props} />;
   const first = props.fetchPriority === 'high';
+  const width = Math.round(src.img.w / 2);
+  const sizes = `(max-width: 768px) 100vw, (max-width: 1200px) min(70vw, ${width}px), ${Math.min(width, 900)}px`;
   return (
     <picture>
       {Object.entries(src.sources).map(([format, srcSet]) => (
@@ -24,11 +26,11 @@ export function Picture({ src, ...props }: Omit<ComponentProps<'img'>, 'src'> & 
       ))}
       <img
         src={src.img.src}
-        width={src.img.w}
-        height={src.img.h}
+        width={width}
+        height={Math.round(src.img.h / 2)}
         loading={first ? 'eager' : 'lazy'}
         decoding="async"
-        className="rounded-lg"
+        className="mx-auto rounded-lg"
         {...props}
       />
     </picture>

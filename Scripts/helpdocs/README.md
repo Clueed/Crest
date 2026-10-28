@@ -45,7 +45,10 @@ The stages run in this order:
    is saved beside it as `<clip>.poster.png`, which the page shows until
    the clip loads. Screenshots need no frame; their corners are
    transparent. The website build serves screenshots and posters as AVIF
-   (screenshots with a WebP fallback), so publish them as PNG.
+   (screenshots with a WebP fallback), so publish them as PNG. An article
+   shows a screenshot at half its pixel width, the Retina capture's size in
+   points, and never wider than the column, so a cropped capture appears at
+   the size it has in the app.
 4. **check**: fails if any of these is true:
    - a declared label wasn't shown in the app;
    - a **bold** term in the article wasn't shown in the app;
@@ -87,18 +90,21 @@ Each step has a `name` and an `action`:
 | Action | Keys |
 | --- | --- |
 | `click` | `target`, and optionally `button: right` for a secondary click |
-| `type` | `target`, `text`. Fails unless the field takes focus and then holds the text |
+| `type` | `text`, typed one character at a time. With `target`, it clicks the field first and fails unless the field takes focus and then holds the text. Without one, it types into the field that already has focus, such as the command palette after ⌘L |
 | `drag` | `target`, and either `by` (points) or `to`, a target to drop on at `at`, a fraction of its frame (default `[0.5, 0.5]`); optionally `duration` and `hold` before release |
 | `move` | `target`, and optionally `at`, a fraction of its frame (default `[0.5, 0.5]`) |
 | `scroll` | `target`, `lines` |
-| `key` | `keys`, a System Events phrase such as `keystroke "," using command down` |
+| `key` | `keys`, a System Events phrase for a shortcut or special key, such as `keystroke "," using command down` or `key code 48`. Plain text such as `keystroke "gith"` fails; System Events sends it all at once, so it looks pasted in a clip. Use `type` |
 | `open_url` | `url`, opened in the test copy from another app |
-| `expect` | `target`, and optionally `attribute` (default `AXValue`) and `contains` |
+| `expect` | `target`, and optionally `attribute` (default `AXValue`) and `contains`; or `absent: true` to wait until nothing matches `target` |
 | `wait` | `seconds` |
 
 Any step can add:
 - `settle`: seconds to wait afterwards;
 - `capture`: take a screenshot with this name;
+- `crop`: with `capture`, keep only the frame shared by the targets in
+  `around` and `pad` points around it (default 16), such as the command
+  palette rather than the whole window;
 - `collect`: record the window's text, for UI that is gone by the end;
 - `observe`: a popup's label, to record its menu items as seen strings.
 

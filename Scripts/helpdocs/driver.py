@@ -7,6 +7,7 @@ shows the pointer, and every click is logged with its screen position.
 
 from __future__ import annotations
 
+import re
 import subprocess
 import time
 from pathlib import Path
@@ -23,6 +24,8 @@ from ApplicationServices import (
 )
 
 TEXT_ATTRIBUTES = ("AXTitle", "AXDescription", "AXValue")
+# A System Events keystroke of plain text, which arrives all at once.
+TEXT_KEYSTROKE = re.compile(r'keystroke "[^"]*"')
 
 
 class StepFailed(Exception):
@@ -118,6 +121,17 @@ class Driver:
             time.sleep(0.25)
         shown = {key: self.label(value) if key == "label" else value for key, value in plain.items()}
         raise StepFailed(f"target not found: {shown}")
+
+    def wait_gone(self, target, name, timeout: float):
+        """Wait until nothing matches `target`, such as a group that was taken apart."""
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            try:
+                self.resolve(target, 0.3)
+            except StepFailed:
+                return
+            time.sleep(0.25)
+        raise StepFailed(f"{name}: {target} still shows")
 
     def collect_texts(self):
         """Record every string the focused window shows, for the label check."""
@@ -235,13 +249,32 @@ class Driver:
         candidates = [w for w in windows if w["kCGWindowOwnerPID"] == pid and w["kCGWindowLayer"] == 0]
         return max(candidates, key=lambda w: w["kCGWindowBounds"]["Width"] * w["kCGWindowBounds"]["Height"])
 
-    def capture(self, name):
+    def capture(self, name, crop=None):
+        """Screenshot the window, or with `crop`, only the frame its targets share and `pad` points around it."""
         info = self.window()
-        subprocess.run(
-            ["screencapture", "-x", "-o", f"-l{info['kCGWindowNumber']}", str(self.out / f"{name}.png")], check=True
-        )
+        path = self.out / f"{name}.png"
+        subprocess.run(["screencapture", "-x", "-o", f"-l{info['kCGWindowNumber']}", str(path)], check=True)
+        if crop is not None:
+            self.crop(path, info["kCGWindowBounds"], crop)
         self.log["captures"].append({"t": time.time() - self.started, "name": name})
         self.collect_texts()
+
+    def crop(self, path, bounds, crop):
+        from PIL import Image
+
+        frames = [frame(self.resolve(target)) for target in crop["around"]]
+        left, top = min(f[0] for f in frames), min(f[1] for f in frames)
+        right, bottom = max(f[0] + f[2] for f in frames), max(f[1] + f[3] for f in frames)
+        pad = crop.get("pad", 16)
+        image = Image.open(path)
+        scale = image.width / bounds["Width"]
+        box = (
+            max(round((left - pad - bounds["X"]) * scale), 0),
+            max(round((top - pad - bounds["Y"]) * scale), 0),
+            min(round((right + pad - bounds["X"]) * scale), image.width),
+            min(round((bottom + pad - bounds["Y"]) * scale), image.height),
+        )
+        image.crop(box).save(path)
 
     # MARK: - Steps
 
@@ -256,6 +289,8 @@ class Driver:
         name, action = step["name"], step["action"]
         started = time.time()
         if action == "key":
+            if TEXT_KEYSTROKE.fullmatch(step["keys"].strip()):
+                raise StepFailed(f"{name}: enter text with a type step, which types at a person's pace")
             subprocess.run(["osascript", "-e", f'tell application "System Events" to {step["keys"]}'], check=True)
         elif action == "click":
             self.click(self.resolve(step["target"]), name, step.get("button", "left"))
@@ -268,11 +303,16 @@ class Driver:
             self.drag(self.resolve(step["target"]), step)
         elif action == "scroll":
             self.scroll(self.resolve(step["target"]), step["lines"])
-        elif action == "type":
+        elif action == "type" and "target" in step:
             self.type_into(self.resolve(step["target"]), name, self.label(step["text"]))
+        elif action == "type":
+            # Into the field that already has focus, such as the palette after ⌘L.
+            self.type_text(self.label(step["text"]))
         elif action == "open_url":
             # Plain `open URL` goes to the default browser; this is still a link from another app.
             subprocess.run(["open", "-a", str(self.app), self.label(step["url"])], check=True)
+        elif action == "expect" and step.get("absent"):
+            self.wait_gone(step["target"], name, step.get("timeout", 5.0))
         elif action == "expect":
             element = self.resolve(step["target"], step.get("timeout", 5.0))
             value = str(attr(element, step.get("attribute", "AXValue")))
@@ -286,7 +326,7 @@ class Driver:
         if "observe" in step:
             self.observe(name, self.label(step["observe"]))
         if "capture" in step:
-            self.capture(step["capture"])
+            self.capture(step["capture"], step.get("crop"))
         elif step.get("collect"):
             self.collect_texts()
         self.log["steps"].append(
