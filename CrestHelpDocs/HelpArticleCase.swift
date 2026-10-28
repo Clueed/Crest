@@ -112,6 +112,9 @@ class HelpArticleCase: XCTestCase {
         log.steps = []
         log.clicks = []
         try steps()
+        // The clip ends with the last step. Hold the window a moment longer,
+        // so a recording that trails the log never reaches it closing.
+        Thread.sleep(forTimeInterval: 1.5)
         try finish()
     }
 

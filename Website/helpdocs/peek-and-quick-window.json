@@ -16,9 +16,6 @@
   "keys": ["Option"],
   "serve": "fixtures/peek",
   "test": "PeekArticle",
-  "launch": {
-    "window": [1280, 800]
-  },
   "clip": "peek-and-quick-window/pull-link-into-peek.mp4",
   "clip_zoom": 1.0
 }

@@ -17,9 +17,6 @@
   "keys": ["Tab", "Return", "Escape", "Delete"],
   "serve": "fixtures/command-palette",
   "test": "CommandPaletteArticle",
-  "launch": {
-    "window": [1280, 800]
-  },
   "clip": "command-palette/search-a-provider.mp4",
   "clip_zoom": 1.0
 }

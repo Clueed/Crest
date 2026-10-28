@@ -280,7 +280,7 @@ class Run:
         return f"{self.scenario.data['test']}/{name}"
 
     def test_input(self, variables: dict[str, str]) -> dict:
-        window = self.scenario.data.get("launch", {}).get("window", [1280, 800])
+        window = self.scenario.data.get("launch", {}).get("window", [1040, 780])
         return {"server": variables.get("server"), "labels": self.scenario.labels, "window": window}
 
     def capture(self):

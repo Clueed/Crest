@@ -15,9 +15,6 @@
   },
   "serve": "fixtures/split-view",
   "test": "SplitViewArticle",
-  "launch": {
-    "window": [1280, 800]
-  },
   "clip": "split-view/create-split-view.mp4",
   "clip_zoom": 1.0
 }

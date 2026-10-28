@@ -212,7 +212,9 @@ struct Clip {
 
     // MARK: - Static Variables
 
-    static let size = (width: 1280, height: 900)
+    /// The clip's width; its height follows the window's shape, so the
+    /// frame is the same on every side.
+    static let width = 1280
     static let pad = 56
     /// The corner radius of a Crest window, in points; the frame masks the
     /// window to it so no desktop shows at the corners.
@@ -228,6 +230,8 @@ struct Clip {
     let recording: String
     /// The window in recording pixels; its size is even, as the encoder needs.
     let window: (left: Int, top: Int, width: Int, height: Int)
+    /// The clip's size in pixels, with the window `pad` in from each edge.
+    let size: (width: Int, height: Int)
     /// Recording pixels per screen point.
     let scale: Double
     let zoom: Double
@@ -259,6 +263,8 @@ struct Clip {
             Int((width * scale).rounded(.toNearestOrEven)) / 2 * 2,
             Int((height * scale).rounded(.toNearestOrEven)) / 2 * 2
         )
+        let inner = Double(Self.width - 2 * Self.pad)
+        size = (Self.width, Int((inner * height / width).rounded(.toNearestOrEven)) / 2 * 2 + 2 * Self.pad)
 
         // Every step marks activity. Play these at 1x: the pointer's approach
         // to each click and half a second after it, all typing, dragging and
@@ -355,16 +361,12 @@ struct Clip {
     func render(to destinations: [Destination]) throws {
         let times = frameTimes()
         let (width, height) = (Double(window.width), Double(window.height))
-        let inner = (
-            width: Self.size.width - 2 * Self.pad,
-            height: Int((Double(Self.size.width - 2 * Self.pad) * height / width).rounded(.toNearestOrEven)) / 2 * 2
-        )
-        let top = (Self.size.height - inner.height) / 2
+        let inner = (width: size.width - 2 * Self.pad, height: size.height - 2 * Self.pad)
         let radius = (Self.windowRadius * scale * Double(inner.width) / width).rounded(.toNearestOrEven)
         let sRGB = CGColorSpace(name: CGColorSpace.sRGB)!
         // Core Graphics counts up from the bottom.
         let innerRect = CGRect(
-            x: Self.pad, y: Self.size.height - top - inner.height, width: inner.width, height: inner.height)
+            x: Self.pad, y: Self.pad, width: inner.width, height: inner.height)
         let corners = CGPath(roundedRect: innerRect, cornerWidth: radius, cornerHeight: radius, transform: nil)
         let backgrounds = destinations.map { background($0, behind: innerRect, radius: radius) }
 
@@ -382,7 +384,7 @@ struct Clip {
             let process = try Process.start(
                 [
                     "ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba",
-                    "-s", "\(Self.size.width)x\(Self.size.height)", "-r", "\(Int(Self.fps))", "-i", "-",
+                    "-s", "\(size.width)x\(size.height)", "-r", "\(Int(Self.fps))", "-i", "-",
                     "-vf",
                     "scale=out_color_matrix=bt709:out_range=full,"
                         + "setparams=range=pc:colorspace=bt709:color_primaries=bt709:color_trc=iec61966-2-1",
@@ -397,9 +399,9 @@ struct Clip {
             space: sRGB, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)!
         scaled.interpolationQuality = .high
         let frame = CGContext(
-            data: nil, width: Self.size.width, height: Self.size.height, bitsPerComponent: 8,
-            bytesPerRow: Self.size.width * 4, space: sRGB, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
-        let frameBytes = UnsafeRawBufferPointer(start: frame.data, count: Self.size.width * Self.size.height * 4)
+            data: nil, width: size.width, height: size.height, bitsPerComponent: 8, bytesPerRow: size.width * 4,
+            space: sRGB, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        let frameBytes = UnsafeRawBufferPointer(start: frame.data, count: size.width * size.height * 4)
 
         var raw = [UInt8](repeating: 0, count: window.width * window.height * 3)
         var current: CGImage?
@@ -430,7 +432,7 @@ struct Clip {
             let shown = scaled.makeImage()!
 
             for (destination, (background, (_, input))) in zip(destinations, zip(backgrounds, encoders)) {
-                frame.draw(background, in: CGRect(x: 0, y: 0, width: Self.size.width, height: Self.size.height))
+                frame.draw(background, in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
                 frame.saveGState()
                 frame.addPath(corners)
                 frame.clip()
@@ -458,10 +460,10 @@ struct Clip {
 
     /// The page background with the window's soft shadow below the frame.
     private func background(_ destination: Destination, behind frame: CGRect, radius: Double) -> CGImage {
-        let size = CGRect(x: 0, y: 0, width: Self.size.width, height: Self.size.height)
+        let bounds = CGRect(x: 0, y: 0, width: size.width, height: size.height)
         let shadow = CGContext(
-            data: nil, width: Self.size.width, height: Self.size.height, bitsPerComponent: 8,
-            bytesPerRow: Self.size.width, space: CGColorSpaceCreateDeviceGray(),
+            data: nil, width: size.width, height: size.height, bitsPerComponent: 8, bytesPerRow: size.width,
+            space: CGColorSpaceCreateDeviceGray(),
             bitmapInfo: CGImageAlphaInfo.none.rawValue)!
         shadow.setFillColor(gray: 70 / 255, alpha: 1)
         shadow.addPath(
@@ -474,14 +476,14 @@ struct Clip {
                 red: Double(colour.red) / 255, green: Double(colour.green) / 255, blue: Double(colour.blue) / 255,
                 colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!)!)
         let mask = CIImage(cgImage: shadow.makeImage()!).clampedToExtent()
-            .applyingGaussianBlur(sigma: 18).cropped(to: size)
+            .applyingGaussianBlur(sigma: 18).cropped(to: bounds)
         let blended = CIImage(color: .black).applyingFilter(
             "CIBlendWithMask", parameters: [kCIInputBackgroundImageKey: page, kCIInputMaskImageKey: mask]
-        ).cropped(to: size)
+        ).cropped(to: bounds)
         // Blend in sRGB values, as the page's own CSS colour is given.
         let context = CIContext(options: [.workingColorSpace: NSNull(), .outputColorSpace: NSNull()])
         return context.createCGImage(
-            blended, from: size, format: .RGBA8, colorSpace: CGColorSpace(name: CGColorSpace.sRGB))!
+            blended, from: bounds, format: .RGBA8, colorSpace: CGColorSpace(name: CGColorSpace.sRGB))!
     }
 }
 
