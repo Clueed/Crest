@@ -97,6 +97,18 @@ function LinksMenu() {
   );
 }
 
+/** The first stop for the keyboard: hidden until focused, it jumps past the header to `target`. */
+export function SkipLink({ target }: { target: string }) {
+  return (
+    <a
+      href={`#${target}`}
+      className="absolute -top-16 left-4 z-[99] rounded-md bg-ink px-3.5 py-2.5 text-white focus:top-4"
+    >
+      Skip to content
+    </a>
+  );
+}
+
 /**
  * The header every product page shares. It is clear over the page's dark hero, frosted once
  * the page scrolls, and light after the hero. Pages mark their hero with `heroAttribute` and
@@ -108,12 +120,7 @@ function SiteHeader() {
 
   return (
     <>
-      <a
-        href="#main"
-        className="absolute -top-16 left-4 z-[99] rounded-md bg-ink px-3.5 py-2.5 text-white focus:top-4"
-      >
-        Skip to content
-      </a>
+      <SkipLink target="main" />
       <header
         data-light={light || undefined}
         className={cn(

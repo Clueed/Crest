@@ -4,7 +4,6 @@ export const appName = 'Crest';
 export const siteUrl = 'https://crestbrowser.com';
 export const docsRoute = '/docs';
 export const docsImageRoute = '/og/docs';
-export const docsContentRoute = '/llms.mdx/docs';
 /** Help articles lived here before they moved to `docsRoute`; each old URL redirects. */
 export const legacyDocsRoute = '/guides';
 /** Old `legacyDocsRoute` pages whose article now has another name. */
@@ -18,12 +17,9 @@ export const gitConfig = {
   branch: 'main',
 };
 
-const getContentUrl = createGetUrl(docsContentRoute);
-
-export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
-  const segments = [...page.slugs, 'content.md'];
-
-  return { segments, url: getContentUrl(segments, page.locale) };
+/** An article's Markdown for agents: its address with `.md`, such as `/docs/link-routing.md`. */
+export function getPageMarkdownUrl(page: { slugs: string[] }) {
+  return { url: `${[docsRoute, ...page.slugs].join('/')}.md` };
 }
 
 const getImageUrl = createGetUrl(docsImageRoute);

@@ -18,7 +18,6 @@ export function baseOptions(): BaseLayoutProps {
       url: link.url,
       external: isExternal(link.url),
     })),
-    themeSwitch: { enabled: false },
     githubUrl: github,
   };
 }

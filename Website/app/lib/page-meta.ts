@@ -54,6 +54,71 @@ export function webPageStructuredData(page: {
   };
 }
 
+/** The head a Crest Help article needs for search, sharing and agents. */
+export function helpPageMeta(page: {
+  url: string;
+  title: string;
+  description?: string;
+  image: string;
+  markdownUrl: string;
+}): MetaDescriptor[] {
+  const image = `${siteUrl}${page.image}`;
+  const description = page.description ?? '';
+  return [
+    { title: page.title },
+    { name: 'description', content: description },
+    { tagName: 'link', rel: 'canonical', href: page.url },
+    // llms.txt's link relations: this article's Markdown, and the index that covers it.
+    { tagName: 'link', rel: 'alternate', type: 'text/markdown', href: `${siteUrl}${page.markdownUrl}` },
+    { tagName: 'link', rel: 'describedby', type: 'text/plain', href: `${siteUrl}/llms.txt` },
+    { property: 'og:site_name', content: 'Crest' },
+    { property: 'og:locale', content: 'en_US' },
+    { property: 'og:type', content: 'article' },
+    { property: 'og:url', content: page.url },
+    { property: 'og:title', content: page.title },
+    { property: 'og:description', content: description },
+    { property: 'og:image', content: image },
+    { property: 'og:image:width', content: '1200' },
+    { property: 'og:image:height', content: '630' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: page.title },
+    { name: 'twitter:description', content: description },
+    { name: 'twitter:image', content: image },
+  ];
+}
+
+/** schema.org data for a Crest Help article, placed under Help in the site's breadcrumbs. */
+export function helpArticleStructuredData(page: {
+  url: string;
+  title: string;
+  description?: string;
+  image: string;
+  dateModified?: string;
+}) {
+  const helpUrl = `${siteUrl}/docs/`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    '@id': `${page.url}#article`,
+    url: page.url,
+    headline: page.title,
+    description: page.description,
+    image: `${siteUrl}${page.image}`,
+    dateModified: page.dateModified,
+    inLanguage: 'en-US',
+    isPartOf: { '@id': `${siteUrl}/#website` },
+    about: { '@id': `${siteUrl}/#software` },
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Crest', item: `${siteUrl}/` },
+        { '@type': 'ListItem', position: 2, name: 'Help', item: helpUrl },
+        ...(page.url === helpUrl ? [] : [{ '@type': 'ListItem', position: 3, name: page.title, item: page.url }]),
+      ],
+    },
+  };
+}
+
 /** The head every product page shares: search, social cards and app identity. */
 export function productPageMeta(page: ProductPageMeta): MetaDescriptor[] {
   const url = `${siteUrl}${page.path}`;
