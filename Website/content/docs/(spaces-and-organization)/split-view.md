@@ -19,19 +19,19 @@ A one-card placeholder lets you add the next tab without losing the first page.
 
 ## Focus a card
 
-Click or tap a card. On a keyboard, use **Control-Command-Left** and **Control-Command-Right**. The address, Back and Forward, Reload, Find, Reader, page tools, Peek, and extension popups follow the focused card.
+Click or tap a card. On a keyboard, use <kbd>Control-Command-Left</kbd> and <kbd>Control-Command-Right</kbd>. The address, Back and Forward, Reload, Find, Reader, page tools, Peek, and extension popups follow the focused card.
 
 On Mac, turn on **Focus follows pointer** in **Settings → Tabs** to make pointer movement choose the active card automatically.
 
 ## Resize and reorder
 
-Drag a divider to resize columns on Mac or iPad. Crest remembers widths for the window. Use **Shift-Command-Left/Right** to move the focused card, or drag when the interface exposes a reordering target.
+Drag a divider to resize columns on Mac or iPad. Crest remembers widths for the window. Use <kbd>Shift-Command-Left/Right</kbd> to move the focused card, or drag when the interface exposes a reordering target.
 
 In the sidebar, drag the split's header to move the whole group. Drag an individual tab row to move just that tab out of the split, into a folder, or into another Split View. The remaining tabs stay together.
 
 ## Remove or separate tabs
 
-**Remove Tab From Split** takes the focused tab out of the group. **Separate All Tabs** turns every card back into an independent tab; its default shortcut is **Option-Command-U**. Closing the focused card closes that tab while the remaining group survives.
+**Remove Tab From Split** takes the focused tab out of the group. **Separate All Tabs** turns every card back into an independent tab; its default shortcut is <kbd>Option-Command-U</kbd>. Closing the focused card closes that tab while the remaining group survives.
 
 ## iPad and iPhone
 

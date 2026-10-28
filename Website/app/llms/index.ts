@@ -1,5 +1,5 @@
-import { docsLlms } from '@/lib/source';
+import { llmsIndex } from '@/lib/source';
 
 export async function loader() {
-  return new Response(await docsLlms.index());
+  return new Response(await llmsIndex());
 }

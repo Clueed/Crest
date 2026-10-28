@@ -21,7 +21,7 @@ That means the same website can be signed into different accounts in Work and Pe
 
 ## Switch Spaces
 
-Select a Space from the sidebar, swipe or scroll through the Space picker, or use **Option-Command-Left/Right** on a keyboard. **Control-1** through **Control-9** selects a Space by position.
+Select a Space from the sidebar, swipe or scroll through the Space picker, or use <kbd>Option-Command-Left/Right</kbd> on a keyboard. <kbd>Control-1</kbd> through <kbd>Control-9</kbd> selects a Space by position.
 
 Switching changes the whole browser context. The visible tabs, history search, credentials, permissions, and website process pool all follow the selected Space.
 

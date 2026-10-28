@@ -1,6 +1,9 @@
 import { llms, loader } from 'fumadocs-core/source';
+import { applyMdxPreset } from 'fumadocs-mdx/config';
 import { defineDocs } from 'fumadocs-mdx/macro';
-import { docsRoute } from './shared';
+import { remarkAlerts } from './remark-alerts';
+import { remarkKbd } from './remark-kbd';
+import { docsRoute, getPageMarkdownUrl, siteUrl } from './shared';
 
 // A page's date is its last content edit. Renames are skipped, so moving or
 // regrouping help articles does not mark every page as updated. Only the
@@ -23,8 +26,10 @@ export const docs = defineDocs({
     async: true,
     // The macro accepts a date function at build time but types the option as a flag.
     lastModified: lastContentEdit as unknown as true,
+    mdxOptions: applyMdxPreset({ remarkPlugins: (plugins) => [remarkAlerts, remarkKbd, ...plugins] }),
     postprocess: {
-      includeProcessedMarkdown: true,
+      // Agents read each article's Markdown; Fumadocs' `[#id]` heading suffixes would only be noise.
+      includeProcessedMarkdown: { headingIds: false },
     },
   },
 });
@@ -35,7 +40,20 @@ export const source = loader({
 });
 
 export const docsLlms = llms(source, {
-  renderPage: async (page) => `# ${page.data.title} (${page.url})
-
-${await page.data.getText('processed')}`,
+  renderPage: async (page) =>
+    [
+      `# ${page.data.title}`,
+      page.data.description && `> ${page.data.description}`,
+      `Source: ${siteUrl}${page.url}/`,
+      await page.data.getText('processed'),
+    ]
+      .filter(Boolean)
+      .join('\n\n'),
 });
+
+/** `llms.txt`: the help index, with each article linked to its Markdown at its full address. */
+export async function llmsIndex() {
+  const markdownUrls = new Map(source.getPages().map((page) => [page.url, getPageMarkdownUrl(page).url]));
+  const index = await docsLlms.index();
+  return index.replace(/\]\((\/[^)\s]*)\)/g, (_, url: string) => `](${siteUrl}${markdownUrls.get(url) ?? url})`);
+}

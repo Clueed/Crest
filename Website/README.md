@@ -24,6 +24,27 @@ existing links keep working. An old page whose article has a new name is
 listed in `renamedDocs` in `app/lib/shared.ts`. Do not publish new pages
 under `/guides/`.
 
+## Write articles
+
+Write articles in plain Markdown, which agents read as written at
+`/llms.txt`, `/llms-full.txt`, and each article's Markdown address. Use MDX
+only where an article needs a component, such as the cards on the Help home
+page.
+
+- **Procedures.** A numbered list renders as steps.
+- **Callouts.** Use GitHub's alert syntax. Text after the marker is the
+  callout's title, and the kinds are `NOTE`, `TIP`, `IMPORTANT`, `WARNING`,
+  and `CAUTION`:
+
+  ```md
+  > [!WARNING] Use the signed Crest release
+  > 1Password checks the browser's code signature.
+  ```
+
+- **Keys.** Write a shortcut the Apple way inside `<kbd>`, such as
+  `<kbd>Option-Shift-Command-N</kbd>`. It shows as key caps (⌥ ⇧ ⌘ N), and
+  screen readers hear the words.
+
 ## Styles
 
 Every page is styled with Tailwind classes. Crest's palette (`paper`, `ink`,
@@ -43,7 +64,7 @@ Arc list, and `y` scrolls the page by that many pixels.
 
 ## Work on the site
 
-Install Node.js 20 or later, then:
+Install Node.js 22.22 or later, then:
 
 ```sh
 npm install

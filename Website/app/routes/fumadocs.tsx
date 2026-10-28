@@ -9,7 +9,7 @@ export const handle: PageHandle = { htmlClassName: 'help', bodyClassName: 'flex 
 
 function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <RootProvider search={{ SearchDialog }} theme={{ enabled: false }}>
+    <RootProvider search={{ SearchDialog }} theme={{ enableColorScheme: false }}>
       {children}
     </RootProvider>
   );
