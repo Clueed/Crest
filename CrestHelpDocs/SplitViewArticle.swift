@@ -7,7 +7,7 @@ final class SplitViewArticle: HelpArticleCase {
     // MARK: - Variables
 
     private var recipeTab: XCUIElement {
-        app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'tab-' AND label == 'Lemon Tart'")).firstMatch
+        app.element(labelled: "Lemon Tart", identifierPrefix: "tab-")
     }
 
     private var conversionsPage: XCUIElement { app.webViews["Kitchen Conversions"] }
@@ -45,12 +45,9 @@ final class SplitViewArticle: HelpArticleCase {
         try launch()
         try setup {
             key("open-settings", ",", .command, settle: 1.5)
-            try click("open-general", element("settings-general"))
-            try scroll("show-developer", element("settings-form-general"), lines: 60)
-            try click("hide-developer-toolbar", element("automatic-developer-toolbar-toggle"))
             try click("open-shortcuts", element("settings-shortcuts"), settle: 1.5)
             try type("find-shortcut", "Split With Next Tab", into: element("shortcut-search"), settle: 1.0)
-            key("close-settings", "w", .command, settle: 1.0)
+            try hideDeveloperToolbar()
             key("close-start-tab", "w", .command, settle: 1.0)
             try openTab("recipe", "recipe.html")
             try click("link-menu", app.links["kitchen conversions"], right: true, settle: 1.0)
@@ -58,11 +55,5 @@ final class SplitViewArticle: HelpArticleCase {
             key("clear-link-highlight", "r", .command, settle: 1.5)
             try openTab("conversions", "conversions.html")
         }
-    }
-
-    private func openTab(_ name: String, _ page: String) throws {
-        key("new-tab-\(name)", "t", .command, settle: 1.0)
-        try type("enter-\(name)", try fixture(page), into: element("command-palette-field"))
-        key("open-\(name)", XCUIKeyboardKey.return.rawValue, settle: 2.0)
     }
 }

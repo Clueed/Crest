@@ -1,9 +1,10 @@
 # Help article scenarios
 
 These scripts keep Crest Help articles in `Website/content/docs/` true to the
-app. Each covered article has a scenario in `Website/helpdocs/<slug>.yaml`.
-The runner builds a test copy of Crest, replays the scenario through the
-accessibility tree, and then:
+app. Each covered article has a scenario: its metadata in
+`Website/helpdocs/<slug>.yaml` and its steps in a Swift UI test in
+`CrestHelpDocs/`. The runner builds a test copy of Crest, replays the
+scenario through XCUITest, and then:
 
 - regenerates the article's screenshots and clip,
 - checks every UI string the article shows against the running app, and
@@ -14,8 +15,8 @@ or an agent fixes the wording.
 
 ## Requirements
 
-- A Mac GUI session that has granted Accessibility and Screen Recording to the
-  terminal. The runner can't run in CI.
+- A Mac GUI session that has granted Screen Recording to the terminal. The
+  runner can't run in CI.
 - uv, ffmpeg and Xcode. Run `npm ci` in `Website` so the check stage can
   build the site.
 - A display of at least 1440×900. On smaller displays the window shrinks to
@@ -32,11 +33,11 @@ Scripts/helpdocs/run link-routing --stage check --stage verify --keep
 
 The stages run in this order:
 
-1. **build**: builds an unsigned Debug copy of Crest into the work folder.
-2. **capture**: launches it in an isolated, seeded session, runs `setup`
-   unrecorded, then records the screen while it replays `steps`. It takes a
-   window-only PNG for each `capture`, and reports which ones differ from
-   the published images.
+1. **build**: builds an unsigned Debug copy of Crest and the `CrestHelpDocs`
+   test runner into the work folder.
+2. **capture**: records the screen while the scenario's `testCapture` runs.
+   It takes a window-only PNG for each `capture`, and reports which ones
+   differ from the published images.
 3. **polish**: turns the recording into the article's clip. It zooms in on
    clicks, speeds up idle time, and frames the window on the docs page
    background. It renders one clip per site theme, using the
@@ -57,95 +58,88 @@ The stages run in this order:
    - a published asset isn't referenced by the article.
 
    It also builds the website.
-5. **verify**: relaunches the app, runs `setup`, then replays `verify`.
+5. **verify**: runs the scenario's `testVerify` in a fresh session.
 
 Afterwards the test copy is quit, unregistered from Launch Services, and
 deleted, unless you pass `--keep`. Recordings, captures, `run.json` and
 `report.json` stay in the work folder (`--work`, default
 `$TMPDIR/crest-helpdocs`), outside the repository.
 
-Run `Scripts/helpdocs/axdump` while the test copy is running to print its
-accessibility tree when you choose targets for a new scenario.
-
-## Swift scenarios
-
-A scenario with a `test` key keeps its steps in Swift, in
-`CrestHelpDocs/<test>.swift`, a UI-testing target on its own `CrestHelpDocs`
-scheme that no test suite runs. The YAML then holds only `article`,
-`section`, `sources`, `labels`, `keys`, `serve`, `launch.window`, `assets`,
-`clip` and `clip_zoom`. The test subclasses `HelpArticleCase` and declares:
-
-- `testCapture`: launch, run unrecorded steps in `setup { }`, then the
-  recorded steps in `record { }`;
-- `testVerify`: launch, the same setup, then the article's steps and checks
-  with `expect`.
-
-Steps are methods named like the actions below: `click`, `type`, `drag`,
-`scroll`, `key`, `expect` and `wait`, each taking a step name and an
-`XCUIElement`. Find targets with XCUITest queries, such as
-`element("settings-general")` for an identifier or
-`app.webViews["Kitchen Conversions"]`. Use `label("name")` for a declared
-label and `fixture("page.html")` for a page on the fixture server.
-
-The runner starts each test with `xcodebuild test-without-building`, hands
-it the server and labels through `HELPDOCS_RUN`, and records the screen
-around `testCapture`. The test attaches `run.json` to its result, because the
-runner app is sandboxed, and the runner exports it with `xcresulttool`.
-
-The test runner has no Accessibility access, so it moves the pointer by
-hovering along the path; the approach to a click looks stepped next to a
-YAML scenario's.
-
-## Scenario format
+## Scenario metadata
 
 | Key | Contents |
 | --- | --- |
 | `article` | The article, relative to `Website/` |
 | `section` | Optional heading; the check then covers only that section |
-| `sources` | Glob patterns for source files whose changes may make the article stale |
-| `labels` | Every Crest UI string the scenario or article relies on, declared once. Refer to one as `$name` |
+| `sources` | Glob patterns for source files whose changes may make the article stale. The scenario, its article and its Swift test always count |
+| `labels` | Every Crest UI string the scenario or article relies on, declared once. The test reads one with `label("name")` |
 | `keys` | Bold terms in the article that name keyboard keys rather than UI text |
-| `serve` | A fixture folder next to the scenario, served on a free local port as `{server}` |
-| `launch` | `env` for the test copy and the requested `window` size |
-| `setup` | Steps that prepare the app without being recorded. The text they pass counts as seen |
-| `steps` | The recorded steps |
+| `serve` | A fixture folder next to the scenario, served on a free local port; the test reads a page's address with `fixture("page.html")` |
+| `test` | The Swift test class in `CrestHelpDocs/` |
+| `launch` | The requested `window` size |
 | `assets` | Capture name to image path, relative to the article's folder |
 | `clip` | The light clip's path, relative to the article's folder. The dark clip adds `.dark` before the extension. Each clip has a poster beside it with `.poster` before the extension. The article shows them with `<Clip src={…} dark={…} poster={…} darkPoster={…} label="…" />` |
 | `clip_zoom` | How far the clip zooms in on clicks; `1.0` keeps the whole window (default `1.7`) |
-| `verify` | The article's own steps, followed by checks of the outcome |
 
-Each step has a `name` and an `action`:
+## Scenario steps
 
-| Action | Keys |
+The test subclasses `HelpArticleCase` in `CrestHelpDocs/` and declares:
+
+- `testCapture`: `launch`, unrecorded steps in `setup { }`, whose text
+  counts as seen, then the clip's steps in `record { }`;
+- `testVerify`: the same launch and setup, then the article's own steps
+  and checks of the outcome.
+
+Each step takes a name, shown in the run and the clip's log, and an
+`XCUIElement`:
+
+| Step | Does |
 | --- | --- |
-| `click` | `target`, and optionally `button: right` for a secondary click |
-| `type` | `text`, typed one character at a time. With `target`, it clicks the field first and fails unless the field takes focus and then holds the text. Without one, it types into the field that already has focus, such as the command palette after ⌘L |
-| `drag` | `target`, and either `by` (points) or `to`, a target to drop on at `at`, a fraction of its frame (default `[0.5, 0.5]`); optionally `duration` and `hold` before release |
-| `move` | `target`, and optionally `at`, a fraction of its frame (default `[0.5, 0.5]`) |
-| `scroll` | `target`, `lines` |
-| `key` | `keys`, a System Events phrase for a shortcut or special key, such as `keystroke "," using command down` or `key code 48`. Plain text such as `keystroke "gith"` fails; System Events sends it all at once, so it looks pasted in a clip. Use `type` |
-| `open_url` | `url`, opened in the test copy from another app |
-| `expect` | `target`, and optionally `attribute` (default `AXValue`) and `contains`; or `absent: true` to wait until nothing matches `target` |
-| `wait` | `seconds` |
+| `click` | Clicks the target; `right: true` for a secondary click |
+| `type` | Types text one character at a time. With `into:`, clicks the field first and fails unless it takes focus and then holds the text. Without one, types into the field that has focus, such as the command palette after ⌘L |
+| `drag` | Drags the target `onto:` another or `by:` an offset in points, over `duration`, holding `hold` seconds before release |
+| `move` | Rests the pointer at a fraction of the target's frame (default its centre) |
+| `scroll` | Scrolls the target by `lines` |
+| `key` | Presses a key with modifiers, such as `key("open-settings", ",", .command)` |
+| `open` | Opens a URL in the test copy from outside it |
+| `expect` | Waits for the target; with `contains:`, for its value (or `in: \.label`) to include the text. A switch's value reads `1` when on |
+| `wait` | Waits a number of seconds |
+| `capture` | Has the runner screenshot the window; with `around:`, only the frame those elements share and `pad` points around it, such as the command palette |
+| `collectText` | Records the window's text, for UI that is gone by the end |
+| `observe` | Records an open popup's menu items, which the window's text leaves out |
 
-Any step can add:
-- `settle`: seconds to wait afterwards;
-- `capture`: take a screenshot with this name;
-- `crop`: with `capture`, keep only the frame shared by the targets in
-  `around` and `pad` points around it (default 16), such as the command
-  palette rather than the whole window;
-- `collect`: record the window's text, for UI that is gone by the end;
-- `observe`: a popup's label, to record its menu items as seen strings.
+Every step but `capture` takes `settle:`, seconds to wait afterwards.
+`hideDeveloperToolbar()` and `openTab(_:_:)` cover setup that several
+scenarios share.
 
-A target matches on `identifier`, `identifier_prefix`, `role` and `label`.
-`within` scopes the search to another target, such as an open popup.
+Find targets with XCUITest queries: `element("settings-general")` for an
+identifier, `app.webViews["Kitchen Conversions"]` for a type and label, and
+`app.element(labelled:identifierPrefix:)` for an identifier that carries an
+ID, such as a sidebar tab. Scope menu items to their popup, such as
+`popup.menuItems["Work"]`; a bare "Work" also matches the menu bar's Spaces
+menu. When a target isn't found, the step prints the app's accessibility
+tree to `test.log` in the work folder.
+
+### How the runner and the test talk
+
+The runner starts each test with `xcodebuild test-without-building` and
+hands it the server, labels and window size through `HELPDOCS_RUN`. The test
+runner app is sandboxed and may only read outside its container, so:
+
+- the test attaches `run.json`, its steps, clicks and every string seen, to
+  its result, and the runner exports it with `xcresulttool`;
+- `capture` prints a request; the runner takes the window with
+  `screencapture -l`, which leaves its corners transparent, and the test
+  waits for the file.
+
+The test runner has no Accessibility access, so it moves the pointer by
+hovering along the path, for a second at most. The approach to a click is
+stepped, and on a busy screen such as Settings it can jump.
 
 ## Writing a scenario
 
 - Prefer accessibility identifiers to labels, so copy changes only touch
   `labels`.
-- Look for menu items `within` their popup. A bare "Work" also matches the
-  menu bar's Spaces menu.
 - Use a fixture page from `serve` when the scenario needs web content, so
   captures don't depend on the network or on a live site. Write strings from
   fixture pages inline; `labels` is only for Crest's own text.

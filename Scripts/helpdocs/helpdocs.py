@@ -22,7 +22,6 @@ from pathlib import Path
 
 import yaml
 
-from driver import Driver, StepFailed
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent.parent
 WEBSITE = REPOSITORY_ROOT / "Website"
@@ -31,7 +30,6 @@ STAGES = ("build", "capture", "polish", "check", "verify")
 LSREGISTER = (
     "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
 )
-MENU_BAR, DOCK = 33, 55
 
 
 def site_backgrounds() -> dict[str, tuple[int, int, int]]:
@@ -45,6 +43,10 @@ def site_backgrounds() -> dict[str, tuple[int, int, int]]:
     if "light" not in backgrounds:
         raise SystemExit("Website/app/app.css declares no --color-fd-background in @theme")
     return backgrounds
+
+
+class StepFailed(Exception):
+    """A stage could not run as written."""
 
 
 # MARK: - Scenarios
@@ -66,9 +68,10 @@ class Scenario:
         return [cls(path) for path in sorted(SCENARIOS.glob("*.yaml"))]
 
     def sources(self) -> list[str]:
-        own = [str(self.path.relative_to(REPOSITORY_ROOT)), str(self.article.relative_to(REPOSITORY_ROOT))]
-        if "test" in self.data:
-            own += [f"CrestHelpDocs/{self.data['test']}.swift", "CrestHelpDocs/HelpArticleCase.swift"]
+        own = [
+            str(self.path.relative_to(REPOSITORY_ROOT)), str(self.article.relative_to(REPOSITORY_ROOT)),
+            f"CrestHelpDocs/{self.data['test']}.swift", "CrestHelpDocs/HelpArticleCase.swift",
+        ]
         return own + self.data.get("sources", [])
 
     def affected_by(self, changed: list[str]) -> bool:
@@ -137,10 +140,9 @@ class TestApp:
     """An unsigned Debug build launched in an isolated, seeded session."""
 
     def __init__(self, work: Path):
-        self.derived_data = work / "DerivedData"
+        self.derived_data = (work / "DerivedData").resolve()
         self.path = self.derived_data / "Build/Products/Debug/Crest.app"
         self.executable = self.path / "Contents/MacOS/Crest"
-        self.log = work / "crest.log"
         self.runner = self.derived_data / "Build/Products/Debug/CrestHelpDocs-Runner.app"
 
     def build(self):
@@ -181,7 +183,9 @@ class TestApp:
             failure = None
             for line in process.stdout:
                 log.write(line)
-                if line.startswith(("ok  ", "    ")) and " t = " not in line:
+                if line.startswith("helpdocs-capture "):
+                    self.capture(json.loads(line.split(" ", 1)[1]), out)
+                elif line.startswith(("ok  ", "    ")) and " t = " not in line:
                     print(line, end="")
                 elif " error: " in line and failure is None:
                     failure = line.split(" error: ", 1)[1].strip()
@@ -206,39 +210,38 @@ class TestApp:
         subprocess.run(["pkill", "-f", str(self.executable)], capture_output=True)
         time.sleep(1)
 
-    def launch(self, scenario: Scenario):
-        if not self.executable.exists():
-            raise StepFailed("no test build; run the build stage first")
-        self.quit()
-        launch = scenario.data.get("launch", {})
-        env = os.environ | {key: str(value) for key, value in launch.get("env", {}).items()}
-        with open(self.log, "w") as log:
-            subprocess.Popen([str(self.executable)], env=env, stdout=log, stderr=subprocess.STDOUT)
-        width, height = self.fit(launch.get("window", [1280, 800]))
-        for _ in range(60):
-            count = osascript('tell application "System Events" to count windows of process "Crest"')
-            if count not in ("", "0"):
-                break
-            time.sleep(0.5)
-        osascript(
-            f"""tell application "System Events" to tell process "Crest"
-                set frontmost to true
-                set position of window 1 to {{0, {MENU_BAR}}}
-                set size of window 1 to {{{width}, {height}}}
-            end tell"""
-        )
-        time.sleep(2)
+    def capture(self, request: dict, out: Path):
+        """Screenshot the test copy's window for a test, which waits for the file.
 
-    def fit(self, requested):
+        `screencapture -l` takes the window alone, with transparent corners and
+        nothing that overlaps it. A `crop` keeps that frame, in screen points."""
         import Quartz
 
-        display = Quartz.CGDisplayBounds(Quartz.CGMainDisplayID())
-        width = min(requested[0], int(display.size.width) - 24)
-        height = min(requested[1], int(display.size.height) - MENU_BAR - DOCK)
-        if (width, height) != tuple(requested):
-            print(f"    display is {display.size.width:.0f}x{display.size.height:.0f}; window {width}x{height}"
-                  f" instead of {requested[0]}x{requested[1]}")
-        return width, height
+        pid = int(subprocess.check_output(["pgrep", "-nf", str(self.executable)]).split()[0])
+        windows = Quartz.CGWindowListCopyWindowInfo(
+            Quartz.kCGWindowListOptionOnScreenOnly | Quartz.kCGWindowListExcludeDesktopElements,
+            Quartz.kCGNullWindowID,
+        )
+        candidates = [w for w in windows if w["kCGWindowOwnerPID"] == pid and w["kCGWindowLayer"] == 0]
+        info = max(candidates, key=lambda w: w["kCGWindowBounds"]["Width"] * w["kCGWindowBounds"]["Height"])
+        partial = out / f"{request['name']}.partial.png"
+        subprocess.run(["screencapture", "-x", "-o", f"-l{info['kCGWindowNumber']}", str(partial)], check=True)
+        if request.get("crop"):
+            from PIL import Image
+
+            left, top, width, height = request["crop"]
+            bounds = info["kCGWindowBounds"]
+            image = Image.open(partial)
+            scale = image.width / bounds["Width"]
+            box = (
+                max(round((left - bounds["X"]) * scale), 0),
+                max(round((top - bounds["Y"]) * scale), 0),
+                min(round((left + width - bounds["X"]) * scale), image.width),
+                min(round((top + height - bounds["Y"]) * scale), image.height),
+            )
+            image.crop(box).save(partial)
+        # Renamed whole, so the test never reads a half-written file.
+        partial.rename(out / f"{request['name']}.png")
 
     def remove(self):
         """Quit, unregister every bundle inside the build, then delete it."""
@@ -253,10 +256,6 @@ class TestApp:
         shutil.rmtree(self.path)
         shutil.rmtree(self.runner, ignore_errors=True)
         print(f"ok  removed test build ({len(bundles)} bundles unregistered)")
-
-
-def osascript(script: str) -> str:
-    return subprocess.run(["osascript", "-e", script], capture_output=True, text=True).stdout.strip()
 
 
 # MARK: - Stages
@@ -277,61 +276,33 @@ class Run:
     def run_log(self) -> Path:
         return self.out / "run.json"
 
-    def driver(self, out: Path, variables: dict[str, str]) -> Driver:
-        driver = Driver(self.app.path, "Crest", self.scenario.labels, out)
-        driver.variables = variables
-        return driver
+    def test(self, name: str) -> str:
+        return f"{self.scenario.data['test']}/{name}"
+
+    def test_input(self, variables: dict[str, str]) -> dict:
+        window = self.scenario.data.get("launch", {}).get("window", [1280, 800])
+        return {"server": variables.get("server"), "labels": self.scenario.labels, "window": window}
 
     def capture(self):
-        """Replay `steps` while recording the screen, after an unrecorded `setup`."""
+        """Record the screen while the scenario's `testCapture` runs.
+
+        The test logs its steps on the same clock, so the clip lines up however
+        long the launch and setup took."""
         out = self.out / "capture"
         shutil.rmtree(out, ignore_errors=True)
         out.mkdir(parents=True)
         with self.scenario.fixture_server() as variables:
-            if "test" in self.scenario.data:
-                self.record_test(out, variables)
-            else:
-                self.app.launch(self.scenario)
-                driver = self.driver(out, variables)
-                driver.run(self.scenario.data.get("setup", []), collect=True)
-                self.record(driver, out)
-        self.compare_captures(out)
-
-    def test_input(self, variables: dict[str, str]) -> dict:
-        launch = self.scenario.data.get("launch", {})
-        return {"server": variables.get("server"), "labels": self.scenario.labels, "window": launch.get("window", [1280, 800])}
-
-    def record_test(self, out: Path, variables: dict[str, str]):
-        """Record the screen while the scenario's Swift `testCapture` runs.
-
-        The test writes run.json with times on the same clock, so the clip
-        lines up however long the build and setup took."""
-        recording_started = time.time()
-        recorder = subprocess.Popen(["screencapture", "-v", "-k", "-x", str(out / "raw.mov")])
-        try:
-            self.app.run_test(f"{self.scenario.data['test']}/testCapture", self.test_input(variables), out)
-        finally:
-            time.sleep(1.5)
-            recorder.send_signal(2)
-            recorder.wait()
+            recording_started = time.time()
+            recorder = subprocess.Popen(["screencapture", "-v", "-k", "-x", str(out / "raw.mov")])
+            try:
+                self.app.run_test(self.test("testCapture"), self.test_input(variables), out)
+            finally:
+                time.sleep(1.5)
+                recorder.send_signal(2)
+                recorder.wait()
         log = json.loads((out / "run.json").read_text()) | {"recording_started": recording_started}
         self.run_log.write_text(json.dumps(log, indent=2))
-
-    def record(self, driver: Driver, out: Path):
-        recording_started = time.time()
-        recorder = subprocess.Popen(["screencapture", "-v", "-k", "-x", str(out / "raw.mov")])
-        time.sleep(1.5)
-        # The recording starts here; setup steps belong to no clip.
-        driver.started = time.time()
-        driver.log |= {"started": driver.started, "steps": [], "clicks": []}
-        try:
-            driver.run(self.scenario.data["steps"])
-        finally:
-            time.sleep(1.5)
-            recorder.send_signal(2)
-            recorder.wait()
-        log = driver.finish() | {"recording_started": recording_started}
-        self.run_log.write_text(json.dumps(log, indent=2))
+        self.compare_captures(out)
 
     def compare_captures(self, out: Path):
         from PIL import Image, ImageChops
@@ -414,13 +385,7 @@ class Run:
         shutil.rmtree(out, ignore_errors=True)
         out.mkdir(parents=True)
         with self.scenario.fixture_server() as variables:
-            if "test" in self.scenario.data:
-                self.app.run_test(f"{self.scenario.data['test']}/testVerify", self.test_input(variables), out)
-                return
-            self.app.launch(self.scenario)
-            driver = self.driver(out, variables)
-            driver.run(self.scenario.data.get("setup", []))
-            driver.run(self.scenario.data["verify"])
+            self.app.run_test(self.test("testVerify"), self.test_input(variables), out)
 
     def report(self) -> bool:
         print(f"\n{self.scenario.slug}: {'FAILED' if self.problems else 'passed'}")

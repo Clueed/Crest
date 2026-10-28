@@ -1,6 +1,6 @@
 # Pull a link into Peek on Mac: drag a page link, watch the live preview
 # follow the pointer, and release to keep it open as a Peek.
-# Format and actions: Scripts/helpdocs/README.md.
+# Steps: CrestHelpDocs/PeekArticle.swift. Format: Scripts/helpdocs/README.md.
 article: content/docs/(browse-faster)/peek-and-quick-window.mdx
 section: Pull a link into Peek on Mac
 sources:
@@ -18,72 +18,8 @@ keys: [Option]
 # Served on a free local port as {server} while the scenario runs. Strings
 # from these pages are written inline; `labels` holds only Crest's own text.
 serve: fixtures/peek
+test: PeekArticle
 launch:
-  # Nothing is saved between runs.
-  env: {CREST_ISOLATED_SESSION: 1, CREST_SHOWCASE_SESSION: 1}
   window: [1280, 800]
-setup:
-  # Unrecorded. Confirm the default, hide the developer toolbar that local
-  # pages turn on, and open the fixture page in a new tab.
-  - name: open-settings
-    action: key
-    keys: keystroke "," using command down
-    settle: 1.5
-  - {name: open-links, action: click, target: {identifier: settings-links}}
-  - name: drag-to-peek-is-on
-    action: expect
-    target: {identifier: drag-links-to-peek-toggle}
-    contains: "1"
-  - {name: open-general, action: click, target: {identifier: settings-general}}
-  - {name: show-developer, action: scroll, target: {identifier: settings-form-general}, lines: 60}
-  - {name: hide-developer-toolbar, action: click, target: {identifier: automatic-developer-toolbar-toggle}}
-  - name: close-settings
-    action: key
-    keys: keystroke "w" using command down
-    settle: 1.0
-  - name: new-tab
-    action: key
-    keys: keystroke "t" using command down
-    settle: 1.0
-  - {name: enter-address, action: type, target: {identifier: command-palette-field}, text: "{server}/"}
-  - name: open-page
-    action: key
-    keys: key code 36
-    settle: 2.5
-steps:
-  - {name: pause, action: wait, seconds: 0.8}
-  - name: pull-link
-    action: drag
-    target: {role: AXLink, label: mountain weather forecast}
-    by: [90, 150]
-    duration: 1.4
-    hold: 1.2
-    settle: 1.5
-    collect: true                  # Peek's controls are gone once it becomes a tab
-  - name: open-in-tab              # promote into the current Space
-    action: click
-    target: {identifier: peek-open-selected-space}
-    settle: 0.5
-  - name: rest-pointer             # off the vanished controls, onto blank page space
-    action: move
-    target: {role: AXWebArea, label: Mountain Weather}
-    at: [0.5, 0.85]
-    settle: 3.0
 clip: peek-and-quick-window/pull-link-into-peek.mp4
 clip_zoom: 1.0                   # the preview sits beside the pointer; zooming in would crop it
-verify:
-  # Drag the link again, then promote the Peek into a tab with its controls.
-  - name: pull-link
-    action: drag
-    target: {role: AXLink, label: mountain weather forecast}
-    by: [90, 150]
-    settle: 2.0
-  - {name: peek-is-open, action: expect, target: {identifier: peek-close-control}}
-  - name: peek-shows-link
-    action: expect
-    target: {role: AXWebArea, label: Mountain Weather}
-  - {name: open-in-tab, action: click, target: {identifier: peek-open-selected-space}, settle: 1.5}
-  - name: tab-is-active
-    action: expect
-    target: {role: AXButton, label: Mountain Weather, identifier_prefix: tab-}
-    contains: Active
