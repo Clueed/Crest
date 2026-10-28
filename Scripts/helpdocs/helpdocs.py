@@ -67,6 +67,8 @@ class Scenario:
 
     def sources(self) -> list[str]:
         own = [str(self.path.relative_to(REPOSITORY_ROOT)), str(self.article.relative_to(REPOSITORY_ROOT))]
+        if "test" in self.data:
+            own += [f"CrestHelpDocs/{self.data['test']}.swift", "CrestHelpDocs/HelpArticleCase.swift"]
         return own + self.data.get("sources", [])
 
     def affected_by(self, changed: list[str]) -> bool:
@@ -139,15 +141,14 @@ class TestApp:
         self.path = self.derived_data / "Build/Products/Debug/Crest.app"
         self.executable = self.path / "Contents/MacOS/Crest"
         self.log = work / "crest.log"
+        self.runner = self.derived_data / "Build/Products/Debug/CrestHelpDocs-Runner.app"
 
     def build(self):
         entitlements = Path(
             os.environ.get("CREST_MAC_ENTITLEMENTS", Path.home() / ".config/crest/Crest-adhoc.entitlements")
         )
         command = [
-            "xcodebuild", "-project", str(REPOSITORY_ROOT / "Crest.xcodeproj"), "-scheme", "Crest",
-            "-configuration", "Debug", "-destination", "platform=macOS", "-derivedDataPath", str(self.derived_data),
-            "CODE_SIGN_IDENTITY=-", "build",
+            *self.xcodebuild(), "-configuration", "Debug", "CODE_SIGN_IDENTITY=-", "build-for-testing",
         ]
         if entitlements.exists():
             command.insert(-1, f"CREST_MAC_ENTITLEMENTS={entitlements}")
@@ -156,6 +157,49 @@ class TestApp:
             if subprocess.run(command, stdout=log, stderr=subprocess.STDOUT).returncode != 0:
                 raise StepFailed(f"build failed; see {log.name}")
         print(f"ok  build ({time.time() - started:.0f} s)")
+
+    def xcodebuild(self) -> list[str]:
+        """The CrestHelpDocs scheme builds Crest and the runner that replays Swift scenarios."""
+        return [
+            "xcodebuild", "-project", str(REPOSITORY_ROOT / "Crest.xcodeproj"), "-scheme", "CrestHelpDocs",
+            "-destination", "platform=macOS", "-derivedDataPath", str(self.derived_data),
+        ]
+
+    def run_test(self, test: str, input: dict, out: Path):
+        """Run one test of the CrestHelpDocs target, handing it `input` as HELPDOCS_RUN."""
+        if not self.runner.exists():
+            raise StepFailed("no test build; run the build stage first")
+        self.quit()
+        (out / "input.json").write_text(json.dumps(input))
+        results = out / "results.xcresult"
+        shutil.rmtree(results, ignore_errors=True)
+        env = os.environ | {"TEST_RUNNER_HELPDOCS_RUN": str(out / "input.json")}
+        command = [*self.xcodebuild(), "-resultBundlePath", str(results), f"-only-testing:CrestHelpDocs/{test}",
+                   "test-without-building"]
+        with open(out / "test.log", "w") as log:
+            process = subprocess.Popen(command, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            failure = None
+            for line in process.stdout:
+                log.write(line)
+                if line.startswith(("ok  ", "    ")) and " t = " not in line:
+                    print(line, end="")
+                elif " error: " in line and failure is None:
+                    failure = line.split(" error: ", 1)[1].strip()
+            if process.wait() != 0:
+                raise StepFailed(failure or f"{test} failed; see {log.name}")
+        self.export_attachments(results, out)
+
+    def export_attachments(self, results: Path, out: Path):
+        """Copy the files a test attached, such as run.json, into `out` under their names."""
+        exported = out / "attachments"
+        shutil.rmtree(exported, ignore_errors=True)
+        subprocess.run(["xcrun", "xcresulttool", "export", "attachments", "--path", str(results),
+                        "--output-path", str(exported)], check=True, capture_output=True)
+        for test in json.loads((exported / "manifest.json").read_text()):
+            for attachment in test["attachments"]:
+                # Xcode appends "_<index>_<UUID>" to the attachment's name.
+                name = re.sub(r"_\d+_[0-9A-F-]{36}(?=\.)", "", attachment["suggestedHumanReadableName"])
+                shutil.copyfile(exported / attachment["exportedFileName"], out / name)
 
     def quit(self):
         # Match this build's executable only, never the person's own Crest.
@@ -202,9 +246,12 @@ class TestApp:
         if not self.path.exists():
             return
         bundles = [self.path] + sorted(self.path.rglob("*.app"))
+        if self.runner.exists():
+            bundles.append(self.runner)
         for bundle in bundles:
             subprocess.run([LSREGISTER, "-u", str(bundle)], capture_output=True)
         shutil.rmtree(self.path)
+        shutil.rmtree(self.runner, ignore_errors=True)
         print(f"ok  removed test build ({len(bundles)} bundles unregistered)")
 
 
@@ -241,11 +288,34 @@ class Run:
         shutil.rmtree(out, ignore_errors=True)
         out.mkdir(parents=True)
         with self.scenario.fixture_server() as variables:
-            self.app.launch(self.scenario)
-            driver = self.driver(out, variables)
-            driver.run(self.scenario.data.get("setup", []), collect=True)
-            self.record(driver, out)
+            if "test" in self.scenario.data:
+                self.record_test(out, variables)
+            else:
+                self.app.launch(self.scenario)
+                driver = self.driver(out, variables)
+                driver.run(self.scenario.data.get("setup", []), collect=True)
+                self.record(driver, out)
         self.compare_captures(out)
+
+    def test_input(self, variables: dict[str, str]) -> dict:
+        launch = self.scenario.data.get("launch", {})
+        return {"server": variables.get("server"), "labels": self.scenario.labels, "window": launch.get("window", [1280, 800])}
+
+    def record_test(self, out: Path, variables: dict[str, str]):
+        """Record the screen while the scenario's Swift `testCapture` runs.
+
+        The test writes run.json with times on the same clock, so the clip
+        lines up however long the build and setup took."""
+        recording_started = time.time()
+        recorder = subprocess.Popen(["screencapture", "-v", "-k", "-x", str(out / "raw.mov")])
+        try:
+            self.app.run_test(f"{self.scenario.data['test']}/testCapture", self.test_input(variables), out)
+        finally:
+            time.sleep(1.5)
+            recorder.send_signal(2)
+            recorder.wait()
+        log = json.loads((out / "run.json").read_text()) | {"recording_started": recording_started}
+        self.run_log.write_text(json.dumps(log, indent=2))
 
     def record(self, driver: Driver, out: Path):
         recording_started = time.time()
@@ -344,6 +414,9 @@ class Run:
         shutil.rmtree(out, ignore_errors=True)
         out.mkdir(parents=True)
         with self.scenario.fixture_server() as variables:
+            if "test" in self.scenario.data:
+                self.app.run_test(f"{self.scenario.data['test']}/testVerify", self.test_input(variables), out)
+                return
             self.app.launch(self.scenario)
             driver = self.driver(out, variables)
             driver.run(self.scenario.data.get("setup", []))

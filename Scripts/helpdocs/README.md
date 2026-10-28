@@ -67,6 +67,35 @@ deleted, unless you pass `--keep`. Recordings, captures, `run.json` and
 Run `Scripts/helpdocs/axdump` while the test copy is running to print its
 accessibility tree when you choose targets for a new scenario.
 
+## Swift scenarios
+
+A scenario with a `test` key keeps its steps in Swift, in
+`CrestHelpDocs/<test>.swift`, a UI-testing target on its own `CrestHelpDocs`
+scheme that no test suite runs. The YAML then holds only `article`,
+`section`, `sources`, `labels`, `keys`, `serve`, `launch.window`, `assets`,
+`clip` and `clip_zoom`. The test subclasses `HelpArticleCase` and declares:
+
+- `testCapture`: launch, run unrecorded steps in `setup { }`, then the
+  recorded steps in `record { }`;
+- `testVerify`: launch, the same setup, then the article's steps and checks
+  with `expect`.
+
+Steps are methods named like the actions below: `click`, `type`, `drag`,
+`scroll`, `key`, `expect` and `wait`, each taking a step name and an
+`XCUIElement`. Find targets with XCUITest queries, such as
+`element("settings-general")` for an identifier or
+`app.webViews["Kitchen Conversions"]`. Use `label("name")` for a declared
+label and `fixture("page.html")` for a page on the fixture server.
+
+The runner starts each test with `xcodebuild test-without-building`, hands
+it the server and labels through `HELPDOCS_RUN`, and records the screen
+around `testCapture`. The test attaches `run.json` to its result, because the
+runner app is sandboxed, and the runner exports it with `xcresulttool`.
+
+The test runner has no Accessibility access, so it moves the pointer by
+hovering along the path; the approach to a click looks stepped next to a
+YAML scenario's.
+
 ## Scenario format
 
 | Key | Contents |
