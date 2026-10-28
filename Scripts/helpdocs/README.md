@@ -44,8 +44,14 @@ The stages run in this order:
 3. **polish**: turns the recording into the article's clip. It speeds up
    idle time, easing in and out of it, zooms in on clicks, timed on the clip
    so a speed-up never hurries the zoom, draws a larger pointer from the
-   logged path that dips at each click, and frames the window on the docs
-   page background, the same margin on every side. It renders one clip per site
+   logged path that dips at each click and stays pressed through a drag, and
+   frames the window on the docs page background, the same margin on every
+   side. The clip holds still for a second, then the pointer flies in from
+   the window edge nearest the end of its first move, straight to that
+   move's target. At the end it flies out to the edge nearest its last
+   position before another still second. A move after the last click, such
+   as resting the pointer on blank space, isn't drawn: the pointer flies out
+   when that move starts. It renders one clip per site
    theme, using the `--color-fd-background` values in `Website/app/app.css`:
    the `@theme` value for light and the `.dark` value for dark. Each clip's
    first frame is saved beside it as `<clip>.poster.png`, which the page

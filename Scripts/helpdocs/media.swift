@@ -237,6 +237,26 @@ struct PointerPath: Codable {
         (recording as NSString).deletingPathExtension + ".pointer.json"
     }
 
+    /// The pointer's first move after `t`, from when it covers 2 points
+    /// within 50 ms to when it has stayed within half a point for a tenth of
+    /// a second. Slower drift, such as a hover settling, is not a move.
+    func firstMove(after t: Double) -> (start: Double, end: Double)? {
+        func still(_ a: Sample, _ b: Sample) -> Bool { hypot(a.x - b.x, a.y - b.y) < 0.5 }
+        guard let from = samples.firstIndex(where: { $0.t >= t }) else { return nil }
+        let start = samples.indices.dropFirst(max(from, 1)).first { index in
+            let ahead = samples[index...].prefix { $0.t - samples[index].t <= 0.05 }
+            return ahead.contains { hypot($0.x - samples[index - 1].x, $0.y - samples[index - 1].y) >= 2 }
+        }
+        guard let start else { return nil }
+        for index in start..<samples.count {
+            let rest = samples[index...].prefix { $0.t - samples[index].t <= 0.1 }
+            if samples[samples.count - 1].t - samples[index].t > 0.1, rest.allSatisfy({ still($0, samples[index]) }) {
+                return (samples[start - 1].t, samples[index].t)
+            }
+        }
+        return nil
+    }
+
     /// The position at `t`, between the samples around it.
     func position(at t: Double) -> (x: Double, y: Double)? {
         guard let last = samples.last else { return nil }
@@ -364,12 +384,16 @@ func compare(published: String, new: String) throws {
 /// recording's first frame added.
 struct RunLog: Decodable {
     struct Step: Decodable {
+        let name: String
         let action: String
         let t: Double
         let seconds: Double
     }
 
+    /// A press, logged with the step that made it. A drag logs its press
+    /// and its release, in that order.
     struct Click: Decodable {
+        let step: String
         let t: Double
         let x: Double
         let y: Double
@@ -409,6 +433,14 @@ struct Clip {
         let y: Double
     }
 
+    /// One frame of the clip: the recording time it shows, the clip time
+    /// its camera follows, and the pointer drawn over it in window pixels.
+    struct Frame {
+        let t: Double
+        let camera: Double
+        let pointer: (x: Double, y: Double, press: Double)?
+    }
+
     // MARK: - Static Variables
 
     /// The clip's width; its height follows the window's shape, so the
@@ -425,6 +457,8 @@ struct Clip {
     static let ramp = 0.4
     /// The drawn pointer's size against the system's.
     static let pointerSize = 1.6
+    /// Seconds the clip holds still, without the pointer, at each end.
+    static let still = 1.0
     /// The pointer's outline, in points with the tip at the origin and y up:
     /// the system arrow's shape.
     static let arrow: CGPath = {
@@ -449,8 +483,18 @@ struct Clip {
     let zoom: Double
     /// The clicks in recording seconds.
     let clicks: [Click]
+    /// When the button is down, in recording seconds: an instant for a
+    /// click, from the press to the release for a drag.
+    let presses: [(start: Double, end: Double)]
     /// Where the pointer was, if the recording logged it.
     let pointer: PointerPath?
+    /// The pointer's first move, in recording seconds, and the window edge
+    /// it flies in from instead of where it started, in window pixels.
+    private(set) var entrance: (start: Double, end: Double, from: (x: Double, y: Double))?
+    /// A move after the last press, which only takes the pointer out of the
+    /// way: instead the pointer flies out from where that move starts, to
+    /// the nearest window edge, in recording seconds and window pixels.
+    private(set) var exit: (start: Double, end: Double, from: (x: Double, y: Double), to: (x: Double, y: Double))?
     /// The window's top left in screen points.
     let origin: (x: Double, y: Double)
     var activeSpans: [(start: Double, end: Double)]
@@ -500,6 +544,20 @@ struct Clip {
                 ($0.t + offset, $0.t + offset + $0.seconds)
             }
         self.clicks = clicks
+        let drags = Set(log.steps.filter { $0.action == "drag" }.map(\.name))
+        var presses: [(start: Double, end: Double)] = []
+        var index = 0
+        while index < clicks.count {
+            let step = log.clicks[index].step
+            if drags.contains(step), index + 1 < clicks.count, log.clicks[index + 1].step == step {
+                presses.append((clicks[index].t, clicks[index + 1].t))
+                index += 2
+            } else {
+                presses.append((clicks[index].t, clicks[index].t))
+                index += 1
+            }
+        }
+        self.presses = presses
 
         // The clip ends when the last step's settle does, so a scenario sets
         // its final hold. The recording only has frames while the screen
@@ -511,6 +569,15 @@ struct Clip {
         first = max(firstActivity - 0.5, 0)
         last = ending
         activeSpans.append((lastActivity, last))
+        if let move = pointer?.firstMove(after: first) {
+            let end = window(pointer!.position(at: move.end)!)
+            entrance = (move.start, move.end, edge(nearest: end))
+        }
+        if let release = presses.last?.end, let move = pointer?.firstMove(after: release + 0.05) {
+            let from = window(pointer!.position(at: move.start)!)
+            let to = edge(nearest: from)
+            exit = (move.start, move.start + flightTime(from: from, to: to), from, to)
+        }
     }
 
     // MARK: - Actions - Timing
@@ -590,11 +657,110 @@ struct Clip {
     }
 
     /// The pointer in window pixels at recording time `t`, and how far it is
-    /// pressed in, from 0 to 1, around each click.
+    /// pressed in, from 0 to 1: it eases in before each press, stays in
+    /// while the button is down and eases out after the release.
+    ///
+    /// Before its first move the pointer is hidden. During that move it
+    /// flies in from the entrance edge: the logged path, offset by the gap
+    /// between that edge and where the pointer started, the gap easing to
+    /// nothing.
     func pointer(at t: Double) -> (x: Double, y: Double, press: Double)? {
-        guard let position = pointer?.position(at: t) else { return nil }
-        let press = clicks.map { 1 - Self.smooth(abs(t - $0.t) / 0.18) }.max() ?? 0
-        return ((position.x - origin.x) * scale, (position.y - origin.y) * scale, press)
+        guard let logged = pointer?.position(at: t) else { return nil }
+        if let exit, t >= exit.start {
+            guard t < exit.end else { return nil }
+            let k = Self.smooth((t - exit.start) / (exit.end - exit.start))
+            return (exit.from.x + (exit.to.x - exit.from.x) * k, exit.from.y + (exit.to.y - exit.from.y) * k, 0)
+        }
+        var position = window(logged)
+        if let entrance, let start = pointer?.position(at: entrance.start) {
+            guard t >= entrance.start else { return nil }
+            let gap = 1 - Self.smooth((t - entrance.start) / (entrance.end - entrance.start))
+            let from = window(start)
+            position.x += (entrance.from.x - from.x) * gap
+            position.y += (entrance.from.y - from.y) * gap
+        }
+        let press = presses.map { 1 - Self.smooth(max($0.start - t, t - $0.end, 0) / 0.18) }.max() ?? 0
+        return (position.x, position.y, press)
+    }
+
+    /// `point`, in screen points, in window pixels.
+    private func window(_ point: (x: Double, y: Double)) -> (x: Double, y: Double) {
+        ((point.x - origin.x) * scale, (point.y - origin.y) * scale)
+    }
+
+    /// The window edge nearest `point`, in window pixels, just far enough
+    /// past it that the pointer is hidden.
+    private func edge(nearest point: (x: Double, y: Double)) -> (x: Double, y: Double) {
+        let (width, height) = (Double(window.width), Double(window.height))
+        let margin = 24 * Self.pointerSize * scale
+        let edges = [
+            (point.x, (-margin, point.y)), (width - point.x, (width + margin, point.y)),
+            (point.y, (point.x, -margin)), (height - point.y, (point.x, height + margin)),
+        ]
+        return edges.min { $0.0 < $1.0 }!.1
+    }
+
+    /// Seconds to fly from `start` to `end`, in window pixels: longer for
+    /// a longer way.
+    private func flightTime(from start: (x: Double, y: Double), to end: (x: Double, y: Double)) -> Double {
+        min(0.35 + hypot(end.x - start.x, end.y - start.y) / scale / 1800, 0.7)
+    }
+
+    /// The pointer easing from `start` to `end`, in window pixels, over its
+    /// flight time, one position per frame.
+    private func flight(from start: (x: Double, y: Double), to end: (x: Double, y: Double))
+        -> [(x: Double, y: Double, press: Double)]
+    {
+        let count = Int((flightTime(from: start, to: end) * Self.fps).rounded())
+        return (1...count).map {
+            let k = Self.smooth(Double($0) / Double(count))
+            return (start.x + (end.x - start.x) * k, start.y + (end.y - start.y) * k, 0)
+        }
+    }
+
+    /// The clip's frames: a still second, the pointer flying in from the
+    /// nearest edge, the recording, the pointer flying out to the nearest
+    /// edge, and a still second.
+    ///
+    /// When the pointer moves, it flies in on its first move, to where that
+    /// move ends, and the clip starts a still second before it. Otherwise
+    /// the clip holds its first frame while the pointer flies in. Likewise
+    /// a move after the last press becomes the flight out, and the clip
+    /// ends a still second after it.
+    private func frames(at times: [Double]) -> [Frame] {
+        let (first, last) = (times[0], times[times.count - 1])
+        let ending = Double(times.count - 1) / Self.fps
+        let still = Int(Self.still * Self.fps)
+        var recorded = times.enumerated().map {
+            Frame(t: $1, camera: Double($0) / Self.fps, pointer: pointer(at: $1))
+        }
+        var frames: [Frame] = []
+        if let entrance {
+            let arrival = recorded.firstIndex { $0.t >= entrance.start } ?? 0
+            recorded.removeFirst(max(arrival - still, 0))
+            frames = Array(repeating: Frame(t: first, camera: 0, pointer: nil), count: max(still - arrival, 0))
+        } else {
+            frames = Array(repeating: Frame(t: first, camera: 0, pointer: nil), count: still)
+            if let entry = pointer(at: first) {
+                frames += flight(from: edge(nearest: (entry.x, entry.y)), to: (entry.x, entry.y)).dropLast().map {
+                    Frame(t: first, camera: 0, pointer: $0)
+                }
+            }
+        }
+        if let exit {
+            let gone = recorded.firstIndex { $0.t >= exit.end } ?? recorded.count
+            recorded.removeLast(max(recorded.count - gone - still, 0))
+            let padding = max(still - (recorded.count - gone), 0)
+            let held = recorded[recorded.count - 1]
+            return frames + recorded + Array(repeating: Frame(t: held.t, camera: held.camera, pointer: nil), count: padding)
+        }
+        frames += recorded
+        if let exit = pointer(at: last) {
+            frames += flight(from: (exit.x, exit.y), to: edge(nearest: (exit.x, exit.y))).map {
+                Frame(t: last, camera: ending, pointer: $0)
+            }
+        }
+        return frames + Array(repeating: Frame(t: last, camera: ending, pointer: nil), count: still)
     }
 
     // MARK: - Actions - Rendering
@@ -676,7 +842,8 @@ struct Clip {
         var raw = [UInt8](repeating: 0, count: window.width * window.height * 3)
         var current: CGImage?
         var index = -1
-        for (number, t) in times.enumerated() {
+        for (number, shot) in frames(at: times).enumerated() {
+            let t = shot.t
             // Variable frame rate source: look frames up by time, not by index.
             while index < Int((t * Self.fps).rounded(.toNearestOrEven)), decoded.fileHandleForReading.read(into: &raw) {
                 current = CGImage(
@@ -689,7 +856,7 @@ struct Clip {
             guard let current else { throw Failure(description: "\(recording) has no frames") }
 
             // Scale the part of the window the camera shows onto the inner frame.
-            let camera = camera(at: Double(number) / Self.fps, in: clusters)
+            let camera = camera(at: shot.camera, in: clusters)
             let (cropWidth, cropHeight) = (width / camera.factor, height / camera.factor)
             let x = min(max(camera.x - cropWidth / 2, 0), width - cropWidth)
             let y = min(max(camera.y - cropHeight / 2, 0), height - cropHeight)
@@ -699,7 +866,7 @@ struct Clip {
                 in: CGRect(
                     x: -x * scaleX, y: Double(inner.height) - (height - y) * scaleY, width: width * scaleX,
                     height: height * scaleY))
-            if let pointer = pointer(at: t) {
+            if let pointer = shot.pointer {
                 drawPointer(
                     in: scaled,
                     at: CGPoint(x: (pointer.x - x) * scaleX, y: Double(inner.height) - (pointer.y - y) * scaleY),
