@@ -1,0 +1,110 @@
+# Search a site from the command palette: type a provider's shortcut, see
+# its chips, press Tab to choose it, and type a query. The clip stops before
+# Return, so it needs no network.
+# Format and actions: Scripts/helpdocs/README.md.
+article: content/docs/(browse-faster)/command-palette.mdx
+section: Search a site or ask an assistant
+sources:
+  - CrestShared/Features/Chrome/Components/BrowserCommandPalette/**
+  - CrestShared/Features/Settings/BrowserSearchSettingsPane/**
+  - CrestShared/Application/BrowserSearch/**
+labels:
+  settings: Settings
+  search: Search
+  tab_to_search: Tab to search providers
+  space_to_search: Space to search providers
+  search_youtube: Search YouTube
+  stop_youtube: Stop searching YouTube
+# Bold terms in the section that name keys rather than UI text.
+keys: [Tab, Return, Escape, Delete]
+# Served on a free local port as {server}: a calm page behind the palette.
+serve: fixtures/command-palette
+launch:
+  # Nothing is saved between runs.
+  env: {CREST_ISOLATED_SESSION: 1, CREST_SHOWCASE_SESSION: 1}
+  window: [1280, 800]
+setup:
+  # Unrecorded. Confirm Tab to search providers is on, as the article assumes,
+  # hide the developer toolbar that local pages turn on, and open the page.
+  - name: open-settings
+    action: key
+    keys: keystroke "," using command down
+    settle: 1.5
+  - {name: open-search, action: click, target: {identifier: settings-search}, settle: 1.0}
+  - name: tab-to-search-is-on
+    action: expect
+    target: {identifier: palette-tab-to-search}
+    contains: "1"
+  - {name: open-general, action: click, target: {identifier: settings-general}}
+  - {name: show-developer, action: scroll, target: {identifier: settings-form-general}, lines: 60}
+  - {name: hide-developer-toolbar, action: click, target: {identifier: automatic-developer-toolbar-toggle}}
+  - name: close-settings
+    action: key
+    keys: keystroke "w" using command down
+    settle: 1.0
+  - name: new-tab
+    action: key
+    keys: keystroke "t" using command down
+    settle: 1.0
+  - {name: enter-address, action: type, target: {identifier: command-palette-field}, text: "{server}/"}
+  - name: open-page
+    action: key
+    keys: key code 36
+    settle: 2.5
+steps:
+  - {name: pause, action: wait, seconds: 0.8}
+  - name: open-palette             # selects the page's address, which typing replaces
+    action: key
+    keys: keystroke "l" using command down
+    settle: 1.2
+  - name: type-shortcut            # "yt" matches no tab or page, so only its search shows
+    action: key
+    keys: keystroke "yt"
+    settle: 3.5
+    collect: true
+  - name: chips-show
+    action: expect
+    target: {identifier: command-palette-provider-chip-youTube}
+    attribute: AXDescription
+    contains: $search_youtube
+  - name: choose-provider
+    action: key
+    keys: key code 48               # Tab
+    settle: 1.0
+  - name: provider-chosen
+    action: expect
+    target: {identifier: command-palette-provider-token}
+    attribute: AXDescription
+    contains: $stop_youtube
+  - name: type-query
+    action: type
+    target: {identifier: command-palette-field}
+    text: aurora borealis
+    settle: 2.5
+    collect: true
+clip: command-palette/search-a-provider.mp4
+clip_zoom: 1.0                   # the palette is wide; zooming on the field click would crop it
+verify:
+  # The article's steps with Wikipedia: shortcut, Tab, query. Return would leave
+  # for a live site, so the check stops at the palette's search row.
+  - name: open-palette
+    action: key
+    keys: keystroke "l" using command down
+    settle: 1.0
+  - {name: type-shortcut, action: key, keys: keystroke "w", settle: 1.0}
+  - name: chip-offered
+    action: expect
+    target: {identifier: command-palette-provider-chip-wikipedia}
+    attribute: AXDescription
+    contains: Wikipedia
+  - {name: press-tab, action: key, keys: key code 48, settle: 1.0}
+  - name: provider-chosen
+    action: expect
+    target: {identifier: command-palette-provider-token}
+    attribute: AXDescription
+    contains: Wikipedia
+  - {name: type-query, action: type, target: {identifier: command-palette-field}, text: aurora borealis}
+  - name: searches-wikipedia
+    action: expect
+    target: {identifier: command-palette-primary-action}
+    contains: Wikipedia
