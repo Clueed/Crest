@@ -31,9 +31,8 @@ The same page lists the Space’s saved passwords, with **Import Passwords…** 
 
 System Passwords and passkeys are provider-managed and may appear in any Space for a matching site. They are separate from Crest Passwords’ Space-local records. On Mac, check Crest’s access to system passkeys in **Settings → Privacy → System permissions → Passkeys**.
 
-<Callout type="info" title="What turning it off does not do">
-It does not delete saved passwords, export them, move them to another Space, or place password values in CloudKit session data.
-</Callout>
+> [!NOTE] What turning it off does not do
+> It does not delete saved passwords, export them, move them to another Space, or place password values in CloudKit session data.
 
 Private Spaces must be unlocked before Crest reveals account and site metadata or changes their password settings.
 

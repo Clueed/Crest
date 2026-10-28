@@ -91,6 +91,73 @@
   --color-fd-overlay: rgb(15 20 26 / 0.3);
 }
 
+/*
+ * Crest Help after dark: the night palette, with gold where light mode uses ink. The `.help`
+ * qualifier outranks Fumadocs' own `.dark` colors, sidebar included.
+ */
+html.help.dark {
+  --color-fd-background: var(--color-night-2);
+  --color-fd-foreground: var(--color-mist);
+  --color-fd-muted: #1d2530;
+  --color-fd-muted-foreground: #9aa5b4;
+  --color-fd-popover: #1a222c;
+  --color-fd-popover-foreground: var(--color-mist);
+  --color-fd-card: var(--color-night);
+  --color-fd-card-foreground: var(--color-mist);
+  --color-fd-border: rgb(241 239 233 / 0.14);
+  --color-fd-primary: var(--color-gold);
+  --color-fd-primary-foreground: var(--color-night-2);
+  --color-fd-secondary: #1d2530;
+  --color-fd-secondary-foreground: var(--color-mist);
+  --color-fd-accent: rgb(241 239 233 / 0.08);
+  --color-fd-accent-foreground: var(--color-mist);
+  --color-fd-ring: var(--color-sky);
+  --color-fd-overlay: rgb(0 0 0 / 0.5);
+
+  & #nd-sidebar {
+    --color-fd-muted: #1d2530;
+    --color-fd-secondary: #1d2530;
+    --color-fd-muted-foreground: #9aa5b4;
+  }
+}
+
+/*
+ * The theme is set by class alone, so leaving Crest Help for a product page drops dark mode
+ * with the `help` class rather than leaving the page's form controls dark.
+ */
+html.help {
+  color-scheme: light;
+}
+html.help.dark {
+  color-scheme: dark;
+}
+
+/* Full page loads between the site's pages cross-fade where the browser supports it. */
+@view-transition {
+  navigation: auto;
+}
+
+/* Moving between help articles: the old one fades, the new one rises into place. */
+::view-transition-old(.article-exit) {
+  animation: 100ms ease-in both article-exit;
+}
+::view-transition-new(.article-enter) {
+  animation: 300ms var(--ease-soft) 100ms both article-enter;
+}
+@keyframes article-exit {
+  to { opacity: 0; }
+}
+@keyframes article-enter {
+  from { opacity: 0; transform: translateY(10px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 /* Screenshots (`?shot`) and reduced motion put `noanim` on <html>; `animated` is everything else. */
 @custom-variant noanim (&:where(.noanim, .noanim *));
 @custom-variant animated (&:where(html:not(.noanim) *));

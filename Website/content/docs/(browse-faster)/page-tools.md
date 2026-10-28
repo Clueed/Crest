@@ -12,7 +12,7 @@ On Mac, each page runs in Chromium or WebKit. Crest on iPhone and iPad uses WebK
 
 Translate webpages on device using Apple’s Translation framework. Whole-page translation works on iPhone, iPad, and Mac, where it works on both Chromium and WebKit pages. On a Chromium page you can also select text and translate the selection from the page's context menu; it uses the same on-device translation.
 
-On Mac, open the translation toolbar with **Shift-Command-L**. On iPhone and iPad, tap the address bar’s translation button for options, or touch and hold it to translate immediately.
+On Mac, open the translation toolbar with <kbd>Shift-Command-L</kbd>. On iPhone and iPad, tap the address bar’s translation button for options, or touch and hold it to translate immediately.
 
 Choose **Detect Language** or a source language, pick a target language, then translate. **Show Original** restores the page’s original text. Language availability depends on Apple’s support; Apple asks before downloading a language that is needed.
 
@@ -23,8 +23,8 @@ Downloaded language packs are shared with other apps and remain on the device af
 ## Read and search
 
 - **Reader** converts a supported article into a focused reading surface. Use the page controls, menu, command palette, or assign a shortcut. Reader works on WebKit pages. On Mac, open a Chromium page in WebKit to read it in Reader.
-- **Find in Page** uses **Command-F**. Step through matches and close Find when finished. On a Chromium page, Find shows how many matches there are and which one is selected; on a WebKit page, it shows whether there is a match.
-- **Zoom In**, **Zoom Out**, and **Actual Size** use **Command-+**, **Command--**, and **Command-0**.
+- **Find in Page** uses <kbd>Command-F</kbd>. Step through matches and close Find when finished. On a Chromium page, Find shows how many matches there are and which one is selected; on a WebKit page, it shows whether there is a match.
+- **Zoom In**, **Zoom Out**, and **Actual Size** use <kbd>Command-+</kbd>, <kbd>Command--</kbd>, and <kbd>Command-0</kbd>.
 
 Set a default zoom for pages in **Settings → Appearance**, from **50% to 300%**.
 
@@ -34,13 +34,13 @@ Use the sidebar’s Now Playing controls for eligible active media. On Mac, supp
 
 ## Copy and share
 
-- **Copy Page Link** uses **Shift-Command-C**.
-- **Copy Page Link as Markdown** uses **Option-Shift-Command-C** and produces a title-and-URL link suitable for notes or issue trackers.
+- **Copy Page Link** uses <kbd>Shift-Command-C</kbd>.
+- **Copy Page Link as Markdown** uses <kbd>Option-Shift-Command-C</kbd> and produces a title-and-URL link suitable for notes or issue trackers.
 - **Share Page** opens the platform share sheet when available.
 
 ## Export
 
-- **Print Page** uses **Command-P**.
+- **Print Page** uses <kbd>Command-P</kbd>.
 - **Export as PDF** writes a portable rendered document.
 - **Save Web Archive** saves the whole page in one file. A Chromium page saves an `.mhtml` file, and a WebKit page saves a `.webarchive` file.
 
@@ -50,7 +50,7 @@ Export and Share are available through menus and the command palette even when n
 
 ## Reload choices
 
-**Command-R** performs a normal reload. **Shift-Command-R** reloads from the origin when a cached response is not what you need. **Command-.** stops the current load.
+<kbd>Command-R</kbd> performs a normal reload. <kbd>Shift-Command-R</kbd> reloads from the origin when a cached response is not what you need. <kbd>Command-.</kbd> stops the current load.
 
 ## Content and site controls
 

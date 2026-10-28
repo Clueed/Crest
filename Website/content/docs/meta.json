@@ -1,4 +1,6 @@
 {
+  "title": "Crest Help",
+  "description": "Help for Crest, an independent browser for Mac, iPad, and iPhone built around Spaces that keep work, home, and private browsing apart. Each link below is the Markdown version of an article.",
   "pages": [
     "index",
     "(get-started)",

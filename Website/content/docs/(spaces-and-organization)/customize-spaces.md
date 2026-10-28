@@ -40,7 +40,7 @@ Choose an app icon palette here too. These controls change the browser on this d
 
 On Mac, click **+** next to the Spaces heading in the Settings sidebar to add a Space. Its Appearance page opens with the name ready to type. Right-click a Space there, or use the **…** menu on its page, to rename it, edit its crest, lock it, or delete it. Crest needs at least one Space.
 
-Drag a Space in the picker to reorder it. In the Mac Settings sidebar, click the pencil next to the Spaces heading, drag Spaces by their handles, then click the checkmark; or right-click a Space and choose **Move Up** or **Move Down**. On iPhone and iPad, use the order controls in **Settings → Spaces**. Position matters for **Control-1** through **Control-9**, so put frequently used Spaces first.
+Drag a Space in the picker to reorder it. In the Mac Settings sidebar, click the pencil next to the Spaces heading, drag Spaces by their handles, then click the checkmark; or right-click a Space and choose **Move Up** or **Move Down**. On iPhone and iPad, use the order controls in **Settings → Spaces**. Position matters for <kbd>Control-1</kbd> through <kbd>Control-9</kbd>, so put frequently used Spaces first.
 
 ## Automatic cleanup
 
