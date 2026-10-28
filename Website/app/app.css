@@ -2,8 +2,155 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
-html {
-  scrollbar-gutter: stable;
+/* Crest's palette, type and measures. Every page, Crest Help included, draws from these. */
+@theme {
+  --color-paper: #f4efe4;
+  --color-paper-2: #ebe4d4;
+  --color-cream: #fbf8f1;
+  --color-ink: #14202c;
+  --color-ink-2: #3d4a5c;
+  --color-ink-3: #6b7585;
+  --color-night: #171e26;
+  --color-night-2: #0f141a;
+  --color-mist: #f1efe9;
+  --color-sky: #9fb4c4;
+  --color-gold: #d2ad58;
+  --color-coral: #dc5b47;
+  --color-rule: rgb(20 32 44 / 0.12);
+  --color-rule-2: rgb(20 32 44 / 0.22);
+
+  --font-serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Each is one pixel past its width, so `max-phone:` is 760px and narrower, as the old pages were. */
+  --breakpoint-small: 32.5625rem; /* 520px */
+  --breakpoint-phone: 47.5625rem; /* 760px */
+  --breakpoint-narrow: 53.8125rem; /* 860px */
+  --breakpoint-tablet: 61.3125rem; /* 980px */
+  --breakpoint-laptop: 68.8125rem; /* 1100px */
+
+  --container-page: 70rem;
+  --container-wide: 81.25rem;
+  /* The hero headline and the feature tour's window before it grows. */
+  --container-stage: 77.5rem;
+
+  /* The sticky header's height. `headerHeight` in site-chrome.tsx matches it. */
+  --spacing-header: 4rem;
+
+  --ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  --animate-rise: rise 1s var(--ease-soft) 0.1s both;
+  --animate-bob: bob var(--bob-duration, 7s) ease-in-out var(--bob-delay, 0s) infinite alternate;
+  --animate-swing: swing 1.4s cubic-bezier(0.3, 0.6, 0.3, 1);
+  --animate-belt: belt 110s linear infinite;
+  --animate-blink: blink 1s steps(1) infinite;
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(22px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes bob {
+    from { transform: translateY(-6px) rotate(var(--tilt, 0deg)); }
+    to { transform: translateY(6px) rotate(calc(var(--tilt, 0deg) * 0.7)); }
+  }
+  @keyframes swing {
+    0% { transform: none; }
+    18% { transform: rotate(3deg); }
+    42% { transform: rotate(-2deg); }
+    66% { transform: rotate(1deg); }
+    100% { transform: none; }
+  }
+  @keyframes belt {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+}
+
+/* Crest Help wears the same palette. Fumadocs reads its colors from these. */
+@theme {
+  --color-fd-background: var(--color-paper);
+  --color-fd-foreground: var(--color-ink);
+  --color-fd-muted: var(--color-paper-2);
+  --color-fd-muted-foreground: var(--color-ink-3);
+  --color-fd-popover: var(--color-cream);
+  --color-fd-popover-foreground: var(--color-ink);
+  --color-fd-card: var(--color-cream);
+  --color-fd-card-foreground: var(--color-ink);
+  --color-fd-border: var(--color-rule-2);
+  --color-fd-primary: var(--color-ink);
+  --color-fd-primary-foreground: var(--color-cream);
+  --color-fd-secondary: var(--color-paper-2);
+  --color-fd-secondary-foreground: var(--color-ink);
+  --color-fd-accent: rgb(20 32 44 / 0.07);
+  --color-fd-accent-foreground: var(--color-ink);
+  --color-fd-ring: var(--color-ink-3);
+  --color-fd-overlay: rgb(15 20 26 / 0.3);
+}
+
+/* Screenshots (`?shot`) and reduced motion put `noanim` on <html>; `animated` is everything else. */
+@custom-variant noanim (&:where(.noanim, .noanim *));
+@custom-variant animated (&:where(html:not(.noanim) *));
+/* `ends:` styles `::before` and `::after` together, for a pair of matching end pieces. */
+@custom-variant ends (&::before, &::after);
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  /* Crest Help keeps room for the scrollbar so its dialogs don't shift the page. */
+  html.help {
+    scrollbar-gutter: stable;
+  }
+  /* Sections a product page links to land below its sticky header. */
+  html:not(.help) {
+    scroll-padding-top: var(--spacing-header);
+  }
+  /* Product pages glide to the sections they link to; Crest Help jumps, as Fumadocs expects. */
+  @media (prefers-reduced-motion: no-preference) {
+    html:not(.noanim, .help) {
+      scroll-behavior: smooth;
+    }
+  }
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+}
+
+/* The page measures: content width, the wider one the header and articles use, and the hero's. */
+@utility page-width {
+  width: min(var(--container-page), calc(100% - 2.5rem));
+  margin-inline: auto;
+}
+@utility wide-width {
+  width: min(var(--container-wide), calc(100% - 2.5rem));
+  margin-inline: auto;
+}
+@utility stage-width {
+  width: min(var(--container-stage), calc(100% - 2.5rem));
+  margin-inline: auto;
+}
+
+/* Product mockups set `--spacing` to one design point, so these scale with the mockup. */
+@utility text-pt-* {
+  font-size: calc(var(--spacing) * --value(number));
+}
+@utility rounded-pt-* {
+  border-radius: calc(var(--spacing) * --value(number));
 }
 
 html > body[data-scroll-locked] {

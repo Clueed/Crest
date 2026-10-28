@@ -8,28 +8,35 @@ import {
   useMatches,
 } from 'react-router';
 import type { Route } from './+types/root';
+import { siteIcons } from '@/lib/page-meta';
+import appStylesheet from './app.css?url';
 
-/** A route sets `handle.bodyClassName` when its stylesheet styles the body. */
-export type PageHandle = { bodyClassName?: string };
+export const links: Route.LinksFunction = () => [
+  { rel: 'stylesheet', href: appStylesheet },
+  ...siteIcons,
+];
 
-function useBodyClassName() {
+/** A route sets `handle.htmlClassName` or `handle.bodyClassName` when it needs a class on `<html>` or `<body>`. */
+export type PageHandle = { htmlClassName?: string; bodyClassName?: string };
+
+function useHandleClassName(key: keyof PageHandle) {
   const matches = useMatches();
   return matches
-    .map((match) => (match.handle as PageHandle | undefined)?.bodyClassName)
+    .map((match) => (match.handle as PageHandle | undefined)?.[key])
     .filter(Boolean)
     .at(-1);
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={useHandleClassName('htmlClassName')} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
-      <body className={useBodyClassName()}>
+      <body className={useHandleClassName('bodyClassName')}>
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -56,11 +63,11 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 w-full max-w-[1400px] mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
+    <main className="page-width py-16">
+      <h1 className="mb-2 text-4xl">{message}</h1>
+      <p className="text-ink-2">{details}</p>
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
+        <pre className="mt-6 w-full overflow-x-auto p-4 text-sm">
           <code>{stack}</code>
         </pre>
       )}

@@ -10,6 +10,7 @@ import {
 } from 'fumadocs-ui/layouts/docs/page';
 import { docs, source } from '@/lib/source';
 import { baseOptions } from '@/lib/layout.shared';
+import { github } from '@/lib/site-links';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { useMDXComponents } from '@/components/mdx';
 import { use } from 'react';
@@ -61,7 +62,7 @@ function Content({
         <MarkdownCopyButton markdownUrl={markdownUrl} />
         <ViewOptionsPopover
           markdownUrl={markdownUrl}
-          githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/Website/content/docs/${path}`}
+          githubUrl={`${github}/blob/${gitConfig.branch}/Website/content/docs/${path}`}
         />
       </div>
       <DocsBody>
