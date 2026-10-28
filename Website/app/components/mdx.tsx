@@ -28,7 +28,7 @@ const keySymbols: Record<string, string> = {
   Left: '←',
   Right: '→',
 };
-const modifierPrefix = /^(Command|Option|Shift|Control|Fn)-/;
+const modifierPrefix = /^(Command|Option|Shift|Control)-/;
 
 /** The keys of a shortcut written the Apple way, such as `Option-Command-Up Arrow`. */
 function shortcutKeys(shortcut: string) {
@@ -52,13 +52,11 @@ const keyCap =
 
 // `<kbd>Shift-Command-T</kbd>` shows each key as a key cap; screen readers hear the words.
 function Kbd({ children, className, ...props }: ComponentProps<'kbd'>) {
-  if (typeof children !== 'string') {
-    return <kbd className={cn('not-prose', keyCap, className)} {...props}>{children}</kbd>;
-  }
+  const shortcut = String(children);
   return (
     <kbd className={cn('not-prose inline-flex gap-0.5 whitespace-nowrap align-baseline', className)} {...props}>
-      <span className="sr-only">{children}</span>
-      {shortcutKeys(children).map((key, index) => (
+      <span className="sr-only">{shortcut}</span>
+      {shortcutKeys(shortcut).map((key, index) => (
         <kbd key={index} className={keyCap} aria-hidden>
           {key}
         </kbd>
