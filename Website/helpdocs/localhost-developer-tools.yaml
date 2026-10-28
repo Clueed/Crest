@@ -1,6 +1,6 @@
 # Preview a local page at the Phone viewport from the developer toolbar,
 # which local addresses show automatically.
-# Format and actions: Scripts/helpdocs/README.md.
+# Steps: CrestHelpDocs/LocalhostDeveloperToolsArticle.swift. Format: Scripts/helpdocs/README.md.
 article: content/docs/(browse-faster)/localhost-developer-tools.md
 section: Preview a different viewport
 sources:
@@ -13,55 +13,8 @@ labels:
 # Served on a free local port as {server}. Being a local address, it shows the
 # developer toolbar without any setting. Strings from the page are inline.
 serve: fixtures/localhost-developer-tools
+test: LocalhostDeveloperToolsArticle
 launch:
-  # Nothing is saved between runs.
-  env: {CREST_ISOLATED_SESSION: 1, CREST_SHOWCASE_SESSION: 1}
   window: [1280, 800]
-setup:
-  # Unrecorded. Open the fixture page in a new tab.
-  - name: new-tab
-    action: key
-    keys: keystroke "t" using command down
-    settle: 1.0
-  - {name: enter-address, action: type, target: {identifier: command-palette-field}, text: "{server}/"}
-  - name: open-page
-    action: key
-    keys: key code 36
-    settle: 2.5
-  - {name: toolbar-is-shown, action: expect, target: {identifier: developer-viewport-menu}, contains: "Off"}
-  - name: hide-sidebar             # gives the page the whole window, so the narrow preview stands out
-    action: key
-    keys: keystroke "s" using command down
-    settle: 1.5
-steps:
-  - name: open-viewport-menu
-    action: click
-    target: {identifier: developer-viewport-menu}
-    settle: 0.8
-    collect: true
-  - name: choose-phone
-    action: click
-    target: {role: AXMenuItem, label: $phone, within: {identifier: developer-viewport-menu}}
-    settle: 2.0
-  - name: rest-pointer             # off the toolbar, so no tooltip covers it
-    action: move
-    target: {role: AXWebArea, label: Harbor Bakery}
-    at: [0.5, 0.9]
-    settle: 1.5
-    capture: phone
 assets:
   phone: localhost-developer-tools/phone-viewport.png
-verify:
-  # Choose the Phone preset, then return to the normal viewport.
-  - {name: open-viewport-menu, action: click, target: {identifier: developer-viewport-menu}, settle: 0.8}
-  - name: choose-phone
-    action: click
-    target: {role: AXMenuItem, label: $phone, within: {identifier: developer-viewport-menu}}
-    settle: 1.5
-  - {name: phone-is-previewed, action: expect, target: {identifier: developer-viewport-menu}, contains: Phone}
-  - {name: reopen-viewport-menu, action: click, target: {identifier: developer-viewport-menu}, settle: 0.8}
-  - name: choose-normal
-    action: click
-    target: {role: AXMenuItem, label: $normal, within: {identifier: developer-viewport-menu}}
-    settle: 1.5
-  - {name: preview-is-off, action: expect, target: {identifier: developer-viewport-menu}, contains: "Off"}
