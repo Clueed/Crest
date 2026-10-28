@@ -37,12 +37,14 @@ The stages run in this order:
    test runner into the work folder.
 2. **capture**: records the screen with ScreenCaptureKit while the
    scenario's `testCapture` runs. The recorder reports when its first frame
-   was taken, so the clip lines up with the test's steps exactly. It takes a
-   window-only PNG for each `capture`, and reports which ones differ from the
-   published images.
+   was taken, so the clip lines up with the test's steps exactly. The video
+   leaves the pointer out and logs its path beside the recording instead.
+   It takes a window-only PNG for each `capture`, and reports which ones
+   differ from the published images.
 3. **polish**: turns the recording into the article's clip. It speeds up
    idle time, easing in and out of it, zooms in on clicks, timed on the clip
-   so a speed-up never hurries the zoom, and frames the window on the docs
+   so a speed-up never hurries the zoom, draws a larger pointer from the
+   logged path that dips at each click, and frames the window on the docs
    page background, the same margin on every side. It renders one clip per site
    theme, using the `--color-fd-background` values in `Website/app/app.css`:
    the `@theme` value for light and the `.dark` value for dark. Each clip's
@@ -140,8 +142,9 @@ runner app is sandboxed and may only read outside its container, so:
   `screencapture -l`, which leaves its corners transparent, and the test
   waits for the file.
 - before each click, drag and `move`, the test asks the runner to glide the
-  pointer to the target. The runner eases it there over a time that grows
-  with the distance, taking each position from the clock, then answers with
+  pointer to the target. The runner eases it along a slightly curved path,
+  over a time that grows with the distance, and lets it overshoot and settle
+  as a hand would, taking each position from the clock, then answers with
   a file. The test then hovers on the target so the app sees the pointer
   arrive. XCUITest's own hover moves the pointer in uneven steps, and the
   sandboxed test may not move it itself.

@@ -109,6 +109,10 @@ extension CGImage {
 /// Prints `recording <seconds since 1970>` once the first frame arrives: the
 /// wall-clock time of the video's zero, from the frame's own host-clock
 /// timestamp, so the runner lines the run log up with the video exactly.
+///
+/// The video leaves the pointer out. Its path, sampled 240 times a second,
+/// goes to `PointerPath.path(for:)` beside the video, so the clip draws a
+/// larger pointer that moves smoothly between frames.
 final class Recorder: NSObject, SCStreamOutput {
 
     // MARK: - Variables
@@ -118,7 +122,11 @@ final class Recorder: NSObject, SCStreamOutput {
     private var stream: SCStream?
     private var writer: AVAssetWriter?
     private var input: AVAssetWriterInput?
-    private var started = false
+    /// The host-clock time of the first frame, once it arrives.
+    private var started: Double?
+    private var sampler: DispatchSourceTimer?
+    /// Host-clock seconds and screen points.
+    private var samples: [(t: Double, x: Double, y: Double)] = []
 
     // MARK: - Initializers
 
@@ -141,8 +149,7 @@ final class Recorder: NSObject, SCStreamOutput {
         configuration.minimumFrameInterval = CMTime(value: 1, timescale: 60)
         configuration.pixelFormat = kCVPixelFormatType_32BGRA
         configuration.colorSpaceName = CGColorSpace.sRGB
-        configuration.showsCursor = true
-        if #available(macOS 15, *) { configuration.showMouseClicks = true }
+        configuration.showsCursor = false
 
         try? FileManager.default.removeItem(at: output)
         let writer = try AVAssetWriter(outputURL: output, fileType: .mov)
@@ -166,6 +173,14 @@ final class Recorder: NSObject, SCStreamOutput {
             filter: SCContentFilter(display: display, excludingWindows: []), configuration: configuration,
             delegate: nil)
         try stream.addStreamOutput(self, type: .screen, sampleHandlerQueue: queue)
+        let sampler = DispatchSource.makeTimerSource(flags: .strict, queue: queue)
+        sampler.schedule(deadline: .now(), repeating: .nanoseconds(1_000_000_000 / 240), leeway: .nanoseconds(0))
+        sampler.setEventHandler { [unowned self] in
+            guard let location = CGEvent(source: nil)?.location else { return }
+            samples.append((CMClockGetTime(CMClockGetHostTimeClock()).seconds, location.x, location.y))
+        }
+        sampler.resume()
+        self.sampler = sampler
         try await stream.startCapture()
         self.stream = stream
     }
@@ -173,12 +188,15 @@ final class Recorder: NSObject, SCStreamOutput {
     /// Stops capturing and finishes the file.
     func stop() async {
         try? await stream?.stopCapture()
+        sampler?.cancel()
         await withCheckedContinuation { continuation in
             queue.async { continuation.resume() }
         }
-        guard started, let writer, let input else { return }
+        guard let started, let writer, let input else { return }
         input.markAsFinished()
         await writer.finishWriting()
+        let path = PointerPath(samples: samples.map { .init(t: $0.t - started, x: $0.x, y: $0.y) })
+        try? JSONEncoder().encode(path).write(to: URL(fileURLWithPath: PointerPath.path(for: output.path)))
     }
 
     func stream(_ stream: SCStream, didOutputSampleBuffer buffer: CMSampleBuffer, of type: SCStreamOutputType) {
@@ -189,8 +207,8 @@ final class Recorder: NSObject, SCStreamOutput {
             let status = attachments.first?[.status] as? Int, SCFrameStatus(rawValue: status) == .complete
         else { return }
         let time = buffer.presentationTimeStamp
-        if !started {
-            started = true
+        if started == nil {
+            started = time.seconds
             writer.startWriting()
             writer.startSession(atSourceTime: time)
             let age = CMTimeSubtract(CMClockGetTime(CMClockGetHostTimeClock()), time).seconds
@@ -203,23 +221,76 @@ final class Recorder: NSObject, SCStreamOutput {
 
 // MARK: - Pointer
 
-/// Moves the pointer to `target`, in screen points, as a person would: easing
-/// in and out over a time that grows with the distance. Each position is
-/// taken from the clock, so a late sample never changes the pointer's speed.
+/// Where the pointer was during a recording, in seconds from its first frame
+/// and screen points.
+struct PointerPath: Codable {
+    struct Sample: Codable {
+        let t: Double
+        let x: Double
+        let y: Double
+    }
+
+    let samples: [Sample]
+
+    /// The path beside the recording at `recording`.
+    static func path(for recording: String) -> String {
+        (recording as NSString).deletingPathExtension + ".pointer.json"
+    }
+
+    /// The position at `t`, between the samples around it.
+    func position(at t: Double) -> (x: Double, y: Double)? {
+        guard let last = samples.last else { return nil }
+        guard let after = samples.firstIndex(where: { $0.t >= t }) else { return (last.x, last.y) }
+        guard after > 0 else { return (samples[0].x, samples[0].y) }
+        let (a, b) = (samples[after - 1], samples[after])
+        let k = b.t > a.t ? (t - a.t) / (b.t - a.t) : 1
+        return (a.x + (b.x - a.x) * k, a.y + (b.y - a.y) * k)
+    }
+}
+
+/// Moves the pointer to `target`, in screen points, as a person would. A
+/// guide eases along a path that bows off the straight line towards the end,
+/// over a time that grows with the distance, and the pointer follows it on a
+/// spring, so it starts gently, lags a little, overshoots and settles. Each
+/// position is taken from the clock, so a late sample never changes the
+/// pointer's speed.
 func glide(to target: CGPoint) {
     let start = CGEvent(source: nil)?.location ?? target
-    let distance = hypot(target.x - start.x, target.y - start.y)
+    let (dx, dy) = (target.x - start.x, target.y - start.y)
+    let distance = hypot(dx, dy)
     guard distance >= 1 else { return }
-    let duration = min(0.3 + distance / 1500, 0.8)
+    let duration = min(0.25 + distance / 1800, 0.65)
+    // The bow is widest two thirds of the way along, always to the same side.
+    let bow = min(distance * 0.08, 40) / distance
+    // A 4 Hz spring, damped so it overshoots by a few points.
+    let frequency = 4 * 2 * Double.pi
+    let (stiffness, damping) = (frequency * frequency, 2 * 0.6 * frequency)
+    var (position, velocity) = (start, CGVector.zero)
+    var simulated = 0.0
     // Ahead of the recorder's encoding, so a sample is rarely late.
     pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0)
     let started = Date()
     while true {
-        let progress = min(Date().timeIntervalSince(started) / duration, 1)
-        let eased = progress * progress * progress * (progress * (progress * 6 - 15) + 10)
-        CGWarpMouseCursorPosition(
-            CGPoint(x: start.x + (target.x - start.x) * eased, y: start.y + (target.y - start.y) * eased))
-        if progress == 1 { return }
+        let now = Date().timeIntervalSince(started)
+        while simulated < now {
+            let progress = min(simulated / duration, 1)
+            let eased = progress * progress * progress * (progress * (progress * 6 - 15) + 10)
+            let side = bow * 27 / 4 * eased * eased * (1 - eased)
+            let guide = CGPoint(x: start.x + dx * eased - dy * side, y: start.y + dy * eased + dx * side)
+            velocity.dx += (stiffness * (guide.x - position.x) - damping * velocity.dx) / 1000
+            velocity.dy += (stiffness * (guide.y - position.y) - damping * velocity.dy) / 1000
+            position.x += velocity.dx / 1000
+            position.y += velocity.dy / 1000
+            simulated += 1.0 / 1000
+        }
+        let settled =
+            simulated >= duration && hypot(target.x - position.x, target.y - position.y) < 0.5
+            && hypot(velocity.dx, velocity.dy) < 10
+        CGWarpMouseCursorPosition(settled ? target : position)
+        if settled || now > duration + 1 {
+            CGWarpMouseCursorPosition(target)
+            return
+        }
         Thread.sleep(forTimeInterval: 1.0 / 120)
     }
 }
@@ -316,9 +387,10 @@ struct RunLog: Decodable {
 /// Turns a raw screen recording and its run log into a short framed clip.
 ///
 /// Crops to the Crest window, speeds up idle stretches, easing in and out of
-/// them, eases a zoom in around each group of clicks and back out, and frames
-/// the result with rounded corners on the docs page background, once for each
-/// site theme. The zoom is timed on the clip, so a speed-up never hurries it.
+/// them, eases a zoom in around each group of clicks and back out, draws the
+/// pointer, and frames the result with rounded corners on the docs page
+/// background, once for each site theme. The zoom is timed on the clip, so a
+/// speed-up never hurries it.
 struct Clip {
 
     // MARK: - Types
@@ -346,11 +418,24 @@ struct Clip {
     /// The corner radius of a Crest window, in points; the frame masks the
     /// window to it so no desktop shows at the corners.
     static let windowRadius = 26.0
-    static let fps = 30.0
+    static let fps = 60.0
     /// The length idle stretches are sped up towards.
     static let target = 13.0
     /// Recording seconds over which playback eases between 1x and the idle speed.
     static let ramp = 0.4
+    /// The drawn pointer's size against the system's.
+    static let pointerSize = 1.6
+    /// The pointer's outline, in points with the tip at the origin and y up:
+    /// the system arrow's shape.
+    static let arrow: CGPath = {
+        let path = CGMutablePath()
+        path.addLines(between: [
+            CGPoint(x: 0, y: 0), CGPoint(x: 0, y: -17), CGPoint(x: 4, y: -13.2), CGPoint(x: 6.9, y: -19.8),
+            CGPoint(x: 9.8, y: -18.6), CGPoint(x: 7, y: -12.2), CGPoint(x: 12.2, y: -12.2),
+        ])
+        path.closeSubpath()
+        return path
+    }()
 
     // MARK: - Variables
 
@@ -364,6 +449,10 @@ struct Clip {
     let zoom: Double
     /// The clicks in recording seconds.
     let clicks: [Click]
+    /// Where the pointer was, if the recording logged it.
+    let pointer: PointerPath?
+    /// The window's top left in screen points.
+    let origin: (x: Double, y: Double)
     var activeSpans: [(start: Double, end: Double)]
     let first: Double
     let last: Double
@@ -388,6 +477,9 @@ struct Clip {
         let (width, height) = ((frame["Width"] ?? 0) - 4, (frame["Height"] ?? 0) - 4)
         self.recording = recording
         self.scale = scale
+        origin = (x, y)
+        pointer = try? JSONDecoder().decode(
+            PointerPath.self, from: Data(contentsOf: URL(fileURLWithPath: PointerPath.path(for: recording))))
         self.zoom = zoom
         window = (
             Int((x * scale).rounded(.toNearestOrEven)), Int((y * scale).rounded(.toNearestOrEven)),
@@ -497,7 +589,37 @@ struct Clip {
         return result
     }
 
+    /// The pointer in window pixels at recording time `t`, and how far it is
+    /// pressed in, from 0 to 1, around each click.
+    func pointer(at t: Double) -> (x: Double, y: Double, press: Double)? {
+        guard let position = pointer?.position(at: t) else { return nil }
+        let press = clicks.map { 1 - Self.smooth(abs(t - $0.t) / 0.18) }.max() ?? 0
+        return ((position.x - origin.x) * scale, (position.y - origin.y) * scale, press)
+    }
+
     // MARK: - Actions - Rendering
+
+    /// Draws the pointer into `context` with its tip at `tip`, `size` pixels
+    /// per point, pressed in by `press`.
+    private func drawPointer(in context: CGContext, at tip: CGPoint, size: Double, press: Double) {
+        let size = size * (1 - 0.18 * press)
+        context.saveGState()
+        context.translateBy(x: tip.x, y: tip.y)
+        context.scaleBy(x: size, y: size)
+        context.setLineJoin(.round)
+        context.setShadow(
+            offset: CGSize(width: 0, height: -1.2 * size), blur: 3.5 * size,
+            color: CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 0.35))
+        context.addPath(Self.arrow)
+        context.setStrokeColor(CGColor(srgbRed: 1, green: 1, blue: 1, alpha: 1))
+        context.setLineWidth(2.6)
+        context.strokePath()
+        context.setShadow(offset: .zero, blur: 0, color: nil)
+        context.addPath(Self.arrow)
+        context.setFillColor(CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 1))
+        context.fillPath()
+        context.restoreGState()
+    }
 
     /// Writes one clip per destination, and its first frame as the poster.
     func render(to destinations: [Destination]) throws {
@@ -577,6 +699,12 @@ struct Clip {
                 in: CGRect(
                     x: -x * scaleX, y: Double(inner.height) - (height - y) * scaleY, width: width * scaleX,
                     height: height * scaleY))
+            if let pointer = pointer(at: t) {
+                drawPointer(
+                    in: scaled,
+                    at: CGPoint(x: (pointer.x - x) * scaleX, y: Double(inner.height) - (pointer.y - y) * scaleY),
+                    size: scale * scaleX * Self.pointerSize, press: pointer.press)
+            }
             let shown = scaled.makeImage()!
 
             for (destination, (background, (_, input))) in zip(destinations, zip(backgrounds, encoders)) {
