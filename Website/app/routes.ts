@@ -1,7 +1,7 @@
 import { index, layout, route, type RouteConfig } from '@react-router/dev/routes';
 
 export default [
-  // Product pages carry their own stylesheets and no Fumadocs chrome.
+  // Product pages have no Fumadocs chrome.
   index('routes/home.tsx'),
   route('privacy', 'routes/privacy.tsx'),
   route('support', 'routes/support.tsx'),

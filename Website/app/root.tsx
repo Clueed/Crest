@@ -16,27 +16,27 @@ export const links: Route.LinksFunction = () => [
   ...siteIcons,
 ];
 
-/** A route sets `handle.bodyClassName` when it needs a class on `<body>`. */
-export type PageHandle = { bodyClassName?: string };
+/** A route sets `handle.htmlClassName` or `handle.bodyClassName` when it needs a class on `<html>` or `<body>`. */
+export type PageHandle = { htmlClassName?: string; bodyClassName?: string };
 
-function useBodyClassName() {
+function useHandleClassName(key: keyof PageHandle) {
   const matches = useMatches();
   return matches
-    .map((match) => (match.handle as PageHandle | undefined)?.bodyClassName)
+    .map((match) => (match.handle as PageHandle | undefined)?.[key])
     .filter(Boolean)
     .at(-1);
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={useHandleClassName('htmlClassName')} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
-      <body className={useBodyClassName()}>
+      <body className={useHandleClassName('bodyClassName')}>
         {children}
         <ScrollRestoration />
         <Scripts />

@@ -13,7 +13,7 @@ const tabDots = ['#5b9be0', '#e9a43a', '#7cc08a', '#e2665a'];
 const tabLineEnds = ['22%', '22%', '34%', '28%'];
 
 const ring =
-  "before:absolute before:-top-3 before:left-[20%] before:z-3 before:h-3.5 before:w-[9px] before:rounded-[5px] before:border-2 before:border-[#3a3f47] before:content-[''] after:absolute after:-top-3 after:right-[20%] after:z-3 after:h-3.5 after:w-[9px] after:rounded-[5px] after:border-2 after:border-[#3a3f47] after:content-['']";
+  "ends:absolute ends:-top-3 ends:z-3 ends:h-3.5 ends:w-[9px] ends:rounded-[5px] ends:border-2 ends:border-[#3a3f47] ends:content-[''] before:left-[20%] after:right-[20%]";
 
 /** One template's sidebar, hung as a banner: its crest, then stubs of pinned sites and tabs. */
 function Banner({ id, swinging, onPick }: { id: TemplateId; swinging: boolean; onPick: () => void }) {
@@ -23,7 +23,7 @@ function Banner({ id, swinging, onPick }: { id: TemplateId; swinging: boolean; o
       aria-label={`Use ${templates[id].name}`}
       onClick={onPick}
       className={cn(
-        'group relative block origin-top cursor-pointer p-0 drop-shadow-[0_16px_14px_rgb(20_32_44/0.2)] transition-opacity duration-300 [-webkit-tap-highlight-color:transparent] focus-visible:outline-none max-[860px]:snap-start',
+        'group relative block origin-top cursor-pointer p-0 drop-shadow-[0_16px_14px_rgb(20_32_44/0.2)] transition-opacity duration-300 [-webkit-tap-highlight-color:transparent] focus-visible:outline-none max-narrow:snap-start',
         ring,
       )}
     >
@@ -108,15 +108,15 @@ export function BannersSection() {
     <Section id="crests" aria-labelledby="crests-title">
       <div className="page-width">
         <SectionHead titleId="crests-title" title="The sidebar is the banner." lede="Start from a template, or make your own." />
-        <Reveal className="relative mt-[clamp(2.5rem,5vw,3.5rem)] pt-4 max-[860px]:pt-0">
+        <Reveal className="relative mt-[clamp(2.5rem,5vw,3.5rem)] pt-4 max-narrow:pt-0">
           <div
             aria-hidden="true"
-            className="absolute -inset-x-[1.5%] top-1.5 z-2 h-2 rounded-sm bg-linear-to-b from-[#4a4f57] to-[#22262c] shadow-[0_3px_6px_rgb(20_32_44/0.25)] before:absolute before:-top-1 before:-left-2 before:size-4 before:rounded-full before:bg-[radial-gradient(circle_at_35%_35%,#6b717a,#202429)] before:content-[''] after:absolute after:-top-1 after:-right-2 after:size-4 after:rounded-full after:bg-[radial-gradient(circle_at_35%_35%,#6b717a,#202429)] after:content-[''] max-[860px]:inset-x-1 max-[860px]:top-5"
+            className="absolute -inset-x-[1.5%] top-1.5 z-2 h-2 rounded-sm bg-linear-to-b from-[#4a4f57] to-[#22262c] shadow-[0_3px_6px_rgb(20_32_44/0.25)] ends:absolute ends:-top-1 ends:size-4 ends:rounded-full ends:bg-[radial-gradient(circle_at_35%_35%,#6b717a,#202429)] ends:content-[''] before:-left-2 after:-right-2 max-narrow:inset-x-1 max-narrow:top-5"
           />
           <div
             role="group"
             aria-label="Crest templates"
-            className="relative grid grid-cols-9 gap-[clamp(0.6rem,1.4vw,1.15rem)] max-[860px]:auto-cols-[96px] max-[860px]:grid-flow-col max-[860px]:grid-cols-none max-[860px]:snap-x max-[860px]:snap-mandatory max-[860px]:scroll-px-3.5 max-[860px]:gap-3.5 max-[860px]:overflow-x-auto max-[860px]:px-3.5 max-[860px]:pt-[26px] max-[860px]:pb-8 max-[860px]:mask-[linear-gradient(90deg,transparent,#000_14px,#000_calc(100%-14px),transparent)] max-[860px]:[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="relative grid grid-cols-9 gap-[clamp(0.6rem,1.4vw,1.15rem)] max-narrow:auto-cols-[96px] max-narrow:grid-flow-col max-narrow:grid-cols-none max-narrow:snap-x max-narrow:snap-mandatory max-narrow:scroll-px-3.5 max-narrow:gap-3.5 max-narrow:overflow-x-auto max-narrow:px-3.5 max-narrow:pt-[26px] max-narrow:pb-8 max-narrow:mask-[linear-gradient(90deg,transparent,#000_14px,#000_calc(100%-14px),transparent)] max-narrow:[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {templateOrder.map((id) => (
               <Banner key={id} id={id} swinging={swinging === id} onPick={() => pick(id)} />

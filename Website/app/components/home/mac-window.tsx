@@ -8,16 +8,16 @@ import { CrestArt, spaceField, windowSize } from './templates';
  * `h-48` is 48 points and `text-pt-13` is 13 points at any size.
  */
 
-export type Space = 'work' | 'personal';
+type Space = 'work' | 'personal';
 
 /** A sidebar row: its glyph and title. */
-export type Row = [glyph: string, title: string];
+type Row = [glyph: string, title: string];
 
 /** An address: the host, and the path drawn quieter after it. */
-export type Address = { host: string; path?: string };
+type Address = { host: string; path?: string };
 
 /** A description page the window shows for a feature that has no demo page. */
-export type Description = {
+type Description = {
   kicker: string;
   title: string;
   body: string[];
@@ -27,7 +27,7 @@ export type Description = {
   routes?: [pattern: string, match: string, space: Space][];
 };
 
-export type PageKind = 'desc' | 'northstar' | 'fieldnotes' | 'split' | 'peek' | 'palette' | 'localhost';
+type PageKind = 'desc' | 'northstar' | 'fieldnotes' | 'split' | 'peek' | 'palette' | 'localhost';
 
 /** What the window shows: whose Space, which page, and what the sidebar highlights. */
 export type WindowView = {
@@ -373,7 +373,7 @@ function QuickWindow() {
             Open in Personal ⌄
           </span>
         </div>
-        <div className="absolute inset-x-10 top-64 bottom-10 overflow-hidden rounded-pt-12 bg-[#eef2e8] text-[#20372d]">
+        <div className={cn('absolute inset-x-10 top-64 bottom-10 overflow-hidden rounded-pt-12 bg-(--pbg) text-(--pink)', fieldnotes)}>
           <PageBody size="quick" {...trailNote} text="Opened from another app, in the Personal Space." />
         </div>
       </div>
@@ -492,13 +492,14 @@ function Page({ view, peekHidden }: { view: WindowView; peekHidden: boolean }) {
       return (
         <div className="relative m-8 ml-0 grid min-w-0 grid-cols-2 gap-8">
           {[
-            { note: fieldGuide, pill: true, focus: false },
-            { note: trailNote, pill: false, focus: true },
-          ].map(({ note, pill, focus }) => (
+            { note: fieldGuide, focus: false },
+            { note: trailNote, focus: true },
+          ].map(({ note, focus }) => (
             <div
               key={note.title}
               className={cn(
-                'relative overflow-hidden rounded-pt-13 bg-[#eef2e8] text-[#20372d]',
+                'relative overflow-hidden rounded-pt-13 bg-(--pbg) text-(--pink)',
+                fieldnotes,
                 focus
                   ? 'shadow-[0_0_0_calc(2*var(--spacing))_rgb(255_255_255/0.85),0_0_0_calc(3.5*var(--spacing))_rgb(0_0_0/0.12)]'
                   : 'shadow-[0_0_0_var(--spacing)_rgb(0_0_0/0.18)]',
@@ -508,7 +509,7 @@ function Page({ view, peekHidden }: { view: WindowView; peekHidden: boolean }) {
                 <div className={kicker}>{note.kick}</div>
                 <h3 className="mt-56 max-w-[12ch] font-serif text-pt-46 leading-[0.9] font-semibold tracking-[-0.055em]">{note.title}</h3>
                 <p className="mt-22 max-w-[34em] text-pt-14 leading-normal text-[#56675e]">{note.text}</p>
-                {pill && <PeekPill />}
+                {!focus && <PeekPill />}
               </div>
             </div>
           ))}
@@ -539,7 +540,7 @@ function Page({ view, peekHidden }: { view: WindowView; peekHidden: boolean }) {
             </div>
             <div
               className={cn(
-                'relative min-h-0 overflow-hidden rounded-pt-15 bg-[#eef2e8] text-[#20372d] shadow-[0_calc(14*var(--spacing))_calc(28*var(--spacing))_rgb(0_0_0/0.34),0_0_0_var(--spacing)_rgb(0_0_0/0.16)] transition-[translate] duration-550 ease-soft',
+                'relative min-h-0 overflow-hidden rounded-pt-15 bg-(--pbg) text-(--pink) shadow-[0_calc(14*var(--spacing))_calc(28*var(--spacing))_rgb(0_0_0/0.34),0_0_0_var(--spacing)_rgb(0_0_0/0.16)] transition-[translate] duration-550 ease-soft',
                 peekHidden && 'animated:translate-y-[105%]',
               )}
             >
@@ -573,12 +574,7 @@ function Page({ view, peekHidden }: { view: WindowView; peekHidden: boolean }) {
 
 /** The command palette, in Liquid Glass, over the page. */
 function CommandPalette() {
-  const rows: [string, string][] = [
-    ['🔬', 'Audience research'],
-    ['🚩', 'Launch plan'],
-    ['🎨', 'Design review'],
-    ['✨', 'Monday overview'],
-  ];
+  const rows = [...spaces.work.kids, spaces.work.group[0]];
   const section = 'px-20 pt-14 pb-6 text-pt-10.5 font-semibold text-white/55';
   const item = 'mx-12 mb-8 grid grid-cols-[calc(30*var(--spacing))_1fr_auto] items-center gap-12 rounded-pt-10 bg-white/6 px-12 py-10';
   const action = 'flex items-center gap-8 text-pt-10.5 whitespace-nowrap text-white/62';

@@ -4,7 +4,7 @@ import { isExternal } from '@/lib/site-links';
 import { external, heroAttribute } from './site-chrome';
 
 /** The small uppercase line above a heading. */
-export function Eyebrow({ className, ...props }: ComponentProps<'p'>) {
+function Eyebrow({ className, ...props }: ComponentProps<'p'>) {
   return (
     <p
       className={cn('mb-4 text-[0.67rem] leading-[1.4] font-extrabold tracking-[0.19em] uppercase', className)}
@@ -33,13 +33,13 @@ export function ArticleHero({
     <section
       {...heroAttribute}
       aria-labelledby={titleId}
-      className="-mt-header grid min-h-[660px] items-center gap-[clamp(3rem,8vw,8rem)] bg-night px-[max(1.5rem,calc((100vw-1280px)/2))] pt-[calc(var(--spacing-header)+clamp(5rem,8vw,8rem))] pb-[clamp(5rem,8vw,8rem)] text-cream min-[1100px]:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)] max-phone:min-h-0 max-phone:gap-12 max-phone:px-4 max-phone:pt-36 max-phone:pb-20"
+      className="-mt-header grid min-h-[660px] items-center gap-[clamp(3rem,8vw,8rem)] bg-night px-[max(1.5rem,calc((100vw-1280px)/2))] pt-[calc(var(--spacing-header)+clamp(5rem,8vw,8rem))] pb-[clamp(5rem,8vw,8rem)] text-cream laptop:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)] max-phone:min-h-0 max-phone:gap-12 max-phone:px-4 max-phone:pt-36 max-phone:pb-20"
     >
       <div className="min-w-0">
         <Eyebrow className="text-gold">{eyebrow}</Eyebrow>
         <h1
           id={titleId}
-          className="mt-4 mb-8 max-w-[850px] text-[clamp(4.5rem,7.3vw,8rem)] leading-[0.86] font-normal tracking-[-0.055em] max-phone:text-[clamp(3.8rem,17vw,6rem)] max-[520px]:text-[clamp(3.4rem,17vw,4.8rem)] [&_em]:text-gold"
+          className="mt-4 mb-8 max-w-[850px] text-[clamp(4.5rem,7.3vw,8rem)] leading-[0.86] font-normal tracking-[-0.055em] max-phone:text-[clamp(3.8rem,17vw,6rem)] max-small:text-[clamp(3.4rem,17vw,4.8rem)] [&_em]:text-gold"
         >
           {title}
         </h1>
@@ -47,17 +47,17 @@ export function ArticleHero({
       </div>
       <div
         aria-label={pointsLabel}
-        className="border-t border-cream/20 max-[1100px]:grid max-[1100px]:grid-cols-3 max-phone:grid-cols-1"
+        className="border-t border-cream/20 max-laptop:grid max-laptop:grid-cols-3 max-phone:grid-cols-1"
       >
         {points.map((point, i) => (
           <article
             key={point.title}
-            className="grid min-h-[150px] grid-cols-[2.8rem_minmax(0,1fr)] content-center gap-x-4.5 gap-y-1.5 border-b border-cream/20 py-6 max-[1100px]:block max-[1100px]:min-h-[170px] max-[1100px]:border-r max-[1100px]:p-6 max-[1100px]:last:border-r-0 max-phone:grid max-phone:min-h-0 max-phone:grid-cols-[2.5rem_minmax(0,1fr)] max-phone:border-r-0 max-phone:px-0 max-phone:py-5"
+            className="grid min-h-[150px] grid-cols-[2.8rem_minmax(0,1fr)] content-center gap-x-4.5 gap-y-1.5 border-b border-cream/20 py-6 max-laptop:block max-laptop:min-h-[170px] max-laptop:border-r max-laptop:p-6 max-laptop:last:border-r-0 max-phone:grid max-phone:min-h-0 max-phone:grid-cols-[2.5rem_minmax(0,1fr)] max-phone:border-r-0 max-phone:px-0 max-phone:py-5"
           >
             <span className="row-span-2 block text-[0.65rem] font-extrabold tracking-[0.12em] text-gold">
               {String(i + 1).padStart(2, '0')}
             </span>
-            <strong className="block font-serif text-[1.55rem] leading-none font-normal max-[1100px]:mt-7 max-[1100px]:mb-2 max-phone:m-0">
+            <strong className="block font-serif text-[1.55rem] leading-none font-normal max-laptop:mt-7 max-laptop:mb-2 max-phone:m-0">
               {point.title}
             </strong>
             <p className="m-0 block text-[0.78rem] leading-[1.6] text-cream/55">{point.text}</p>
@@ -122,7 +122,7 @@ export function ArticleSection({
     <section
       id={id}
       className={cn(
-        'relative mb-18 scroll-mt-10 border-b border-rule pb-18 max-[520px]:mb-14 max-[520px]:pb-14 [&_p]:text-ink/72 [&_strong]:text-ink',
+        'relative mb-18 scroll-mt-10 border-b border-rule pb-18 max-small:mb-14 max-small:pb-14 [&_p]:text-ink/72 [&_strong]:text-ink',
         prose,
       )}
     >
@@ -130,7 +130,7 @@ export function ArticleSection({
         <span className="mb-4 block text-[0.68rem] leading-[1.78] font-extrabold tracking-[0.15em] text-coral">{index}</span>
       )}
       {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-      <h2 className="mt-2.5 mb-6 max-w-[720px] text-[clamp(2.8rem,4.8vw,5rem)] leading-[0.92] font-normal tracking-[-0.042em] max-[520px]:text-[clamp(2.7rem,13vw,4rem)]">
+      <h2 className="mt-2.5 mb-6 max-w-[720px] text-[clamp(2.8rem,4.8vw,5rem)] leading-[0.92] font-normal tracking-[-0.042em] max-small:text-[clamp(2.7rem,13vw,4rem)]">
         {title}
       </h2>
       {children}
@@ -158,7 +158,7 @@ export function ArticleAside({
       id={id}
       aria-labelledby={titleId}
       className={cn(
-        'mb-18 grid scroll-mt-10 grid-cols-[170px_minmax(0,1fr)] gap-[clamp(1.5rem,4vw,3.5rem)] border-b-8 border-gold bg-night p-[clamp(1.5rem,3vw,2.5rem)] text-cream max-phone:grid-cols-1 max-[520px]:p-5.5',
+        'mb-18 grid scroll-mt-10 grid-cols-[170px_minmax(0,1fr)] gap-[clamp(1.5rem,4vw,3.5rem)] border-b-8 border-gold bg-night p-[clamp(1.5rem,3vw,2.5rem)] text-cream max-phone:grid-cols-1 max-small:p-5.5',
         '[&_code]:rounded-sm [&_code]:bg-gold [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.86em] [&_code]:text-ink [&_p]:text-cream/70 [&_strong]:text-cream [&_a:hover]:text-gold',
         prose,
       )}

@@ -36,7 +36,7 @@ export const bannerModes: Record<TemplateId, BackgroundMode> = {
  * template; `step`, `dev`, `open` and `plat` pick the tour step, device, full Arc list and
  * download platform; `y` scrolls the page by that many pixels.
  */
-export type ShotParams = {
+type ShotParams = {
   shot: boolean;
   crest: TemplateId | null;
   mode: BackgroundMode | null;

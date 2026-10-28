@@ -33,7 +33,7 @@ const chipNarrowing: Partial<Record<TemplateId, string>> = {
 const phoneFan = ['max-phone:[--tilt:-7deg] max-phone:translate-y-2', 'max-phone:[--tilt:0deg] max-phone:-translate-y-2.5', 'max-phone:[--tilt:7deg] max-phone:translate-y-2'];
 
 const clip = '[clip-path:polygon(0_0,100%_0,100%_100%,50%_88%,0_100%)]';
-const knob = "before:absolute before:-top-0.5 before:-left-[5px] before:size-2.5 before:rounded-full before:bg-[radial-gradient(circle_at_35%_35%,#f2f4f6,#757c85)] before:content-[''] after:absolute after:-top-0.5 after:-right-[5px] after:size-2.5 after:rounded-full after:bg-[radial-gradient(circle_at_35%_35%,#f2f4f6,#757c85)] after:content-['']";
+const knob = "ends:absolute ends:-top-0.5 ends:size-2.5 ends:rounded-full ends:bg-[radial-gradient(circle_at_35%_35%,#f2f4f6,#757c85)] ends:content-[''] before:-left-[5px] after:-right-[5px]";
 
 /** The hero's background: two layers, so a new template fades in over the last. */
 function HeroBackground() {
@@ -255,7 +255,7 @@ export function Hero() {
       <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-1 h-30 bg-linear-to-b from-transparent to-paper" />
       <div
         ref={heroHead}
-        className="relative mx-auto grid min-h-[clamp(520px,64vh,620px)] w-[min(var(--container-stage),calc(100%-2.5rem))] place-items-center pt-10 pb-4 max-phone:block max-phone:min-h-0 max-phone:pt-6"
+        className="relative grid min-h-[clamp(520px,64vh,620px)] stage-width place-items-center pt-10 pb-4 max-phone:block max-phone:min-h-0 max-phone:pt-6"
       >
         <TemplateChips heroHead={heroHead} platform={platform} phone={phone} />
         <div className="relative z-2 grid justify-items-center text-center">

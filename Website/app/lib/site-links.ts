@@ -1,7 +1,9 @@
+import { gitConfig } from './shared';
+
 /** A link in the site's navigation. `url` starting with `/` stays on this site. */
 export type SiteLink = { text: string; url: string };
 
-export const github = 'https://github.com/pauljoda/Crest';
+export const github = `https://github.com/${gitConfig.user}/${gitConfig.repo}`;
 
 export const links = {
   home: { text: 'Product site', url: '/' },

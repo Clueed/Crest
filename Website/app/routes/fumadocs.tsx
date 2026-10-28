@@ -5,7 +5,7 @@ import type { Route } from './+types/fumadocs';
 import type { PageHandle } from '@/root';
 import SearchDialog from '@/components/search';
 
-export const handle: PageHandle = { bodyClassName: 'flex flex-col min-h-screen' };
+export const handle: PageHandle = { htmlClassName: 'help', bodyClassName: 'flex flex-col min-h-screen' };
 
 function Providers({ children }: { children: React.ReactNode }) {
   return (

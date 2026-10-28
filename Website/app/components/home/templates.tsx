@@ -1,7 +1,7 @@
 import { cn } from '@/lib/cn';
 
 /** A Space template: field, primary and charge colors, as the app's BrowserSpaceHousePalette has them. */
-export type Template = { name: string; colors: [field: string, primary: string, charge: string] };
+type Template = { name: string; colors: [field: string, primary: string, charge: string] };
 
 export const templates = {
   winter: { name: 'Winter', colors: ['#1e2833', '#3e4e5e', '#86adc4'] },

@@ -23,9 +23,12 @@
   --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* `max-phone:` is 760px and narrower, `max-tablet:` 980px and narrower. */
-  --breakpoint-phone: 47.5625rem;
-  --breakpoint-tablet: 61.3125rem;
+  /* Each is one pixel past its width, so `max-phone:` is 760px and narrower, as the old pages were. */
+  --breakpoint-small: 32.5625rem; /* 520px */
+  --breakpoint-phone: 47.5625rem; /* 760px */
+  --breakpoint-narrow: 53.8125rem; /* 860px */
+  --breakpoint-tablet: 61.3125rem; /* 980px */
+  --breakpoint-laptop: 68.8125rem; /* 1100px */
 
   --container-page: 70rem;
   --container-wide: 81.25rem;
@@ -91,22 +94,24 @@
 /* Screenshots (`?shot`) and reduced motion put `noanim` on <html>; `animated` is everything else. */
 @custom-variant noanim (&:where(.noanim, .noanim *));
 @custom-variant animated (&:where(html:not(.noanim) *));
+/* `ends:` styles `::before` and `::after` together, for a pair of matching end pieces. */
+@custom-variant ends (&::before, &::after);
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
   }
   /* Crest Help keeps room for the scrollbar so its dialogs don't shift the page. */
-  html:has(#nd-docs-layout, #nd-home-layout) {
+  html.help {
     scrollbar-gutter: stable;
   }
   /* Sections a product page links to land below its sticky header. */
-  html:not(:has(#nd-docs-layout, #nd-home-layout)) {
+  html:not(.help) {
     scroll-padding-top: var(--spacing-header);
   }
   /* Product pages glide to the sections they link to; Crest Help jumps, as Fumadocs expects. */
   @media (prefers-reduced-motion: no-preference) {
-    html:not(.noanim, :has(#nd-docs-layout, #nd-home-layout)) {
+    html:not(.noanim, .help) {
       scroll-behavior: smooth;
     }
   }
@@ -126,13 +131,17 @@
   }
 }
 
-/* The page measures: content width, and the wider one the header and hero use. */
+/* The page measures: content width, the wider one the header and articles use, and the hero's. */
 @utility page-width {
   width: min(var(--container-page), calc(100% - 2.5rem));
   margin-inline: auto;
 }
 @utility wide-width {
   width: min(var(--container-wide), calc(100% - 2.5rem));
+  margin-inline: auto;
+}
+@utility stage-width {
+  width: min(var(--container-stage), calc(100% - 2.5rem));
   margin-inline: auto;
 }
 
