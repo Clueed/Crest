@@ -28,9 +28,8 @@ under `/guides/`.
 
 Write articles in plain Markdown, which agents read as written at
 `/llms.txt`, `/llms-full.txt`, and beside each article at `/docs/<article>.md`.
-Use MDX
-only where an article needs a component, such as the cards on the Help home
-page.
+Use MDX only where an article needs a component, such as the cards on the Help
+home page.
 
 - **Procedures.** A numbered list renders as steps.
 - **Callouts.** Use GitHub's alert syntax. Text after the marker is the
