@@ -33,7 +33,8 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "unist-util-visit": "^5.2.0",
-    "vite": "^8.3.5"
+    "vite": "^8.3.5",
+    "vite-imagetools": "^12.0.1"
   },
   "engines": {
     "node": ">=22.22.0"

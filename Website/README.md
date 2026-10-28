@@ -63,6 +63,12 @@ animation still, `crest` and `mode` pick the template, `step` the feature tour
 step, `dev` the device, `plat` the download platform, `open` opens the full
 Arc list, and `y` scrolls the page by that many pixels.
 
+Keep an article's images as PNG in a folder named after the article, and
+reference them with relative paths. The build serves each one as AVIF with a
+WebP fallback, at the column width and twice it, and lazy-loads every image
+but the article's first. A clip's poster, `<clip>.poster.png`, becomes a
+single AVIF.
+
 ## Work on the site
 
 Install Node.js 22.22 or later, then:

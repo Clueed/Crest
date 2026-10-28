@@ -41,8 +41,11 @@ The stages run in this order:
    clicks, speeds up idle time, and frames the window on the docs page
    background. It renders one clip per site theme, using the
    `--color-fd-background` values in `Website/app/app.css`: the `@theme`
-   value for light and the `.dark` value for dark. Screenshots need no
-   frame; their corners are transparent.
+   value for light and the `.dark` value for dark. Each clip's first frame
+   is saved beside it as `<clip>.poster.png`, which the page shows until
+   the clip loads. Screenshots need no frame; their corners are
+   transparent. The website build serves screenshots and posters as AVIF
+   (screenshots with a WebP fallback), so publish them as PNG.
 4. **check**: fails if any of these is true:
    - a declared label wasn't shown in the app;
    - a **bold** term in the article wasn't shown in the app;
@@ -75,7 +78,7 @@ accessibility tree when you choose targets for a new scenario.
 | `setup` | Steps that prepare the app without being recorded. The text they pass counts as seen |
 | `steps` | The recorded steps |
 | `assets` | Capture name to image path, relative to the article's folder |
-| `clip` | The light clip's path, relative to the article's folder. The dark clip adds `.dark` before the extension. The article shows both with `<Clip src={…} dark={…} label="…" />` |
+| `clip` | The light clip's path, relative to the article's folder. The dark clip adds `.dark` before the extension. Each clip has a poster beside it with `.poster` before the extension. The article shows them with `<Clip src={…} dark={…} poster={…} darkPoster={…} label="…" />` |
 | `clip_zoom` | How far the clip zooms in on clicks; `1.0` keeps the whole window (default `1.7`) |
 | `verify` | The article's own steps, followed by checks of the outcome |
 

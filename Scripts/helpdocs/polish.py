@@ -2,7 +2,8 @@
 
 Crops to the Crest window, eases a zoom in around each group of clicks and
 back out, speeds up idle stretches, and frames the result with rounded
-corners on the docs page background, once for each site theme.
+corners on the docs page background, once for each site theme. Each clip's
+first frame is also saved beside it as its poster.
 """
 
 from __future__ import annotations
@@ -20,6 +21,11 @@ OUT_W, OUT_H, PAD = 1280, 900, 56
 WINDOW_RADIUS = 26
 
 
+def poster_path(clip: Path) -> Path:
+    """Where a clip's first frame is saved: `name.mp4` -> `name.poster.png`."""
+    return clip.with_suffix(".poster.png")
+
+
 def smooth(x):
     x = min(max(x, 0.0), 1.0)
     return x * x * (3 - 2 * x)
@@ -27,7 +33,8 @@ def smooth(x):
 
 def polish(recording: Path, log: dict, destinations: dict[Path, tuple[int, int, int]], lag=0.25, zoom=1.7, target=13.0,
            fps=30):
-    """Write one clip per destination, framed on its background colour.
+    """Write one clip per destination, framed on its background colour, and
+    its first frame as `poster_path(destination)`.
 
     `lag` is how far the run log trails the recording, measured once by eye.
     """
@@ -150,10 +157,12 @@ def polish(recording: Path, log: dict, destinations: dict[Path, tuple[int, int, 
         image = Image.frombuffer("RGB", (W, H), current).resize(
             (inner_w, inner_h), Image.Resampling.LANCZOS, box=(x, y, x + cw, y + ch)
         )
-        for background, encode in zip(backgrounds, encoders):
+        for background, encode, destination in zip(backgrounds, encoders, destinations):
             frame = background.copy()
             frame.paste(image, (PAD, top), mask)
             encode.stdin.write(frame.tobytes())
+            if t == times[0]:
+                frame.save(poster_path(destination))
     for encode in encoders:
         encode.stdin.close()
         encode.wait()
