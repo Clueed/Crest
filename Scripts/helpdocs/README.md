@@ -86,9 +86,9 @@ Each step has a `name` and an `action`:
 
 | Action | Keys |
 | --- | --- |
-| `click` | `target` |
+| `click` | `target`, and optionally `button: right` for a secondary click |
 | `type` | `target`, `text`. Fails unless the field takes focus and then holds the text |
-| `drag` | `target`, `by` (points), and optionally `duration` and `hold` before release |
+| `drag` | `target`, and either `by` (points) or `to`, a target to drop on at `at`, a fraction of its frame (default `[0.5, 0.5]`); optionally `duration` and `hold` before release |
 | `move` | `target`, and optionally `at`, a fraction of its frame (default `[0.5, 0.5]`) |
 | `scroll` | `target`, `lines` |
 | `key` | `keys`, a System Events phrase such as `keystroke "," using command down` |

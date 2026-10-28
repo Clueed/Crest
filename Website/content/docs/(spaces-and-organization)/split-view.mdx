@@ -4,6 +4,11 @@ description: Create, focus, resize, reorder, synchronize, and separate two to fo
 keywords: [Split View, split tabs, cards, columns, iPhone pager]
 ---
 
+import createSplitView from './split-view/create-split-view.mp4';
+import createSplitViewDark from './split-view/create-split-view.dark.mp4';
+import createSplitViewPoster from './split-view/create-split-view.poster.png';
+import createSplitViewDarkPoster from './split-view/create-split-view.dark.poster.png';
+
 Split View keeps two to four live tabs in one durable sidebar group. The focused card owns the address field and page commands; the other cards remain visible and live.
 
 ## Create a Split View
@@ -14,6 +19,14 @@ Use any of these paths:
 - Open the tab context menu and choose the Split View action.
 - Right-click or touch and hold a page link, then choose **Open Link in Split View**.
 - Run **Split With Next Tab** from the command palette or assign it a shortcut.
+
+<Clip
+  src={createSplitView}
+  dark={createSplitViewDark}
+  poster={createSplitViewPoster}
+  darkPoster={createSplitViewDarkPoster}
+  label="Dragging the Lemon Tart tab from the sidebar onto the Kitchen Conversions page: the two pages appear as cards side by side, and clicking the Kitchen Conversions card focuses it"
+/>
 
 A one-card placeholder lets you add the next tab without losing the first page.
 
