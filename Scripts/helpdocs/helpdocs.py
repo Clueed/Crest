@@ -299,9 +299,13 @@ class Run:
         return self.out / f"capture/clip.{theme}.mp4"
 
     def publish(self):
-        """Copy the fresh captures and clip next to the article."""
+        """Copy the fresh captures, clips and clip posters next to the article."""
+        from polish import poster_path
+
         sources = {self.out / f"capture/{name}.png": relative for name, relative in self.scenario.assets.items()}
-        sources |= {self.clip_capture(theme): relative for theme, relative in self.scenario.clips().items()}
+        for theme, relative in self.scenario.clips().items():
+            sources[self.clip_capture(theme)] = relative
+            sources[poster_path(self.clip_capture(theme))] = str(poster_path(Path(relative)))
         for source, relative in sources.items():
             target = self.scenario.article.parent / relative
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -324,7 +328,10 @@ class Run:
         for name, old in self.scenario.committed_labels(self.base).items():
             if self.scenario.labels.get(name) != old and old in article:
                 self.problems.append(f"article still says {old!r}; label {name} is now {self.scenario.labels.get(name)!r}")
-        for relative in [*self.scenario.assets.values(), *self.scenario.clips().values()]:
+        from polish import poster_path
+
+        clips = self.scenario.clips().values()
+        for relative in [*self.scenario.assets.values(), *clips, *(str(poster_path(Path(c))) for c in clips)]:
             if f"./{relative}" not in self.scenario.article.read_text():
                 self.problems.append(f"article does not show {relative}")
         print(f"ok  check ({len(self.problems)} problems)")

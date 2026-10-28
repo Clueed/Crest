@@ -1,5 +1,7 @@
 import { llms, loader } from 'fumadocs-core/source';
+import { applyMdxPreset } from 'fumadocs-mdx/config';
 import { defineDocs } from 'fumadocs-mdx/macro';
+import { remarkFirstImage } from './remark-first-image';
 import { docsRoute } from './shared';
 
 // A page's date is its last content edit. Renames are skipped, so moving or
@@ -23,6 +25,9 @@ export const docs = defineDocs({
     async: true,
     // The macro accepts a date function at build time but types the option as a flag.
     lastModified: lastContentEdit as unknown as true,
+    mdxOptions: applyMdxPreset({
+      remarkPlugins: (plugins) => [...plugins, remarkFirstImage],
+    }),
     postprocess: {
       includeProcessedMarkdown: true,
     },
