@@ -128,10 +128,8 @@ class Driver:
 
     # MARK: - Input
 
-    def mouse(self, kind, x, y):
-        Quartz.CGEventPost(
-            Quartz.kCGHIDEventTap, Quartz.CGEventCreateMouseEvent(None, kind, (x, y), Quartz.kCGMouseButtonLeft)
-        )
+    def mouse(self, kind, x, y, button=Quartz.kCGMouseButtonLeft):
+        Quartz.CGEventPost(Quartz.kCGHIDEventTap, Quartz.CGEventCreateMouseEvent(None, kind, (x, y), button))
 
     def move_to(self, x, y):
         """Glide the pointer at a steady, readable speed; returns the seconds it took."""
@@ -146,16 +144,20 @@ class Driver:
             time.sleep(0.01)
         return duration
 
-    def click(self, element, name):
+    def click(self, element, name, button="left"):
         AXUIElementPerformAction(element, "AXScrollToVisible")
         time.sleep(0.3)
         x, y, width, height = frame(element)
         cx, cy = x + width / 2, y + height / 2
         moved = self.move_to(cx, cy)
         self.log["clicks"].append({"t": time.time() - self.started, "x": cx, "y": cy, "step": name, "move": moved})
-        self.mouse(Quartz.kCGEventLeftMouseDown, cx, cy)
+        if button == "right":
+            down, up, number = Quartz.kCGEventRightMouseDown, Quartz.kCGEventRightMouseUp, Quartz.kCGMouseButtonRight
+        else:
+            down, up, number = Quartz.kCGEventLeftMouseDown, Quartz.kCGEventLeftMouseUp, Quartz.kCGMouseButtonLeft
+        self.mouse(down, cx, cy, number)
         time.sleep(0.05)
-        self.mouse(Quartz.kCGEventLeftMouseUp, cx, cy)
+        self.mouse(up, cx, cy, number)
         self.refresh_cursor(cx, cy)
 
     def type_text(self, text):
@@ -189,10 +191,16 @@ class Driver:
         self.move_to(x + 8, y + 6)
 
     def drag(self, element, step):
-        """Press on the element, move the pointer smoothly by `by` points, pause, and release."""
+        """Press on the element, move the pointer smoothly by `by` points, or onto
+        the `to` target at the fraction `at` of its frame, pause, and release."""
         x, y, width, height = frame(element)
         sx, sy = x + width / 2, y + height / 2
-        ex, ey = sx + step["by"][0], sy + step["by"][1]
+        if "to" in step:
+            tx, ty, tw, th = frame(self.resolve(step["to"]))
+            fx, fy = step.get("at", [0.5, 0.5])
+            ex, ey = tx + tw * fx, ty + th * fy
+        else:
+            ex, ey = sx + step["by"][0], sy + step["by"][1]
         moved = self.move_to(sx, sy)
         self.log["clicks"].append({"t": time.time() - self.started, "x": sx, "y": sy, "step": step["name"], "move": moved})
         self.mouse(Quartz.kCGEventLeftMouseDown, sx, sy)
@@ -250,7 +258,7 @@ class Driver:
         if action == "key":
             subprocess.run(["osascript", "-e", f'tell application "System Events" to {step["keys"]}'], check=True)
         elif action == "click":
-            self.click(self.resolve(step["target"]), name)
+            self.click(self.resolve(step["target"]), name, step.get("button", "left"))
         elif action == "move":
             # Rest the pointer at a fraction of the target's frame, such as blank page space.
             x, y, width, height = frame(self.resolve(step["target"]))

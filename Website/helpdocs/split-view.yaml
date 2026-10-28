@@ -1,0 +1,85 @@
+# Create a Split View on Mac: drag a sidebar tab onto the page on show, then
+# click the other card to focus it.
+# Format and actions: Scripts/helpdocs/README.md.
+article: content/docs/(spaces-and-organization)/split-view.mdx
+section: Create a Split View
+sources:
+  - CrestShared/Features/SplitView/**
+  - CrestMac/Features/SplitView/**
+  - CrestShared/Features/Sidebar/Components/BrowserSidebarSplitGroupRow/**
+  - CrestMac/Features/Sidebar/Components/BrowserSidebarDrag/**
+labels:
+  split_view: Split View
+  two_tabs: Split View with 2 tabs
+  open_link_in_split_view: Open Link in Split View
+  split_with_next_tab: Split With Next Tab
+# Served on a free local port as {server} while the scenario runs. Strings
+# from these pages are written inline; `labels` holds only Crest's own text.
+serve: fixtures/split-view
+launch:
+  # Nothing is saved between runs. The plain isolated seed keeps the sidebar
+  # short, so both fixture tabs stay in view.
+  env: {CREST_ISOLATED_SESSION: 1}
+  window: [1280, 800]
+setup:
+  # Unrecorded. Hide the developer toolbar that local pages turn on, close the
+  # seeded start tab, and open the two fixture pages as separate tabs. On the
+  # way, show the other two paths the section names so the check sees them:
+  # the command in Settings → Shortcuts, and the page link menu.
+  - name: open-settings
+    action: key
+    keys: keystroke "," using command down
+    settle: 1.5
+  - {name: open-general, action: click, target: {identifier: settings-general}}
+  - {name: show-developer, action: scroll, target: {identifier: settings-form-general}, lines: 60}
+  - {name: hide-developer-toolbar, action: click, target: {identifier: automatic-developer-toolbar-toggle}}
+  - {name: open-shortcuts, action: click, target: {identifier: settings-shortcuts}, settle: 1.5}
+  - {name: find-shortcut, action: type, target: {identifier: shortcut-search}, text: Split With Next Tab, settle: 1.0}
+  - {name: close-settings, action: key, keys: keystroke "w" using command down, settle: 1.0}
+  - {name: close-start-tab, action: key, keys: keystroke "w" using command down, settle: 1.0}
+  - {name: new-tab-recipe, action: key, keys: keystroke "t" using command down, settle: 1.0}
+  - {name: enter-recipe, action: type, target: {identifier: command-palette-field}, text: "{server}/recipe.html"}
+  - {name: open-recipe, action: key, keys: key code 36, settle: 2.0}
+  - name: link-menu
+    action: click
+    button: right
+    target: {role: AXLink, label: kitchen conversions}
+    settle: 1.0
+  - {name: close-link-menu, action: key, keys: key code 53, settle: 0.5}
+  - {name: clear-link-highlight, action: key, keys: keystroke "r" using command down, settle: 1.5}
+  - {name: new-tab-conversions, action: key, keys: keystroke "t" using command down, settle: 1.0}
+  - {name: enter-conversions, action: type, target: {identifier: command-palette-field}, text: "{server}/conversions.html"}
+  - {name: open-conversions, action: key, keys: key code 36, settle: 2.0}
+steps:
+  - {name: pause, action: wait, seconds: 0.8}
+  - name: drag-tab-onto-page       # Lemon Tart joins the Kitchen Conversions page as a second card
+    action: drag
+    target: {role: AXButton, label: Lemon Tart, identifier_prefix: tab-}
+    to: {role: AXWebArea, label: Kitchen Conversions}
+    duration: 1.6
+    hold: 1.0
+    settle: 2.0
+  - name: focus-other-card
+    action: click
+    target: {role: AXWebArea, label: Kitchen Conversions}
+    settle: 3.0
+clip: split-view/create-split-view.mp4
+clip_zoom: 1.0                   # the drag crosses from the sidebar to the page; zooming in would crop it
+verify:
+  # Drag a sidebar tab onto the current page, then focus the other card.
+  - name: drag-tab-onto-page
+    action: drag
+    target: {role: AXButton, label: Lemon Tart, identifier_prefix: tab-}
+    to: {role: AXWebArea, label: Kitchen Conversions}
+    settle: 2.0
+  - name: split-has-both
+    action: expect
+    target: {role: AXButton, label: $split_view}
+    contains: $two_tabs
+  - {name: recipe-card-shown, action: expect, target: {role: AXWebArea, label: Lemon Tart}}
+  - {name: conversions-card-shown, action: expect, target: {role: AXWebArea, label: Kitchen Conversions}}
+  - {name: focus-other-card, action: click, target: {role: AXWebArea, label: Kitchen Conversions}, settle: 1.0}
+  - name: address-follows-focus
+    action: expect
+    target: {identifier: address-display}
+    contains: conversions.html

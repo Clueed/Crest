@@ -1,0 +1,58 @@
+body {
+  margin: 0;
+  font: 17px/1.6 -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+main {
+  max-width: 560px;
+  margin: 48px auto;
+  padding: 0 32px;
+}
+
+.kicker {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 8px 0 20px;
+  font-size: 34px;
+  line-height: 1.2;
+}
+
+h2 {
+  margin-top: 28px;
+  font-size: 21px;
+}
+
+.recipe {
+  color: #3a2a10;
+  background: #fdf3c8;
+}
+
+.recipe .kicker {
+  color: #b07a00;
+}
+
+.conversions {
+  color: #e6edf5;
+  background: #1f3347;
+}
+
+.conversions .kicker {
+  color: #8fc3ee;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #3c5670;
+  text-align: left;
+}
