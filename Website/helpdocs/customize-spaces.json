@@ -31,9 +31,6 @@
     "artwork_credits": "Artwork Credits"
   },
   "test": "CustomizeSpacesArticle",
-  "launch": {
-    "window": [1280, 800]
-  },
   "assets": {
     "studio": "customize-spaces/crest-studio.png"
   }

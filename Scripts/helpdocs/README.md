@@ -40,7 +40,10 @@ The stages run in this order:
    was taken, so the clip lines up with the test's steps exactly. The video
    leaves the pointer out and logs its path beside the recording instead.
    It takes a window-only PNG for each `capture`, and reports which ones
-   differ from the published images.
+   differ from the published images. A whole-window capture is framed as a
+   clip frames it, with the same margin and shadow in proportion to the
+   window, on a transparent background, so the app looks the same size in a
+   screenshot as in a clip and one image suits both site themes.
 3. **polish**: turns the recording into the article's clip. It speeds up
    idle time, easing in and out of it, zooms in on clicks, timed on the clip
    so a speed-up never hurries the zoom, draws a larger pointer from the
@@ -55,12 +58,12 @@ The stages run in this order:
    theme, using the `--color-fd-background` values in `Website/app/app.css`:
    the `@theme` value for light and the `.dark` value for dark. Each clip's
    first frame is saved beside it as `<clip>.poster.png`, which the page
-   shows until the clip loads. Screenshots need no frame; their corners are
-   transparent. The website build serves screenshots and posters as AVIF
-   (screenshots with a WebP fallback), so publish them as PNG. An article
-   shows a screenshot at half its pixel width, the Retina capture's size in
-   points, and never wider than the column, so a cropped capture appears at
-   the size it has in the app.
+   shows until the clip loads. The website build serves screenshots and
+   posters as AVIF (screenshots with a WebP fallback), so publish them as
+   PNG. An article shows a screenshot at half its pixel width, the Retina
+   capture's size in points, and never wider than the column. A framed
+   window and a clip both fill the column, and a cropped capture, which has
+   no frame, appears at the size it has in the app.
 4. **check**: fails if any of these is true:
    - a declared label wasn't shown in the app;
    - a **bold** term in the article wasn't shown in the app;
@@ -92,7 +95,7 @@ are in `media.swift`, which the runner compiles into the work folder with
 | `keys` | Bold terms in the article that name keyboard keys rather than UI text |
 | `serve` | A fixture folder next to the scenario, served on a free local port; the test reads a page's address with `fixture("page.html")` |
 | `test` | The Swift test class in `CrestHelpDocs/` |
-| `launch` | The requested `window` size in points (default 1040×780, a 4:3 window that fits a 1440×900 display above the Dock) |
+| `launch` | The requested `window` size in points (default 1040×780, a 4:3 window that fits a 1440×900 display above the Dock). Keep the default, so every clip and screenshot shows the app at the same size |
 | `assets` | Capture name to image path, relative to the article's folder |
 | `clip` | The light clip's path, relative to the article's folder. The dark clip adds `.dark` before the extension. Each clip has a poster beside it with `.poster` before the extension. The article shows them with `<Clip src={…} dark={…} poster={…} darkPoster={…} label="…" />` |
 | `clip_zoom` | How far the clip zooms in on clicks; `1.0` keeps the whole window (default `1.7`) |

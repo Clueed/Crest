@@ -12,9 +12,6 @@
   },
   "serve": "fixtures/localhost-developer-tools",
   "test": "LocalhostDeveloperToolsArticle",
-  "launch": {
-    "window": [1280, 800]
-  },
   "assets": {
     "phone": "localhost-developer-tools/phone-viewport.png"
   }

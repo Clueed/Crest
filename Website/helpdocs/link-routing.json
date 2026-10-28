@@ -19,9 +19,6 @@
     "work": "Work"
   },
   "test": "LinkRoutingArticle",
-  "launch": {
-    "window": [1280, 800]
-  },
   "assets": {
     "route": "link-routing/route.png"
   }

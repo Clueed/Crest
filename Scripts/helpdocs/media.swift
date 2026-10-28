@@ -102,6 +102,69 @@ extension CGImage {
     }
 }
 
+// MARK: - Framing
+
+/// How clips and screenshots set the window on the docs page: the same
+/// margin on every side and a soft shadow below, each in proportion to the
+/// window's width. A page shows both as wide as its column, so the app looks
+/// the same size in a clip as in a screenshot.
+enum Framing {
+
+    // MARK: - Static Variables
+
+    /// The window width, in pixels, that the measures below are given for:
+    /// a clip's window.
+    static let reference = Double(Clip.width - 2 * Clip.pad)
+    /// The margin on each side, against the window's width.
+    static let margin = Double(Clip.pad) / reference
+    /// How far the shadow drops and blurs, against the window's width.
+    static let drop = 8 / reference
+    static let blur = 18 / reference
+    /// The shadow's opacity under the middle of the window.
+    static let opacity = 70.0 / 255
+
+    // MARK: - Actions
+
+    /// The margin in pixels around a window `width` pixels wide.
+    static func pad(around width: Int) -> Int {
+        Int((Double(width) * margin).rounded(.toNearestOrEven))
+    }
+
+    /// The shadow `shape` casts: black where it is opaque, dropped and blurred
+    /// in proportion to `width`, the window's width in pixels.
+    static func shadow(of shape: CIImage, width: Double) -> CIImage {
+        let none = CIVector(x: 0, y: 0, z: 0, w: 0)
+        return shape.applyingFilter(
+            "CIColorMatrix",
+            parameters: [
+                "inputRVector": none, "inputGVector": none, "inputBVector": none,
+                "inputAVector": CIVector(x: 0, y: 0, z: 0, w: opacity), "inputBiasVector": none,
+            ]
+        )
+        .transformed(by: CGAffineTransform(translationX: 0, y: -drop * width))
+        .applyingGaussianBlur(sigma: blur * width)
+    }
+
+    /// `image`, a window with transparent corners, on a transparent margin
+    /// with its shadow below, as a clip frames it. The page shows through
+    /// the margin, so one image suits every site theme.
+    static func frame(_ image: CGImage) throws -> CGImage {
+        let pad = Double(pad(around: image.width))
+        let bounds = CGRect(
+            x: 0, y: 0, width: Double(image.width) + 2 * pad, height: Double(image.height) + 2 * pad)
+        let window = CIImage(cgImage: image).transformed(by: CGAffineTransform(translationX: pad, y: pad))
+        let framed = window.composited(over: shadow(of: window, width: Double(image.width))).cropped(to: bounds)
+        // Blend in the capture's own values, as the page blends the image.
+        let context = CIContext(options: [.workingColorSpace: NSNull(), .outputColorSpace: NSNull()])
+        guard
+            let result = context.createCGImage(
+                framed, from: bounds, format: .RGBA8,
+                colorSpace: image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!)
+        else { throw Failure(description: "cannot frame the capture") }
+        return result
+    }
+}
+
 // MARK: - Record
 
 /// Records the main display with ScreenCaptureKit until interrupted.
@@ -346,11 +409,12 @@ struct Window {
         self.bounds = bounds
     }
 
-    /// Takes the window into `path`, keeping only `crop`, in screen points, when given.
+    /// Takes the window into `path`, framed as a clip frames it, or keeping
+    /// only `crop`, in screen points, unframed.
     func capture(to path: String, crop: CGRect?) throws {
         try Process.output(["screencapture", "-x", "-o", "-l\(number)", path])
-        guard let crop else { return }
         let image = try CGImage.load(path)
+        guard let crop else { return try Framing.frame(image).write(to: path) }
         let scale = Double(image.width) / bounds.width
         let left = max(((crop.minX - bounds.minX) * scale).rounded(.toNearestOrEven), 0)
         let top = max(((crop.minY - bounds.minY) * scale).rounded(.toNearestOrEven), 0)
@@ -904,29 +968,22 @@ struct Clip {
     /// The page background with the window's soft shadow below the frame.
     private func background(_ destination: Destination, behind frame: CGRect, radius: Double) -> CGImage {
         let bounds = CGRect(x: 0, y: 0, width: size.width, height: size.height)
-        let shadow = CGContext(
+        let shape = CGContext(
             data: nil, width: size.width, height: size.height, bitsPerComponent: 8, bytesPerRow: size.width,
-            space: CGColorSpaceCreateDeviceGray(),
-            bitmapInfo: CGImageAlphaInfo.none.rawValue)!
-        shadow.setFillColor(gray: 70 / 255, alpha: 1)
-        shadow.addPath(
-            CGPath(
-                roundedRect: frame.offsetBy(dx: 0, dy: -8), cornerWidth: radius, cornerHeight: radius, transform: nil))
-        shadow.fillPath()
+            space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.alphaOnly.rawValue)!
+        shape.addPath(CGPath(roundedRect: frame, cornerWidth: radius, cornerHeight: radius, transform: nil))
+        shape.fillPath()
         let colour = destination.background
         let page = CIImage(
             color: CIColor(
                 red: Double(colour.red) / 255, green: Double(colour.green) / 255, blue: Double(colour.blue) / 255,
                 colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!)!)
-        let mask = CIImage(cgImage: shadow.makeImage()!).clampedToExtent()
-            .applyingGaussianBlur(sigma: 18).cropped(to: bounds)
-        let blended = CIImage(color: .black).applyingFilter(
-            "CIBlendWithMask", parameters: [kCIInputBackgroundImageKey: page, kCIInputMaskImageKey: mask]
-        ).cropped(to: bounds)
+        let shadow = Framing.shadow(of: CIImage(cgImage: shape.makeImage()!), width: frame.width)
         // Blend in sRGB values, as the page's own CSS colour is given.
         let context = CIContext(options: [.workingColorSpace: NSNull(), .outputColorSpace: NSNull()])
         return context.createCGImage(
-            blended, from: bounds, format: .RGBA8, colorSpace: CGColorSpace(name: CGColorSpace.sRGB))!
+            shadow.composited(over: page).cropped(to: bounds), from: bounds, format: .RGBA8,
+            colorSpace: CGColorSpace(name: CGColorSpace.sRGB))!
     }
 }
 
