@@ -6,6 +6,7 @@ import {
   DocsPage,
   DocsTitle,
   MarkdownCopyButton,
+  PageLastUpdate,
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 import { docs, source } from '@/lib/source';
@@ -47,7 +48,7 @@ function Content({
   if (!page) throw new Error(`unknown page: ${path}`);
 
   // content is loaded lazily, call `page.preload()` in your loader to avoid suspending
-  const { toc } = use(page.load());
+  const { toc, lastModified } = use(page.load());
   const Mdx = page.body;
 
   return (
@@ -68,6 +69,7 @@ function Content({
       <DocsBody>
         <Mdx components={useMDXComponents()} />
       </DocsBody>
+      {lastModified && <PageLastUpdate date={lastModified} />}
     </DocsPage>
   );
 }
