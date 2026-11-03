@@ -12,6 +12,8 @@ Use <kbd>Shift-Command-I</kbd> to show or hide the toolbar on any website. To st
 
 Choose a phone or desktop preset, or enter a custom size, in the developer toolbar. The live page renders within that viewport so you can review responsive layouts without resizing your whole browser window. Return to the normal viewport when finished.
 
+![A local bakery page previewed at the Phone viewport under the developer toolbar, its header, photo and product cards stacked in one narrow column](./localhost-developer-tools/phone-viewport.png)
+
 This previews the page’s layout at the chosen dimensions; it does not reproduce another device’s hardware or browser engine.
 
 ## Toolbar controls

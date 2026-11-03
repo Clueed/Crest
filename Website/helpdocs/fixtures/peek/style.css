@@ -1,0 +1,51 @@
+body {
+  margin: 0;
+  font: 18px/1.6 -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1d2330;
+  background: #faf8f4;
+}
+
+main {
+  max-width: 620px;
+  margin: 56px auto;
+  padding: 0 32px;
+}
+
+.kicker {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7a6a4f;
+}
+
+h1 {
+  margin: 8px 0 24px;
+  font-size: 34px;
+  line-height: 1.2;
+}
+
+h2 {
+  margin-top: 32px;
+  font-size: 22px;
+}
+
+a {
+  color: #1f5fbf;
+}
+
+.weather {
+  background: #eef4fb;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #d3deeb;
+  text-align: left;
+}

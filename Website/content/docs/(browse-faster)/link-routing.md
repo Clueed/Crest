@@ -10,15 +10,17 @@ Link Routing is Crest’s equivalent of Arc’s Air Traffic Control: matching li
 
 1. Open **Settings → Links**.
 2. In **Routing**, choose **New Route**.
-3. Enter a URL pattern.
-4. Choose **Contains** or **Exact**.
-5. Choose the destination Space.
+3. In **URL or text**, enter a URL pattern.
+4. Next to **When URL**, choose **Contains** or **Is Exactly**.
+5. In **Open in Space**, choose the destination Space.
+
+![A route in the Routing section: When URL Contains, URL or text github.com, Open in Space Work](./link-routing/route.png)
 
 Routes are evaluated from top to bottom. Reorder them when a narrow rule should win before a broad one.
 
 ## Match deliberately
 
-- **Exact** is best for one complete address that should always land in one Space.
+- **Is Exactly** is best for one complete address that should always land in one Space.
 - **Contains** is useful for a domain or stable path fragment, but a pattern that is too broad may catch unrelated links.
 
 Start with the smallest meaningful domain or URL fragment, test a link from another app, then broaden only if needed.

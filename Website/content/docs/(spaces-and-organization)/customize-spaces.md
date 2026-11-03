@@ -8,19 +8,23 @@ Open a Space’s context menu to edit it, or open its page in Settings. On Mac, 
 
 ## Choose an identity
 
-Crest offers two presentation styles:
+Crest Studio designs a Space’s crest and its sidebar: begin with a template, then choose a shape, field division, band, emblem, border, and finish. Use independent colors for the parts of your design, or make an identity with an emoji, monogram, or searchable SF Symbol. The sidebar behind your tabs can wear one of two presentation styles:
 
-- **Banner** uses Crest Studio: begin with a template, then choose a shape, field division, pattern, trim, and heraldic artwork. Use independent colors for the parts of your design, or make an identity with an emoji, monogram, or searchable SF Symbol.
-- **Traditional Gradient** keeps the familiar Arc-style theme: it blends one to three colors with direction, intensity, a readability fade, and optional texture.
+- A banner pattern, such as **Solid**, **Split** or **Chevron**, painted in the Space’s colors.
+- **Gradient** keeps the familiar Arc-style theme: it blends the Space’s colors with an angle, intensity, a readability fade, and optional texture.
 
 The result appears in the Space picker and browser chrome on Mac, iPad, and iPhone.
 
-Crest Studio is on the Space’s Appearance page. The crest sits on the Space’s own sidebar background, with its colors named by what they paint:
+Crest Studio is on the Space’s Appearance page. The crest sits on the Space’s own sidebar background, beside its colors.
 
-- **Crest:** Field, Second field, Band, Emblem, Border and Edge. A color for a part the crest doesn’t draw is dimmed.
-- **Sidebar:** Background, Accent (selected tabs, pins, the address field and the Space picker) and Pattern.
+![Crest Studio for the Work Space: a gold lion on a red shield over the Space’s sidebar background, its Crest and Sidebar colors beside it, the steps from Start from to Sidebar, and the Start from templates with Lion selected](./customize-spaces/crest-studio.png)
 
-Click or tap a color to choose one of the templates’ tinctures or a custom color. Below the crest, work through **Start from**, **Shape**, **Field**, **Band**, **Emblem**, **Border**, **Finish** and **Sidebar**; each step shows your crest with each choice applied. On iPhone, the steps are a list showing what each has chosen; tap one to open it. Choose **Icon** at the top of **Emblem** to use an SF Symbol or emoji instead of a crest. **Shuffle** suggests a new crest in the templates’ colors, and **Undo** steps back through your changes. **Reset Appearance** and **Artwork Credits** are in the **…** menu on the Space’s page.
+Each color is named by what it paints:
+
+- **Crest**: Field, Second field, Band, Emblem, Border and Edge. A color for a part the crest doesn’t draw is dimmed.
+- **Sidebar**: Background, Accent (selected tabs, pins, the address field and the Space picker) and Pattern.
+
+Click or tap a color to choose one of the templates’ tinctures or a custom color. Below the crest, work through **Start from**, **Shape**, **Field**, **Band**, **Emblem**, **Border**, **Finish** and **Sidebar**; each step shows your crest with each choice applied. On iPhone, the steps are a list showing what each has chosen; tap one to open it. Choose **Icon** at the top of **Emblem** to use an SF Symbol or emoji instead of a crest. **Shuffle** suggests a new crest in the templates’ colors, and **Undo** steps back through your changes. **Reset Appearance** and **Artwork Credits** are in the **Space actions** menu (…) on the Space’s page.
 
 ## Customize folders
 

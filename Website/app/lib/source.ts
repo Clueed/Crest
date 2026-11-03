@@ -2,6 +2,7 @@ import { llms, loader } from 'fumadocs-core/source';
 import { applyMdxPreset } from 'fumadocs-mdx/config';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { remarkAlerts } from './remark-alerts';
+import { remarkFirstImage } from './remark-first-image';
 import { remarkKbd } from './remark-kbd';
 import { docsRoute, getPageMarkdownUrl, siteUrl } from './shared';
 
@@ -26,7 +27,9 @@ export const docs = defineDocs({
     async: true,
     // The macro accepts a date function at build time but types the option as a flag.
     lastModified: lastContentEdit as unknown as true,
-    mdxOptions: applyMdxPreset({ remarkPlugins: (plugins) => [remarkAlerts, remarkKbd, ...plugins] }),
+    mdxOptions: applyMdxPreset({
+      remarkPlugins: (plugins) => [remarkAlerts, remarkKbd, ...plugins, remarkFirstImage],
+    }),
     postprocess: {
       // Agents read each article's Markdown; Fumadocs' `[#id]` heading suffixes would only be noise.
       includeProcessedMarkdown: { headingIds: false },

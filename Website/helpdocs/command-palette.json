@@ -1,0 +1,22 @@
+{
+  "article": "content/docs/(browse-faster)/command-palette.mdx",
+  "section": "Search a site or ask an assistant",
+  "sources": [
+    "CrestShared/Features/Chrome/Components/BrowserCommandPalette/**",
+    "CrestShared/Features/Settings/BrowserSearchSettingsPane/**",
+    "CrestShared/Application/BrowserSearch/**"
+  ],
+  "labels": {
+    "settings": "Settings",
+    "search": "Search",
+    "tab_to_search": "Tab to search providers",
+    "space_to_search": "Space to search providers",
+    "search_youtube": "Search YouTube",
+    "stop_youtube": "Stop searching YouTube"
+  },
+  "keys": ["Tab", "Return", "Escape", "Delete"],
+  "serve": "fixtures/command-palette",
+  "test": "CommandPaletteArticle",
+  "clip": "command-palette/search-a-provider.mp4",
+  "clip_zoom": 1.0
+}

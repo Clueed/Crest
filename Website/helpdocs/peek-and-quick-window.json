@@ -1,0 +1,21 @@
+{
+  "article": "content/docs/(browse-faster)/peek-and-quick-window.mdx",
+  "section": "Pull a link into Peek on Mac",
+  "sources": [
+    "CrestMac/Infrastructure/WebKit/LinkDrag/**",
+    "CrestShared/Application/BrowserTransientBrowsing/Peek/**",
+    "CrestShared/Features/Settings/BrowserLinkSettingsPane/Components/BrowserPeekSettingsSection.swift"
+  ],
+  "labels": {
+    "settings": "Settings",
+    "links": "Links",
+    "drag_to_peek": "Drag links to Peek",
+    "close": "Close Peek",
+    "open_in": "Open In…"
+  },
+  "keys": ["Option"],
+  "serve": "fixtures/peek",
+  "test": "PeekArticle",
+  "clip": "peek-and-quick-window/pull-link-into-peek.mp4",
+  "clip_zoom": 1.0
+}

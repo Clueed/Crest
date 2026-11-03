@@ -400,6 +400,22 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: com.pauldavis.crest.tests
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Crest.app/Contents/MacOS/Crest"
+  # Replays Crest Help articles against the app to regenerate their captures
+  # and check their steps. Not part of any test suite:
+  # Scripts/helpdocs/helpdocs.py drives it through its own scheme. See Scripts/helpdocs/README.md.
+  CrestHelpDocs:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - path: CrestHelpDocs
+    dependencies:
+      - target: Crest
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.pauldavis.crest.helpdocs
+        TEST_TARGET_NAME: Crest
+        SWIFT_EMIT_LOC_STRINGS: NO
   CrestMobileNativeCore:
     type: application
     platform: iOS
@@ -579,6 +595,14 @@ schemes:
       config: Release
     archive:
       config: Release
+  CrestHelpDocs:
+    build:
+      targets:
+        Crest: all
+        CrestHelpDocs: [test]
+    test:
+      targets:
+        - CrestHelpDocs
   CrestKeychainIntegration:
     build:
       targets:
