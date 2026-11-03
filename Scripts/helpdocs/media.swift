@@ -555,6 +555,9 @@ struct Clip {
     /// The pointer's first move, in recording seconds, and the window edge
     /// it flies in from instead of where it started, in window pixels.
     private(set) var entrance: (start: Double, end: Double, from: (x: Double, y: Double))?
+    /// When the first step that acts starts, in recording seconds: anything
+    /// but a wait or a check.
+    let firstAction: Double?
     /// A move after the last press, which only takes the pointer out of the
     /// way: instead the pointer flies out from where that move starts, to
     /// the nearest window edge, in recording seconds and window pixels.
@@ -631,6 +634,7 @@ struct Clip {
             let ending = log.steps.map({ $0.t + offset + $0.seconds }).max()
         else { throw Failure(description: "the run log records no steps") }
         first = max(firstActivity - 0.5, 0)
+        firstAction = log.steps.first { !["wait", "expect"].contains($0.action) }.map { $0.t + offset }
         last = ending
         activeSpans.append((lastActivity, last))
         if let move = pointer?.firstMove(after: first) {
@@ -787,10 +791,12 @@ struct Clip {
     /// edge, and a still second.
     ///
     /// When the pointer moves, it flies in on its first move, to where that
-    /// move ends, and the clip starts a still second before it. Otherwise
-    /// the clip holds its first frame while the pointer flies in. Likewise
-    /// a move after the last press becomes the flight out, and the clip
-    /// ends a still second after it.
+    /// move ends, and the clip starts a still second before that move or
+    /// the first step that acts, whichever is earlier, so keys pressed
+    /// before the pointer moves stay in. Otherwise the clip holds its first
+    /// frame while the pointer flies in. Likewise a move after the last
+    /// press becomes the flight out, and the clip ends a still second after
+    /// it.
     private func frames(at times: [Double]) -> [Frame] {
         let (first, last) = (times[0], times[times.count - 1])
         let ending = Double(times.count - 1) / Self.fps
@@ -800,7 +806,8 @@ struct Clip {
         }
         var frames: [Frame] = []
         if let entrance {
-            let arrival = recorded.firstIndex { $0.t >= entrance.start } ?? 0
+            let start = min(entrance.start, firstAction ?? entrance.start)
+            let arrival = recorded.firstIndex { $0.t >= start } ?? 0
             recorded.removeFirst(max(arrival - still, 0))
             frames = Array(repeating: Frame(t: first, camera: 0, pointer: nil), count: max(still - arrival, 0))
         } else {

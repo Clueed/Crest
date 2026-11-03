@@ -51,7 +51,9 @@ The stages run in this order:
    frames the window on the docs page background, the same margin on every
    side. The clip holds still for a second, then the pointer flies in from
    the window edge nearest the end of its first move, straight to that
-   move's target. At the end it flies out to the edge nearest its last
+   move's target. When a step acts before the pointer first moves, such as
+   a key press, the clip starts a still second before that step instead,
+   and the pointer flies in later, at its first move. At the end it flies out to the edge nearest its last
    position before another still second. A move after the last click, such
    as resting the pointer on blank space, isn't drawn: the pointer flies out
    when that move starts. It renders one clip per site
